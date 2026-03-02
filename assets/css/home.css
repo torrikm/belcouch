@@ -1,0 +1,594 @@
+/* Стили для главной страницы */
+
+/* Первый блок - поиск */
+.search-block {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.search-title {
+	font-family: "Montserrat", sans-serif;
+	font-weight: 600;
+	font-size: 40px;
+	line-height: 49px;
+	color: #0f1f37;
+	margin-bottom: 30px;
+	text-align: center;
+}
+
+.search-form-container {
+	width: 100%;
+	max-width: 800px;
+	position: relative;
+}
+
+.search-form {
+	width: 100%;
+	display: flex;
+	position: relative;
+}
+
+.search-input-container {
+	width: 100%;
+	position: relative;
+}
+
+.search-input {
+	width: 100%;
+	padding: 18px 60px 18px 20px;
+	border: none;
+	border-radius: 36.5px;
+	font-family: "Montserrat", sans-serif;
+	font-size: 20px;
+	color: #0f1f37;
+	box-shadow: 4px 4px 4px 0px rgba(29, 53, 139, 0.19);
+}
+
+.search-input::placeholder {
+	color: #afafaf;
+}
+
+.search-results {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	background-color: #ffffff;
+	border-radius: 0 0 15px 15px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+	z-index: 10;
+	overflow: hidden;
+	display: none;
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+.search-results.active {
+	display: block;
+}
+
+.search-result-item {
+	display: flex;
+	align-items: center;
+	padding: 12px 15px;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+	border-bottom: 1px solid #f1f1f1;
+}
+
+.search-result-item:last-child {
+	border-bottom: none;
+}
+
+.search-result-item:hover {
+	background-color: #f1f7ff;
+}
+
+.search-result-image {
+	width: 60px;
+	height: 60px;
+	border-radius: 5px;
+	object-fit: cover;
+	margin-right: 15px;
+}
+
+.search-result-info {
+	flex: 1;
+}
+
+.search-result-title {
+	font-family: "Montserrat", sans-serif;
+	font-weight: 600;
+	font-size: 16px;
+	color: #0f1f37;
+	margin: 0 0 5px 0;
+}
+
+.search-result-location {
+	font-family: "Montserrat", sans-serif;
+	font-size: 14px;
+	color: #666666;
+	margin: 0;
+}
+
+.search-result-type {
+	font-family: "Montserrat", sans-serif;
+	font-size: 12px;
+	color: #334891;
+	background-color: #f1f7ff;
+	padding: 3px 8px;
+	border-radius: 12px;
+	margin-top: 5px;
+	display: inline-block;
+}
+
+.search-button {
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 40px;
+	height: 40px;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.search-icon {
+	background-color: #c5001b;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.search-icon img {
+	width: 18px;
+	height: 18px;
+}
+
+/* Второй блок - слайдер */
+.slider-section {
+	margin-top: 40px;
+	margin-bottom: 40px;
+}
+
+.slider-container {
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+	max-height: 500px;
+	box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.slider {
+	display: flex;
+	transition: transform 0.5s ease;
+}
+
+.slide {
+	min-width: 100%;
+	position: relative;
+}
+
+.slide img {
+	width: 100%;
+	height: 500px;
+	object-fit: cover;
+}
+
+.slide-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(to top, rgba(15, 21, 43, 1), rgba(51, 72, 145, 0));
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: center;
+	padding-bottom: 40px;
+}
+
+.slide-title {
+	font-family: "Montserrat", sans-serif;
+	font-weight: 600;
+	font-size: 32px;
+	color: #ffffff;
+	text-align: center;
+	max-width: 80%;
+}
+
+.slider-pagination {
+	display: flex;
+	justify-content: center;
+	gap: 15px;
+	position: absolute;
+	bottom: 15px;
+	left: 0;
+	right: 0;
+}
+
+.slider-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background-color: #ffffff;
+	opacity: 0.5;
+	cursor: pointer;
+	transition: opacity 0.3s;
+}
+
+.slider-dot.active {
+	opacity: 1;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+	.search-title {
+		font-size: 28px;
+	}
+
+	.search-input {
+		padding: 15px 50px 15px 15px;
+		font-size: 16px;
+	}
+
+	.slide-title {
+		font-size: 24px;
+	}
+}
+
+@media (max-width: 480px) {
+	.search-title {
+		font-size: 24px;
+	}
+
+	.slide-title {
+		font-size: 20px;
+	}
+}
+
+/* Третий блок - преимущества */
+.features-section {
+	margin-top: 114px;
+}
+
+.features-container {
+	display: flex;
+	justify-content: space-between;
+	gap: 30px;
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 15px;
+}
+
+.feature-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	flex: 1;
+	padding: 20px;
+}
+
+.feature-icon {
+	margin-bottom: 31px;
+}
+
+.feature-icon img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.feature-text {
+	font-family: "Montserrat", sans-serif;
+	font-size: 18px;
+	color: #0f1f37;
+	line-height: 1.4;
+}
+
+/* Адаптивность для третьего блока */
+@media (max-width: 768px) {
+	.features-container {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.feature-item {
+		max-width: 380px;
+	}
+}
+
+/* Четвертый блок - опрос и QR-код */
+.survey-section {
+	position: relative;
+	margin-top: 100px;
+	margin-bottom: 80px;
+}
+
+.survey-left,
+.survey-center {
+	display: flex;
+	flex-direction: column;
+	gap: 51px;
+}
+
+.survey-left {
+	max-width: 540px;
+	width: 100%;
+}
+
+.survey-center {
+	max-width: 310px;
+	width: 100%;
+}
+
+.survey-container {
+	background-color: #ffffff;
+	border-radius: 20px;
+	padding: 14px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	/* box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); */
+	width: 100%;
+}
+
+.survey-text {
+	display: flex;
+	align-items: start;
+	justify-content: space-between;
+	max-width: 900px;
+	width: 100%;
+	padding: 21px;
+	padding-right: 0;
+}
+
+.survey-title {
+	font-family: "Montserrat", sans-serif;
+	font-weight: 600;
+	font-size: 24px;
+	color: #10132f;
+}
+
+.survey-subtitle {
+	font-family: "Montserrat", sans-serif;
+	font-weight: 600;
+	font-size: 24px;
+	color: #10132f;
+	margin-top: 0;
+}
+
+.survey-description {
+	font-family: "Montserrat", sans-serif;
+	font-weight: 400;
+	font-size: 18px;
+	color: #10132f;
+}
+
+.survey-note {
+	font-family: "Montserrat", sans-serif;
+	font-weight: 400;
+	font-size: 18px;
+	color: #000000;
+}
+
+.survey-arrow {
+	position: absolute;
+	opacity: 0.7;
+	top: 67px;
+	right: 222px;
+}
+
+.survey-qr {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.qr-container {
+	background-color: #ffffff;
+	border-radius: 18px;
+	padding: 5px;
+	width: 150px;
+	height: 150px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.qr-image {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+/* Адаптивные стили для блока survey-container */
+@media (max-width: 1024px) {
+	.survey-arrow {
+		top: 50px;
+		right: 180px;
+		width: 120px;
+	}
+}
+
+@media (max-width: 900px) {
+	.survey-container {
+		flex-direction: column;
+		gap: 20px;
+		padding: 20px;
+	}
+
+	.survey-text {
+		padding: 0;
+		max-width: 100%;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+	}
+
+	.survey-arrow {
+		display: none;
+	}
+
+	.survey-left {
+		max-width: 100%;
+	}
+
+	.survey-center {
+		max-width: 100%;
+	}
+
+	.survey-title,
+	.survey-subtitle {
+		font-size: 22px;
+	}
+
+	.survey-description,
+	.survey-note {
+		font-size: 16px;
+	}
+}
+
+@media (max-width: 480px) {
+	.survey-container {
+		padding: 15px;
+		gap: 15px;
+	}
+
+	.survey-title,
+	.survey-subtitle {
+		font-size: 20px;
+	}
+
+	.survey-description,
+	.survey-note {
+		font-size: 14px;
+	}
+
+	.qr-container {
+		width: 120px;
+		height: 120px;
+	}
+}
+
+/* Стили для секции с популярными направлениями */
+.regions-section {
+	margin: 80px 0;
+}
+
+.regions-title {
+	font-family: "Montserrat", sans-serif;
+	font-weight: 700;
+	color: #10132f;
+	font-size: 36px;
+	margin-bottom: 40px;
+	text-align: center;
+}
+
+.regions-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 30px;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.region-card {
+	border-radius: 15px;
+	overflow: hidden;
+	position: relative;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+	background-color: #fff;
+	display: flex;
+	flex-direction: column;
+	text-decoration: none;
+}
+
+.region-card:hover {
+	transform: translateY(-10px);
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.region-image {
+	height: 180px;
+	background-size: cover;
+	background-position: center;
+	position: relative;
+}
+
+.region-badge {
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	background-color: #c5001b;
+	color: #ffffff;
+	padding: 6px 12px;
+	border-radius: 20px;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.region-name {
+	padding: 16px;
+	font-family: "Montserrat", sans-serif;
+	font-weight: 600;
+	font-size: 24px;
+	color: #10132f;
+	text-align: center;
+}
+
+/* Адаптивные стили для секции с регионами */
+@media (max-width: 992px) {
+	.regions-grid {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 20px;
+		padding: 0 15px;
+	}
+
+	.regions-title {
+		font-size: 32px;
+		margin-bottom: 30px;
+	}
+}
+
+@media (max-width: 576px) {
+	.regions-section {
+		margin: 50px 0;
+		padding: 40px 0;
+	}
+
+	.regions-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.region-image {
+		height: 160px;
+	}
+
+	.regions-title {
+		font-size: 28px;
+		margin-bottom: 20px;
+	}
+
+	.region-name {
+		font-size: 20px;
+		padding: 12px;
+	}
+
+	.region-badge {
+		padding: 4px 10px;
+		font-size: 12px;
+	}
+}

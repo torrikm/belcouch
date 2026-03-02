@@ -1,0 +1,1402 @@
+2025-05-20 23:55:23 - Запуск API
+2025-05-20 23:55:23 - POST: Array
+(
+    [listing_id] => 14
+    [property_type_id] => 3
+    [beds_count] => 1
+    [listing_city] => Минск
+    [listing_region_id] => 5
+    [title] => ЦКУТВ
+    [stay_duration_id] => 2
+    [notes] => fasdfфыавфы
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 21
+        )
+
+    [amenities] => Array
+        (
+            [0] => 11
+        )
+
+)
+
+2025-05-20 23:55:23 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-20 23:55:23 - region_id = 5, city = Минск
+2025-05-20 23:55:23 - Обработка данных: listing_id=14, property_type_id=3, title=ЦКУТВ
+2025-05-20 23:55:23 - Правила: Array
+(
+    [0] => 21
+)
+
+2025-05-20 23:55:23 - Удобства: Array
+(
+    [0] => 11
+)
+
+2025-05-20 23:55:23 - Обновление объявления ID: 14
+2025-05-20 23:55:23 - Удаление выбранных фото: ../assets/img/listings/14/
+2025-05-20 23:55:28 - Запуск API
+2025-05-20 23:55:28 - POST: Array
+(
+    [listing_id] => 14
+    [property_type_id] => 3
+    [beds_count] => 1
+    [listing_city] => Минскфыва
+    [listing_region_id] => 5
+    [title] => ЦКУТВ
+    [stay_duration_id] => 2
+    [notes] => fasdfфыавфы
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 21
+        )
+
+    [amenities] => Array
+        (
+            [0] => 11
+        )
+
+)
+
+2025-05-20 23:55:28 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-20 23:55:28 - region_id = 5, city = Минскфыва
+2025-05-20 23:55:28 - Обработка данных: listing_id=14, property_type_id=3, title=ЦКУТВ
+2025-05-20 23:55:28 - Правила: Array
+(
+    [0] => 21
+)
+
+2025-05-20 23:55:28 - Удобства: Array
+(
+    [0] => 11
+)
+
+2025-05-20 23:55:28 - Обновление объявления ID: 14
+2025-05-20 23:55:28 - Удаление выбранных фото: ../assets/img/listings/14/
+2025-05-20 23:55:58 - Запуск API
+2025-05-20 23:55:58 - POST: Array
+(
+    [listing_id] => 14
+    [property_type_id] => 3
+    [beds_count] => 1
+    [listing_city] => Минск
+    [listing_region_id] => 5
+    [title] => ЦКУТВафыва
+    [stay_duration_id] => 2
+    [notes] => fasdfфыавфы
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 21
+        )
+
+    [amenities] => Array
+        (
+            [0] => 11
+        )
+
+)
+
+2025-05-20 23:55:58 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-20 23:55:58 - region_id = 5, city = Минск
+2025-05-20 23:55:58 - Обработка данных: listing_id=14, property_type_id=3, title=ЦКУТВафыва
+2025-05-20 23:55:58 - Правила: Array
+(
+    [0] => 21
+)
+
+2025-05-20 23:55:58 - Удобства: Array
+(
+    [0] => 11
+)
+
+2025-05-20 23:55:58 - Обновление объявления ID: 14
+2025-05-20 23:55:58 - Удаление выбранных фото: ../assets/img/listings/14/
+2025-05-21 00:00:55 - Запуск API
+2025-05-21 00:00:55 - POST: Array
+(
+    [listing_id] => 14
+    [property_type_id] => 3
+    [beds_count] => 1
+    [listing_city] => Минсквыап
+    [listing_region_id] => 1
+    [title] => ЦКУТВафыва
+    [stay_duration_id] => 2
+    [notes] => fasdfфыавфы
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 21
+        )
+
+    [amenities] => Array
+        (
+            [0] => 11
+        )
+
+)
+
+2025-05-21 00:00:55 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-21 00:00:55 - region_id = 1, city = Минсквыап
+2025-05-21 00:00:55 - Обработка данных: listing_id=14, property_type_id=3, title=ЦКУТВафыва
+2025-05-21 00:00:55 - Правила: Array
+(
+    [0] => 21
+)
+
+2025-05-21 00:00:55 - Удобства: Array
+(
+    [0] => 11
+)
+
+2025-05-21 00:00:58 - Запуск API
+2025-05-21 00:00:58 - POST: Array
+(
+    [listing_id] => 14
+    [property_type_id] => 3
+    [beds_count] => 1
+    [listing_city] => Минсквыап
+    [listing_region_id] => 1
+    [title] => ЦКУТВафыва
+    [stay_duration_id] => 2
+    [notes] => fasdfфыавфы
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 21
+        )
+
+    [amenities] => Array
+        (
+            [0] => 11
+        )
+
+)
+
+2025-05-21 00:00:58 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-21 00:00:58 - region_id = 1, city = Минсквыап
+2025-05-21 00:00:58 - Обработка данных: listing_id=14, property_type_id=3, title=ЦКУТВафыва
+2025-05-21 00:00:58 - Правила: Array
+(
+    [0] => 21
+)
+
+2025-05-21 00:00:58 - Удобства: Array
+(
+    [0] => 11
+)
+
+2025-05-21 00:01:05 - Запуск API
+2025-05-21 00:01:05 - POST: Array
+(
+    [listing_id] => 14
+    [property_type_id] => 3
+    [beds_count] => 1
+    [listing_city] => Минскгк
+    [listing_region_id] => 1
+    [title] => ЦКУТВафыва
+    [stay_duration_id] => 2
+    [notes] => fasdfфыавфы
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 21
+        )
+
+    [amenities] => Array
+        (
+            [0] => 11
+        )
+
+)
+
+2025-05-21 00:01:05 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-21 00:01:05 - region_id = 1, city = Минскгк
+2025-05-21 00:01:05 - Обработка данных: listing_id=14, property_type_id=3, title=ЦКУТВафыва
+2025-05-21 00:01:05 - Правила: Array
+(
+    [0] => 21
+)
+
+2025-05-21 00:01:05 - Удобства: Array
+(
+    [0] => 11
+)
+
+2025-05-21 00:01:26 - Запуск API
+2025-05-21 00:01:26 - POST: Array
+(
+    [listing_id] => 14
+    [property_type_id] => 3
+    [beds_count] => 1
+    [listing_city] => Минскгк
+    [listing_region_id] => 1
+    [title] => ЦКУТВафыва
+    [stay_duration_id] => 2
+    [notes] => fasdfфыавфы
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 21
+        )
+
+    [amenities] => Array
+        (
+            [0] => 11
+        )
+
+)
+
+2025-05-21 00:01:26 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-21 00:01:26 - region_id = 1, city = Минскгк
+2025-05-21 00:01:26 - Обработка данных: listing_id=14, property_type_id=3, title=ЦКУТВафыва
+2025-05-21 00:01:26 - Правила: Array
+(
+    [0] => 21
+)
+
+2025-05-21 00:01:26 - Удобства: Array
+(
+    [0] => 11
+)
+
+2025-05-21 00:13:53 - Запуск API
+2025-05-21 00:13:53 - POST: Array
+(
+    [listing_id] => 14
+    [property_type_id] => 3
+    [beds_count] => 1
+    [listing_city] => Минскjhvhk
+    [listing_region_id] => 5
+    [title] => ЦКУТВафыва
+    [stay_duration_id] => 2
+    [notes] => fasdfфыавфы
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 21
+        )
+
+    [amenities] => Array
+        (
+            [0] => 11
+        )
+
+)
+
+2025-05-21 00:13:53 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-21 00:13:53 - region_id = 5, city = Минскjhvhk
+2025-05-21 00:13:53 - Обработка данных: listing_id=14, property_type_id=3, title=ЦКУТВафыва
+2025-05-21 00:13:53 - Правила: Array
+(
+    [0] => 21
+)
+
+2025-05-21 00:13:53 - Удобства: Array
+(
+    [0] => 11
+)
+
+2025-05-21 00:17:06 - Запуск API
+2025-05-21 00:17:06 - POST: Array
+(
+    [listing_id] => 14
+    [property_type_id] => 3
+    [beds_count] => 1
+    [listing_city] => Минскdfgh
+    [listing_region_id] => 5
+    [title] => ЦКУТВафыва
+    [stay_duration_id] => 2
+    [notes] => fasdfфыавфы
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 21
+        )
+
+    [amenities] => Array
+        (
+            [0] => 11
+        )
+
+)
+
+2025-05-21 00:17:06 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-21 00:17:06 - region_id = 5, city = Минскdfgh
+2025-05-21 00:17:06 - Обработка данных: listing_id=14, property_type_id=3, title=ЦКУТВафыва
+2025-05-21 00:17:06 - Правила: Array
+(
+    [0] => 21
+)
+
+2025-05-21 00:17:06 - Удобства: Array
+(
+    [0] => 11
+)
+
+2025-05-21 00:20:29 - Запуск API
+2025-05-21 00:20:29 - POST: Array
+(
+    [listing_id] => 14
+    [property_type_id] => 3
+    [beds_count] => 1
+    [listing_city] => Минскjcmn
+    [listing_region_id] => 3
+    [title] => ЦКУТВафыва
+    [stay_duration_id] => 2
+    [notes] => fasdfфыавфы
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 21
+        )
+
+    [amenities] => Array
+        (
+            [0] => 11
+        )
+
+)
+
+2025-05-21 00:20:29 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-21 00:20:29 - region_id = 3, city = Минскjcmn
+2025-05-21 00:20:29 - Обработка данных: listing_id=14, property_type_id=3, title=ЦКУТВафыва
+2025-05-21 00:20:29 - Правила: Array
+(
+    [0] => 21
+)
+
+2025-05-21 00:20:29 - Удобства: Array
+(
+    [0] => 11
+)
+
+2025-05-21 00:21:10 - Запуск API
+2025-05-21 00:21:10 - POST: Array
+(
+    [listing_id] => 14
+    [property_type_id] => 3
+    [beds_count] => 1
+    [listing_city] => Минскmbvnm
+    [listing_region_id] => 3
+    [title] => ЦКУТВафыва
+    [stay_duration_id] => 2
+    [notes] => fasdfфыавфы
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 21
+        )
+
+    [amenities] => Array
+        (
+            [0] => 11
+        )
+
+)
+
+2025-05-21 00:21:10 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-21 00:21:10 - region_id = 3, city = Минскmbvnm
+2025-05-21 00:21:10 - Обработка данных: listing_id=14, property_type_id=3, title=ЦКУТВафыва
+2025-05-21 00:21:10 - Правила: Array
+(
+    [0] => 21
+)
+
+2025-05-21 00:21:10 - Удобства: Array
+(
+    [0] => 11
+)
+
+2025-05-21 00:21:10 - Обновление объявления ID: 14
+2025-05-21 00:21:10 - Удаление выбранных фото: ../assets/img/listings/14/
+2025-05-21 01:00:46 - Запуск API
+2025-05-21 01:00:46 - POST: Array
+(
+    [listing_id] => 14
+    [property_type_id] => 3
+    [beds_count] => 1
+    [listing_city] => Минскmbvnm
+    [listing_region_id] => 3
+    [title] => ЦКУТВафыва
+    [stay_duration_id] => 2
+    [notes] => fasdfфыавфы
+    [rules_select] => 
+    [amenities] => Array
+        (
+            [0] => 11
+        )
+
+)
+
+2025-05-21 01:00:46 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-21 01:00:46 - region_id = 3, city = Минскmbvnm
+2025-05-21 01:00:46 - Обработка данных: listing_id=14, property_type_id=3, title=ЦКУТВафыва
+2025-05-21 01:00:46 - Правила: Array
+(
+)
+
+2025-05-21 01:00:46 - Удобства: Array
+(
+    [0] => 11
+)
+
+2025-05-21 01:00:46 - Обновление объявления ID: 14
+2025-05-21 01:00:46 - Удаление выбранных фото: ../assets/img/listings/14/
+2025-05-21 12:45:14 - Запуск API
+2025-05-21 12:45:14 - POST: Array
+(
+    [listing_id] => 19
+    [property_type_id] => 4
+    [beds_count] => 50
+    [listing_city] => Лида
+    [listing_region_id] => 4
+    [title] => Лидский пивной завод. Набор сотрудников на удалёнку
+    [stay_duration_id] => 2
+    [notes] => Славяне, до 35 лет, без детей, лысые, любят квас
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 20
+            [1] => 22
+        )
+
+    [amenities] => Array
+        (
+            [0] => 15
+        )
+
+    [deleted_images] => Array
+        (
+            [0] => assets/img/listings/19/main.png
+        )
+
+)
+
+2025-05-21 12:45:14 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => images.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => images.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => D:\Programs\OSPanel\temp\upload\phpF78E.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 12228
+                )
+
+        )
+
+)
+
+2025-05-21 12:45:14 - region_id = 4, city = Лида
+2025-05-21 12:45:14 - Обработка данных: listing_id=19, property_type_id=4, title=Лидский пивной завод. Набор сотрудников на удалёнку
+2025-05-21 12:45:14 - Правила: Array
+(
+    [0] => 20
+    [1] => 22
+)
+
+2025-05-21 12:45:14 - Удобства: Array
+(
+    [0] => 15
+)
+
+2025-05-21 12:45:14 - Обновление объявления ID: 19
+2025-05-21 12:45:14 - Удаление выбранных фото: ../assets/img/listings/19/
+2025-05-21 12:45:14 - Удалено по запросу: ../assets/img/listings/19/main.png
+2025-05-21 12:45:14 - Изображение 0 загружено: ../assets/img/listings/19/main.jpg
+2025-05-21 13:05:01 - Запуск API
+2025-05-21 13:05:01 - POST: Array
+(
+    [listing_id] => 
+    [property_type_id] => 1
+    [beds_count] => 3
+    [listing_city] => Дрогичин
+    [listing_region_id] => 1
+    [title] => Комната в Дрогичине
+    [stay_duration_id] => 1
+    [notes] => 
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 17
+            [1] => 22
+        )
+
+    [amenities] => Array
+        (
+            [0] => 11
+            [1] => 12
+        )
+
+)
+
+2025-05-21 13:05:01 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => Манга-в-интерьере.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => Манга-в-интерьере.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => D:\Programs\OSPanel\temp\upload\php1512.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 1196442
+                )
+
+        )
+
+)
+
+2025-05-21 13:05:01 - region_id = 1, city = Дрогичин
+2025-05-21 13:05:01 - Обработка данных: listing_id=, property_type_id=1, title=Комната в Дрогичине
+2025-05-21 13:05:01 - Правила: Array
+(
+    [0] => 17
+    [1] => 22
+)
+
+2025-05-21 13:05:01 - Удобства: Array
+(
+    [0] => 11
+    [1] => 12
+)
+
+2025-05-21 13:05:01 - Добавление нового объявления, ID: 21
+2025-05-21 13:05:01 - Удаление выбранных фото: ../assets/img/listings/21/
+2025-05-21 13:05:01 - Изображение 0 загружено: ../assets/img/listings/21/main.jpg
+2025-05-21 13:16:31 - Запуск API
+2025-05-21 13:16:31 - POST: Array
+(
+    [listing_id] => 
+    [property_type_id] => 4
+    [beds_count] => 5
+    [listing_city] => Иваново
+    [listing_region_id] => 1
+    [title] => Дом в Иваново
+    [stay_duration_id] => 1
+    [notes] => 
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 25
+            [1] => 22
+        )
+
+    [amenities] => Array
+        (
+            [0] => 12
+            [1] => 11
+            [2] => 14
+            [3] => 10
+        )
+
+)
+
+2025-05-21 13:16:31 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => кв.jpg
+                    [1] => кв2.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => кв.jpg
+                    [1] => кв2.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                    [1] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => D:\Programs\OSPanel\temp\upload\php9CF4.tmp
+                    [1] => D:\Programs\OSPanel\temp\upload\php9CF5.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                    [1] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 137812
+                    [1] => 7171
+                )
+
+        )
+
+)
+
+2025-05-21 13:16:31 - region_id = 1, city = Иваново
+2025-05-21 13:16:31 - Обработка данных: listing_id=, property_type_id=4, title=Дом в Иваново
+2025-05-21 13:16:31 - Правила: Array
+(
+    [0] => 25
+    [1] => 22
+)
+
+2025-05-21 13:16:31 - Удобства: Array
+(
+    [0] => 12
+    [1] => 11
+    [2] => 14
+    [3] => 10
+)
+
+2025-05-21 13:16:31 - Добавление нового объявления, ID: 22
+2025-05-21 13:16:31 - Удаление выбранных фото: ../assets/img/listings/22/
+2025-05-21 13:16:31 - Изображение 0 загружено: ../assets/img/listings/22/main.jpg
+2025-05-21 13:16:31 - Изображение 1 загружено: ../assets/img/listings/22/image_1.jpg
+2025-05-21 13:22:45 - Запуск API
+2025-05-21 13:22:45 - POST: Array
+(
+    [listing_id] => 19
+    [property_type_id] => 4
+    [beds_count] => 50
+    [listing_city] => Лида
+    [listing_region_id] => 4
+    [title] => Лидский пивной завод. Набор сотрудников на удалёнку
+    [stay_duration_id] => 2
+    [notes] => Славяне, до 35 лет, без детей, лысые, любят квас
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 20
+        )
+
+    [amenities] => Array
+        (
+            [0] => 15
+        )
+
+)
+
+2025-05-21 13:22:45 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-21 13:22:45 - region_id = 4, city = Лида
+2025-05-21 13:22:45 - Обработка данных: listing_id=19, property_type_id=4, title=Лидский пивной завод. Набор сотрудников на удалёнку
+2025-05-21 13:22:45 - Правила: Array
+(
+    [0] => 20
+)
+
+2025-05-21 13:22:45 - Удобства: Array
+(
+    [0] => 15
+)
+
+2025-05-21 13:22:45 - Обновление объявления ID: 19
+2025-05-21 13:22:45 - Удаление выбранных фото: ../assets/img/listings/19/
+2025-05-21 15:25:20 - Запуск API
+2025-05-21 15:25:20 - POST: Array
+(
+    [listing_id] => 15
+    [property_type_id] => 3
+    [beds_count] => 3
+    [listing_city] => Минск
+    [listing_region_id] => 5
+    [title] => Квартира в Миснке
+    [stay_duration_id] => 4
+    [notes] => только для людей до 35 лет
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 22
+            [1] => 24
+            [2] => 16
+        )
+
+    [amenities] => Array
+        (
+            [0] => 10
+            [1] => 11
+            [2] => 13
+            [3] => 14
+            [4] => 15
+        )
+
+)
+
+2025-05-21 15:25:20 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-21 15:25:20 - region_id = 5, city = Минск
+2025-05-21 15:25:20 - Обработка данных: listing_id=15, property_type_id=3, title=Квартира в Миснке
+2025-05-21 15:25:20 - Правила: Array
+(
+    [0] => 22
+    [1] => 24
+    [2] => 16
+)
+
+2025-05-21 15:25:20 - Удобства: Array
+(
+    [0] => 10
+    [1] => 11
+    [2] => 13
+    [3] => 14
+    [4] => 15
+)
+
+2025-05-21 15:25:20 - Обновление объявления ID: 15
+2025-05-21 15:25:20 - Удаление выбранных фото: ../assets/img/listings/15/
+2025-05-21 15:25:53 - Запуск API
+2025-05-21 15:25:53 - POST: Array
+(
+    [listing_id] => 15
+    [property_type_id] => 3
+    [beds_count] => 3
+    [listing_city] => Минск
+    [listing_region_id] => 5
+    [title] => Квартира в Минске
+    [stay_duration_id] => 4
+    [notes] => только для людей до 35 лет
+    [rules_select] => 
+    [rules] => Array
+        (
+            [0] => 16
+            [1] => 22
+            [2] => 24
+        )
+
+    [amenities] => Array
+        (
+            [0] => 10
+            [1] => 11
+            [2] => 13
+            [3] => 14
+            [4] => 15
+        )
+
+)
+
+2025-05-21 15:25:53 - FILES: Array
+(
+    [housing_photos] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+2025-05-21 15:25:53 - region_id = 5, city = Минск
+2025-05-21 15:25:53 - Обработка данных: listing_id=15, property_type_id=3, title=Квартира в Минске
+2025-05-21 15:25:53 - Правила: Array
+(
+    [0] => 16
+    [1] => 22
+    [2] => 24
+)
+
+2025-05-21 15:25:53 - Удобства: Array
+(
+    [0] => 10
+    [1] => 11
+    [2] => 13
+    [3] => 14
+    [4] => 15
+)
+
+2025-05-21 15:25:53 - Обновление объявления ID: 15
+2025-05-21 15:25:53 - Удаление выбранных фото: ../assets/img/listings/15/

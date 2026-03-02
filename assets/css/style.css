@@ -1,0 +1,79 @@
+/* Основные стили */
+html {
+	--dark-blue-button: #0f1f37;
+	--dark-blue: #0f1f37;
+	--hover-button: #1d358b;
+	--white-button: white;
+}
+
+*,
+h1,
+h2 {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: "Montserrat", sans-serif;
+	background-color: #e5eeff;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+main {
+	flex: 1;
+}
+
+.container {
+	width: 100%;
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 15px;
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+}
+
+ul {
+	list-style: none;
+}
+
+.btn {
+	width: max-content;
+	display: block;
+	font-family: "Montserrat", sans-serif;
+	font-size: 18px;
+	background-color: var(--dark-blue-button);
+	color: var(--white-button);
+	padding: 10px 20px;
+	border-radius: 10px;
+	border: none;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+	text-align: center;
+}
+
+.btn:hover {
+	background-color: var(--hover-button);
+}
+
+.btn-primary {
+	background-color: var(--dark-blue-button);
+	color: var(--white-button);
+}
+
+.btn-outline {
+	background-color: transparent;
+	color: var(--dark-blue-button);
+	border: 1px solid var(--dark-blue-button);
+}
+
+.btn-outline:hover {
+	background-color: var(--hover-button);
+	color: var(--white-button);
+	border-color: var(--hover-button);
+}

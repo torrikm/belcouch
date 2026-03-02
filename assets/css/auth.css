@@ -1,0 +1,160 @@
+/* Стили для форм авторизации и регистрации */
+
+.auth-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 100vh;
+	padding: 20px;
+	background-color: #e5eeff;
+}
+
+.auth-form {
+	background-color: #fff;
+	border-radius: 15px;
+	padding: 30px;
+	width: 100%;
+	max-width: 675px;
+	box-shadow: 4px 4px 4px 0px rgba(29, 53, 139, 0.19);
+}
+
+.auth-title {
+	font-family: "Montserrat", sans-serif;
+	font-weight: 600;
+	font-size: 32px;
+	line-height: 1.2;
+	margin-bottom: 25px;
+	color: #000000;
+	text-align: center;
+}
+
+.input-group {
+	margin-bottom: 17px;
+}
+
+.input-group input {
+	margin-top: 3px;
+}
+
+.form-input {
+	width: 100%;
+	padding: 14px 8px;
+	border: none;
+	border-radius: 5px;
+	background-color: #e5eeff;
+	font-family: "Montserrat", sans-serif;
+	font-size: 18px;
+	color: #0f1f37;
+}
+
+.form-input::placeholder {
+	color: #8495b6;
+}
+
+.form-input:focus {
+	outline: 2px solid #1d358b;
+}
+
+/* Стили для выпадающего списка даты */
+.date-select {
+	position: relative;
+}
+
+.date-select .form-input {
+	padding-right: 30px; /* место для стрелки */
+	appearance: none;
+	-webkit-appearance: none;
+	cursor: pointer;
+}
+
+.date-select:after {
+	content: "";
+	position: absolute;
+	right: 15px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 0;
+	height: 0;
+	border-left: 7px solid transparent;
+	border-right: 7px solid transparent;
+	border-top: 7px solid #1d358b;
+	pointer-events: none;
+}
+
+/* Стили для кнопки */
+.auth-button {
+	background-color: #1d358b;
+	color: white;
+	border: none;
+	border-radius: 5px;
+	padding: 15px 20px;
+	width: 265px;
+	font-family: "Montserrat", sans-serif;
+	font-size: 18px;
+	font-weight: 600;
+	cursor: pointer;
+	display: block;
+	margin: 30px auto 20px;
+	transition: background-color 0.3s;
+}
+
+.auth-button:hover {
+	background-color: #15276b;
+}
+
+/* Стили для ссылки внизу формы */
+.auth-link-container {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	margin-top: 15px;
+}
+
+.auth-text {
+	color: #0f1f37;
+	font-family: "Montserrat", sans-serif;
+	font-size: 16px;
+}
+
+.auth-link {
+	color: #1d358b;
+	text-decoration: none;
+	font-family: "Montserrat", sans-serif;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.auth-link:hover {
+	text-decoration: underline;
+}
+
+/* Стили для сообщений об ошибках */
+.error-message {
+	color: #e74c3c;
+	font-size: 14px;
+	margin-top: 5px;
+	display: none;
+}
+
+.input-error {
+	outline: 2px solid #e74c3c;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+	.auth-form {
+		padding: 20px;
+	}
+
+	.auth-title {
+		font-size: 24px;
+	}
+
+	.form-input {
+		font-size: 16px;
+	}
+
+	.auth-button {
+		width: 100%;
+	}
+}
