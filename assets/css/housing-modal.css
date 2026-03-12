@@ -1,22 +1,6 @@
 /* Дополнительные стили для модального окна добавления жилья */
-.modal-overlay {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0, 0, 0, 0.6);
-	display: none;
-	justify-content: center;
-	align-items: center;
-	z-index: 1000;
-}
 
-.modal-overlay.show {
-	display: flex;
-}
-
-.modal {
+.housing-modal {
 	background-color: #fff;
 	border-radius: 10px;
 	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -211,45 +195,6 @@
 .btn-add-item:hover {
 	background-color: var(--hover-button);
 	transform: scale(1.05);
-}
-
-/* Кнопки в футере */
-.modal-footer {
-	display: flex;
-	justify-content: flex-end;
-	gap: 15px;
-	padding-top: 20px;
-	margin-top: 10px;
-	border-top: 1px solid #eeeeee;
-}
-
-.btn-save,
-.btn-cancel {
-	padding: 10px 25px;
-	border-radius: 5px;
-	font-weight: 600;
-	cursor: pointer;
-	transition: background-color 0.3s;
-}
-
-.btn-save {
-	background-color: var(--dark-blue-button);
-	color: white;
-	border: none;
-}
-
-.btn-save:hover {
-	background-color: var(--hover-button);
-}
-
-.btn-cancel {
-	background-color: #e5e5e5;
-	color: #333;
-	border: none;
-}
-
-.btn-cancel:hover {
-	background-color: #d5d5d5;
 }
 
 .photo-preview {

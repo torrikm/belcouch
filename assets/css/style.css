@@ -1,3 +1,35 @@
+@font-face {
+	font-family: "Montserrat";
+	src: url("../fonts/Motserrat/Montserrat-Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Montserrat";
+	src: url("../fonts/Motserrat/Montserrat-Medium.ttf") format("truetype");
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Montserrat";
+	src: url("../fonts/Motserrat/Montserrat-SemiBold.ttf") format("truetype");
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Montserrat";
+	src: url("../fonts/Motserrat/Montserrat-Bold.ttf") format("truetype");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
 /* Основные стили */
 html {
 	--dark-blue-button: #0f1f37;
@@ -12,10 +44,10 @@ h2 {
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
+	font-family: "Montserrat", sans-serif;
 }
 
 body {
-	font-family: "Montserrat", sans-serif;
 	background-color: #e5eeff;
 	min-height: 100vh;
 	display: flex;
@@ -24,6 +56,14 @@ body {
 
 main {
 	flex: 1;
+	margin-top: 100px;
+	margin-bottom: 60px;
+	display: flex;
+	flex-direction: column;
+}
+
+button {
+	cursor: pointer;
 }
 
 .container {
@@ -40,6 +80,10 @@ a {
 
 ul {
 	list-style: none;
+}
+
+img {
+	display: block;
 }
 
 .btn {
@@ -76,4 +120,62 @@ ul {
 	background-color: var(--hover-button);
 	color: var(--white-button);
 	border-color: var(--hover-button);
+}
+
+.city-autocomplete {
+	position: relative;
+	width: 100%;
+}
+
+.city-autocomplete-list {
+	position: absolute;
+	top: calc(100% + 6px);
+	left: 0;
+	right: 0;
+	z-index: 40;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	max-height: 260px;
+	overflow-y: auto;
+	padding: 8px;
+	background: #fff;
+	border: 1px solid #d8e2f2;
+	border-radius: 16px;
+	box-shadow: 0 16px 36px rgba(15, 31, 55, 0.12);
+}
+
+.city-autocomplete-list[hidden],
+.city-autocomplete-list:empty {
+	display: none;
+}
+
+.city-autocomplete-option {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+	width: 100%;
+	padding: 10px 12px;
+	border: none;
+	border-radius: 12px;
+	background: transparent;
+	text-align: left;
+	font: inherit;
+	color: #0f1f37;
+}
+
+.city-autocomplete-option:hover,
+.city-autocomplete-option:focus-visible {
+	background: #eef4ff;
+	outline: none;
+}
+
+.city-autocomplete-option-title {
+	font-weight: 600;
+}
+
+.city-autocomplete-option-meta {
+	font-size: 13px;
+	color: #667085;
 }

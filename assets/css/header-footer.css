@@ -2,10 +2,14 @@
 .site-header {
 	background-color: #0f1f37;
 	color: white;
-	padding: 35px 0;
-	position: relative;
-	margin-bottom: 76px;
+	padding: 20px 0;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 1000;
 }
+
 
 .header-container {
 	display: flex;
@@ -14,6 +18,7 @@
 	max-width: 1200px;
 	margin: 0 auto;
 	padding: 0 15px;
+	position: relative;
 }
 
 .logo {
@@ -31,16 +36,17 @@
 .main-navigation {
 	display: flex;
 	align-items: center;
+	gap: 20px;
+
 }
 
 .nav-item {
 	display: flex;
 	align-items: center;
-	margin-left: 30px;
 	text-decoration: none;
 	color: white;
 	font-family: "Montserrat", sans-serif;
-	font-size: 18px;
+	font-size: 14px;
 	transition: opacity 0.3s;
 }
 
@@ -74,9 +80,7 @@
 .site-footer {
 	background-color: #0f1f37;
 	color: white;
-	padding-top: 59px;
-	padding-bottom: 36px;
-	margin-top: 112px;
+	padding: 40px 0;
 }
 
 .footer-container {
@@ -84,36 +88,9 @@
 	margin: 0 auto;
 	padding: 0 15px;
 	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 80px;
-}
-
-.footer-up {
-	width: 100%;
-	display: flex;
 	align-items: center;
 	justify-content: space-between;
-}
-
-.footer-logo {
-	margin-bottom: 20px;
-}
-
-.footer-nav {
-	display: flex;
-	justify-content: center;
-	margin-bottom: 20px;
-	flex-wrap: wrap;
-}
-
-.footer-nav-item {
-	margin: 0 15px 10px;
-	text-decoration: none;
-	color: white;
-	font-family: "Montserrat", sans-serif;
-	font-size: 18px;
-	transition: opacity 0.3s;
+	gap: 10px;
 }
 
 .footer-nav-item:hover {
@@ -123,7 +100,6 @@
 .footer-copyright {
 	font-family: "Montserrat", sans-serif;
 	font-size: 16px;
-	text-align: center;
 }
 
 /* Адаптивные стили */
@@ -154,6 +130,15 @@
 		display: block;
 	}
 
+	.site-footer {
+		padding-top: 20px;
+		padding-bottom: 20px;
+	}
+
+	.footer-container {
+		flex-direction: column;
+	}
+
 	.footer-nav {
 		flex-direction: column;
 		align-items: center;
@@ -161,5 +146,27 @@
 
 	.footer-nav-item {
 		margin: 8px 0;
+	}
+
+	.footer-copyright {
+		font-size: 14px;
+	}
+
+	.logo-img {
+		height: 28px;
+	}
+}
+
+@media (max-width: 480px) {
+	.footer-copyright {
+		font-size: 12px;
+	}
+
+	.logo-img {
+		height: 24px;
+	}
+
+	.site-header {
+		padding: 10px 0;
 	}
 }

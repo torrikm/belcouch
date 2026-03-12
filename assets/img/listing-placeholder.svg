@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" role="img" aria-labelledby="title">
+	<title id="title">Нет фото</title>
+	<rect width="500" height="500" fill="#e6e6e6" />
+	<text x="250" y="250" text-anchor="middle" dominant-baseline="middle" fill="#8f98a3"
+		font-family="Arial, sans-serif" font-size="32" font-weight="400">Нет фото</text>
+</svg>

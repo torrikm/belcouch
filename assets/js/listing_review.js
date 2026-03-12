@@ -1,331 +1,253 @@
 /**
- * JavaScript для функционала отзывов о жилье
+ * Reviews for listing page (profile/housing)
  */
-document.addEventListener("DOMContentLoaded", function () {
+App.register("listingReview", function () {
 	const reviewForm = document.getElementById("listing-review-form");
-	if (!reviewForm) return;
+	if (!reviewForm) {
+		return;
+	}
 
-	const reviewBlock = document.querySelector(".listing-review-block");
+	const reviewBlock =
+		document.querySelector(".review-block") ||
+		document.querySelector(".listing-review-block");
+	if (!reviewBlock) {
+		return;
+	}
+
 	const stars = reviewBlock.querySelectorAll(".star");
+	const ratingInput = reviewForm.querySelector('input[name="rating"]');
+	const listingIdInput = reviewForm.querySelector('input[name="listing_id"]');
+	const submitButton = reviewForm.querySelector('button[type="submit"]');
+	const listingId = listingIdInput ? listingIdInput.value : "";
 	let currentRating = 0;
+	let submitted = false;
 
-	// Наведение и выбор звезды
-	stars.forEach((star, idx) => {
-		star.addEventListener("mouseenter", () => {
-			highlightStars(idx + 1);
-		});
-		star.addEventListener("mouseleave", () => {
-			highlightStars(currentRating);
-		});
-		star.addEventListener("click", () => {
-			currentRating = idx + 1;
-			reviewForm.querySelector('input[name="rating"]').value = currentRating;
-		});
-	});
+	function getReviewsSection() {
+		return (
+			document.querySelector(".listing-reviews-section") ||
+			document.querySelector(".reviews-section")
+		);
+	}
+
+	function getReviewsList() {
+		return (
+			document.querySelector(".reviews-list") ||
+			document.querySelector(".listing-reviews-list")
+		);
+	}
+
+	function ensureReviewsList() {
+		let list = getReviewsList();
+		if (list) {
+			return list;
+		}
+
+		const section = getReviewsSection();
+		if (!section) {
+			return null;
+		}
+
+		list = document.createElement("div");
+		list.className = "reviews-list listing-reviews-list";
+		list.innerHTML = '<h3 class="reviews-title">Отзывы</h3>';
+
+		const formBlock =
+			document.querySelector(".review-block") ||
+			document.querySelector(".listing-review-block");
+
+		if (formBlock) {
+			section.insertBefore(list, formBlock);
+		} else {
+			section.appendChild(list);
+		}
+
+		return list;
+	}
+
+	function removeEmptyState() {
+		const empty = document.querySelector(".reviews-empty");
+		if (empty) {
+			empty.remove();
+		}
+	}
+
+	function setInfoState() {
+		const currentBlock =
+			document.querySelector(".review-block") ||
+			document.querySelector(".listing-review-block");
+
+		if (!currentBlock || !currentBlock.parentNode) {
+			return;
+		}
+
+		const infoBlock = document.createElement("div");
+		infoBlock.className = "profile-review-info listing-review-info";
+		infoBlock.innerHTML = "<p>Вы уже оставили отзыв на это жилье.</p>";
+		currentBlock.parentNode.replaceChild(infoBlock, currentBlock);
+	}
+
+	function normalizeReview(review) {
+		const firstName = String(review?.first_name || "").trim();
+		const lastName = String(review?.last_name || "").trim();
+
+		return {
+			user_id: review?.user_id || review?.rater_id || 0,
+			rating: Number(review?.rating || 0),
+			comment: String(review?.comment || ""),
+			created_at: review?.created_at || new Date().toISOString(),
+			avatar_image: Boolean(review?.avatar_image),
+			full_name: `${firstName} ${lastName}`.trim() || "Пользователь",
+			initials: `${firstName.charAt(0)}${lastName.charAt(0)}` || "U",
+		};
+	}
+
+	function buildReviewItem(rawReview) {
+		const review = normalizeReview(rawReview);
+		const reviewItem = document.createElement("div");
+		reviewItem.className = "review-item";
+
+		const date = new Date(review.created_at);
+		const formattedDate = `${String(date.getDate()).padStart(2, "0")}.${String(
+			date.getMonth() + 1,
+		).padStart(2, "0")}.${date.getFullYear()}`;
+
+		const starsHtml = Array.from({ length: 5 }, (_, i) => {
+			const icon = i < review.rating ? "star-filled.svg" : "star-void.svg";
+			return `<img src="../assets/img/icons/${icon}" alt="Звезда" class="review-star-icon">`;
+		}).join("");
+
+		const avatarHtml = review.avatar_image
+			? `<img src="${API_BASE_URL}/users/get_avatar.php?id=${review.user_id}" alt="Аватар" class="reviewer-avatar">`
+			: `<div class="reviewer-avatar reviewer-avatar-placeholder">${review.initials}</div>`;
+
+		reviewItem.innerHTML = `
+			<div class="review-item-header">
+				<div class="reviewer-info">
+					${avatarHtml}
+					<div class="reviewer-details">
+						<div class="reviewer-name">${review.full_name}</div>
+						<div class="review-date">${formattedDate}</div>
+					</div>
+				</div>
+				<div class="review-rating">${starsHtml}</div>
+			</div>
+			<div class="review-content">
+				<p>${review.comment.replace(/\n/g, "<br>")}</p>
+			</div>
+		`;
+
+		return reviewItem;
+	}
 
 	function highlightStars(rating) {
-		stars.forEach((star, idx) => {
-			const starIcon = star.querySelector(".star-icon");
-			if (idx < rating) {
-				starIcon.src = "../assets/img/icons/star-filled.svg";
-				star.classList.add("active");
-			} else {
-				starIcon.src = "../assets/img/icons/star-void.svg";
-				star.classList.remove("active");
+		stars.forEach((star, index) => {
+			const icon = star.querySelector(".star-icon");
+			const filled = index < rating;
+			if (icon) {
+				icon.src = filled
+					? "../assets/img/icons/star-filled.svg"
+					: "../assets/img/icons/star-void.svg";
 			}
+			star.classList.toggle("active", filled);
 		});
 	}
 
-	// Отправка формы через AJAX
-	reviewForm.addEventListener("submit", function (e) {
-		e.preventDefault();
+	function refreshSectionFromServer() {
+		const currentSection = getReviewsSection();
+		if (!currentSection) {
+			return;
+		}
 
-		// Проверка выбранного рейтинга
+		fetch(window.location.href, {
+			credentials: "same-origin",
+			headers: { "X-Requested-With": "XMLHttpRequest" },
+		})
+			.then((response) => response.text())
+			.then((html) => {
+				const parser = new DOMParser();
+				const doc = parser.parseFromString(html, "text/html");
+				const updatedSection =
+					doc.querySelector(".listing-reviews-section") ||
+					doc.querySelector(".reviews-section");
+
+				if (updatedSection) {
+					currentSection.innerHTML = updatedSection.innerHTML;
+				}
+			})
+			.catch(() => {});
+	}
+
+	stars.forEach((star, index) => {
+		star.addEventListener("mouseenter", function () {
+			highlightStars(index + 1);
+		});
+		star.addEventListener("mouseleave", function () {
+			highlightStars(currentRating);
+		});
+		star.addEventListener("click", function () {
+			currentRating = index + 1;
+			if (ratingInput) {
+				ratingInput.value = String(currentRating);
+			}
+		});
+	});
+
+	reviewForm.addEventListener("submit", function (event) {
+		event.preventDefault();
+
 		if (currentRating === 0) {
-			alert("Пожалуйста, выберите рейтинг");
+			window.App.notify("Пожалуйста, выберите рейтинг", "error");
 			return;
 		}
 
 		const formData = new FormData(reviewForm);
-		const submitButton = reviewForm.querySelector('button[type="submit"]');
-
-		// Блокируем кнопку на время отправки
 		submitButton.disabled = true;
 		submitButton.textContent = "Отправка...";
 
 		$.ajax({
-			url: "../api/submit_listing_review.php",
+			xhrFields: { withCredentials: true },
+			url: API_BASE_URL + "/reviews/submit_listing_review.php",
 			type: "POST",
 			data: formData,
 			processData: false,
 			contentType: false,
 			dataType: "json",
 			success: function (data) {
-				if (data.success) {
-					// Сбрасываем форму и рейтинг
-					reviewForm.reset();
-					currentRating = 0;
-					highlightStars(0);
-
-					// Показываем уведомление об успехе
-					alert("Спасибо за отзыв!");
-
-					// Добавляем новый отзыв в список без перезагрузки
-					addNewReview(data.review);
-				} else {
-					alert(data.message || "Ошибка отправки");
+				if (!data.success) {
+					window.App.notify(data.message || "Ошибка отправки", "error");
+					return;
 				}
+
+				submitted = true;
+				window.App.notify("Спасибо за отзыв!", "success");
+				removeEmptyState();
+
+				const list = ensureReviewsList();
+				if (list) {
+					const item = buildReviewItem(data.review || {});
+					const title = list.querySelector(".reviews-title");
+					if (title) {
+						list.insertBefore(item, title.nextSibling);
+					} else {
+						list.insertBefore(item, list.firstChild);
+					}
+				}
+
+				setInfoState();
+				setTimeout(refreshSectionFromServer, 120);
 			},
 			error: function () {
-				alert("Ошибка отправки");
+				window.App.notify("Ошибка отправки", "error");
 			},
 			complete: function () {
-				// Разблокируем кнопку
+				if (submitted) {
+					return;
+				}
 				submitButton.disabled = false;
 				submitButton.textContent = "Отправить";
 			},
 		});
 	});
 
-	// Функция для добавления нового отзыва в список
-	function addNewReview(review) {
-		// Проверяем, есть ли список отзывов на странице
-		let reviewsList = document.querySelector(".listing-reviews-list");
-
-		// Если списка отзывов нет, создаем его
-		if (!reviewsList) {
-			reviewsList = document.createElement("div");
-			reviewsList.className = "listing-reviews-list";
-
-			const reviewsTitle = document.createElement("h3");
-			reviewsTitle.className = "reviews-title";
-			reviewsTitle.textContent = "Отзывы";
-
-			reviewsList.appendChild(reviewsTitle);
-
-			// Добавляем список перед формой отправки отзыва
-			const reviewsSection = document.querySelector(".listing-reviews-section");
-			const reviewBlock = document.querySelector(".listing-review-block");
-			reviewsSection.insertBefore(reviewsList, reviewBlock);
-		}
-
-		// Создаем элемент отзыва
-		const reviewItem = document.createElement("div");
-		reviewItem.className = "review-item";
-
-		// Создаем заголовок отзыва (информация о пользователе и рейтинг)
-		const reviewHeader = document.createElement("div");
-		reviewHeader.className = "review-item-header";
-
-		// Информация о пользователе, оставившем отзыв
-		const reviewerInfo = document.createElement("div");
-		reviewerInfo.className = "reviewer-info";
-
-		// Аватар пользователя
-		let avatarElement;
-		if (review.avatar_image) {
-			avatarElement = document.createElement("img");
-			avatarElement.src = `../api/get_avatar.php?id=${review.user_id}`;
-			avatarElement.alt = "Аватар";
-			avatarElement.className = "reviewer-avatar";
-		} else {
-			avatarElement = document.createElement("div");
-			avatarElement.className = "reviewer-avatar reviewer-avatar-placeholder";
-			avatarElement.textContent =
-				review.first_name.substr(0, 1) + review.last_name.substr(0, 1);
-		}
-
-		// Детали о пользователе (имя и дата)
-		const reviewerDetails = document.createElement("div");
-		reviewerDetails.className = "reviewer-details";
-
-		const reviewerName = document.createElement("div");
-		reviewerName.className = "reviewer-name";
-		reviewerName.textContent = review.first_name + " " + review.last_name;
-
-		const reviewDate = document.createElement("div");
-		reviewDate.className = "review-date";
-
-		// Форматируем дату
-		const date = new Date(review.created_at);
-		const day = date.getDate().toString().padStart(2, "0");
-		const month = (date.getMonth() + 1).toString().padStart(2, "0");
-		const year = date.getFullYear();
-		reviewDate.textContent = `${day}.${month}.${year}`;
-
-		reviewerDetails.appendChild(reviewerName);
-		reviewerDetails.appendChild(reviewDate);
-
-		reviewerInfo.appendChild(avatarElement);
-		reviewerInfo.appendChild(reviewerDetails);
-
-		// Создаем элемент для отображения рейтинга
-		const reviewRating = document.createElement("div");
-		reviewRating.className = "review-rating";
-
-		// Добавляем звезды рейтинга
-		for (let i = 1; i <= 5; i++) {
-			const starImg = document.createElement("img");
-			starImg.src = `../assets/img/icons/${
-				i <= review.rating ? "star-filled.svg" : "star-void.svg"
-			}`;
-			starImg.alt = "Звезда";
-			starImg.className = "review-star-icon";
-			reviewRating.appendChild(starImg);
-		}
-
-		// Собираем заголовок отзыва
-		reviewHeader.appendChild(reviewerInfo);
-		reviewHeader.appendChild(reviewRating);
-
-		// Создаем содержимое отзыва
-		const reviewContent = document.createElement("div");
-		reviewContent.className = "review-content";
-
-		const reviewText = document.createElement("p");
-		reviewText.textContent = review.comment;
-
-		reviewContent.appendChild(reviewText);
-
-		// Собираем весь отзыв
-		reviewItem.appendChild(reviewHeader);
-		reviewItem.appendChild(reviewContent);
-
-		// Добавляем отзыв в начало списка
-		reviewsList.insertBefore(reviewItem, reviewsList.firstChild.nextSibling);
-	}
-
-	// Загрузка существующих отзывов при загрузке страницы
-	function loadReviews() {
-		const listingId = reviewForm.querySelector('input[name="listing_id"]').value;
-
-		if (!listingId) return;
-
-		$.ajax({
-			url: "../api/get_listing_reviews.php",
-			type: "GET",
-			data: { listing_id: listingId },
-			dataType: "json",
-			success: function (data) {
-				if (data.success && data.reviews.length > 0) {
-					// Если на странице нет блока для отзывов, создаем его
-					let reviewsList = document.querySelector(".listing-reviews-list");
-
-					if (!reviewsList) {
-						reviewsList = document.createElement("div");
-						reviewsList.className = "listing-reviews-list";
-
-						const reviewsTitle = document.createElement("h3");
-						reviewsTitle.className = "reviews-title";
-						reviewsTitle.textContent = "Отзывы";
-
-						reviewsList.appendChild(reviewsTitle);
-
-						// Добавляем список перед формой отправки отзыва
-						const reviewsSection = document.querySelector(".listing-reviews-section");
-						const reviewBlock = document.querySelector(".listing-review-block");
-						reviewsSection.insertBefore(reviewsList, reviewBlock);
-					}
-
-					// Добавляем каждый отзыв в список
-					data.reviews.forEach((review) => {
-						// Создаем элемент отзыва
-						const reviewItem = document.createElement("div");
-						reviewItem.className = "review-item";
-
-						// Создаем заголовок отзыва (информация о пользователе и рейтинг)
-						const reviewHeader = document.createElement("div");
-						reviewHeader.className = "review-item-header";
-
-						// Информация о пользователе, оставившем отзыв
-						const reviewerInfo = document.createElement("div");
-						reviewerInfo.className = "reviewer-info";
-
-						// Аватар пользователя
-						let avatarElement;
-						if (review.avatar_image) {
-							avatarElement = document.createElement("img");
-							avatarElement.src = `../api/get_avatar.php?id=${review.user_id}`;
-							avatarElement.alt = "Аватар";
-							avatarElement.className = "reviewer-avatar";
-						} else {
-							avatarElement = document.createElement("div");
-							avatarElement.className = "reviewer-avatar reviewer-avatar-placeholder";
-							avatarElement.textContent =
-								review.first_name.substr(0, 1) + review.last_name.substr(0, 1);
-						}
-
-						// Детали о пользователе (имя и дата)
-						const reviewerDetails = document.createElement("div");
-						reviewerDetails.className = "reviewer-details";
-
-						const reviewerName = document.createElement("div");
-						reviewerName.className = "reviewer-name";
-						reviewerName.textContent = review.first_name + " " + review.last_name;
-
-						const reviewDate = document.createElement("div");
-						reviewDate.className = "review-date";
-
-						// Форматируем дату
-						const date = new Date(review.created_at);
-						const day = date.getDate().toString().padStart(2, "0");
-						const month = (date.getMonth() + 1).toString().padStart(2, "0");
-						const year = date.getFullYear();
-						reviewDate.textContent = `${day}.${month}.${year}`;
-
-						reviewerDetails.appendChild(reviewerName);
-						reviewerDetails.appendChild(reviewDate);
-
-						reviewerInfo.appendChild(avatarElement);
-						reviewerInfo.appendChild(reviewerDetails);
-
-						// Создаем элемент для отображения рейтинга
-						const reviewRating = document.createElement("div");
-						reviewRating.className = "review-rating";
-
-						// Добавляем звезды рейтинга
-						for (let i = 1; i <= 5; i++) {
-							const starImg = document.createElement("img");
-							starImg.src = `../assets/img/icons/${
-								i <= review.rating ? "star-filled.svg" : "star-void.svg"
-							}`;
-							starImg.alt = "Звезда";
-							starImg.className = "review-star-icon";
-							reviewRating.appendChild(starImg);
-						}
-
-						// Собираем заголовок отзыва
-						reviewHeader.appendChild(reviewerInfo);
-						reviewHeader.appendChild(reviewRating);
-
-						// Создаем содержимое отзыва
-						const reviewContent = document.createElement("div");
-						reviewContent.className = "review-content";
-
-						const reviewText = document.createElement("p");
-						reviewText.textContent = review.comment;
-
-						reviewContent.appendChild(reviewText);
-
-						// Собираем весь отзыв
-						reviewItem.appendChild(reviewHeader);
-						reviewItem.appendChild(reviewContent);
-
-						// Добавляем отзыв в список
-						reviewsList.appendChild(reviewItem);
-					});
-				}
-			},
-			error: function (xhr, status, error) {
-				console.error("Ошибка при загрузке отзывов:", error);
-			},
-		});
-	}
-
-	// Проверяем, есть ли уже отзывы на странице
-	const existingReviews = document.querySelector(".listing-reviews-list");
-	// Загружаем отзывы только если их нет на странице
-	if (!existingReviews) {
-		loadReviews();
-	}
+	// Do not auto-refresh section on init: it recreates DOM and drops star handlers.
 });

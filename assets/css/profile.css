@@ -18,7 +18,6 @@
 	padding: 20px;
 	max-width: 367px;
 	width: 100%;
-	height: max-content;
 }
 
 .profile-header-container {
@@ -53,7 +52,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 48px;
+	font-size: 64px;
 	color: #666;
 	font-weight: 600;
 }
@@ -131,7 +130,7 @@
 	display: flex;
 }
 
-.star {
+.profile-rating .star {
 	width: 20px;
 	height: 20px;
 	margin-right: 2px;
@@ -140,10 +139,15 @@
 /* Кнопки действий */
 .profile-actions {
 	display: flex;
-	flex-direction: column;
 	align-items: center;
 	gap: 14px;
-	margin-top: 32px;
+}
+
+.profile-actions button,
+.profile-actions a  {
+	font-size: 14px;
+	padding: 4px 12px;
+	border-radius: 100px;
 }
 
 /* Кнопка выхода */
@@ -169,7 +173,6 @@
 	display: flex;
 	flex-direction: column;
 	align-items: start;
-	max-width: 753px;
 	width: 100%;
 }
 /* Навигация профиля */
@@ -177,7 +180,7 @@
 	display: flex;
 	gap: 20px;
 	align-items: center;
-	margin-bottom: 30px;
+	margin-bottom: 20px;
 }
 
 .profile-nav-item {

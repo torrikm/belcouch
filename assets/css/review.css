@@ -3,8 +3,8 @@
 	background-color: #ffffff;
 	border-radius: 20px;
 	padding: 32px;
-	margin-top: 40px;
 	width: 100%;
+	box-shadow: 4px 4px 4px 0 rgba(29, 53, 139, 0.19);
 }
 
 .review-block .review-header {
@@ -27,7 +27,7 @@
 	align-items: center;
 }
 
-.star {
+.review-block .star {
 	cursor: pointer;
 	transition: all 0.3s ease;
 	transform-origin: center;
@@ -36,18 +36,18 @@
 	justify-content: center;
 }
 
-.star-icon {
+.review-block .star-icon {
 	width: 24px;
 	height: 24px;
 	transition: all 0.3s ease;
 }
 
-.star:hover {
+.review-block .star:hover {
 	transform: scale(1.1);
 }
 
-.star:hover .star-icon,
-.star.active .star-icon {
+.review-block .star:hover .star-icon,
+.review-block .star.active .star-icon {
 	content: url('../img/icons/star-filled.svg');
 }
 
@@ -89,7 +89,7 @@
 
 /* Стили для секции отзывов */
 .reviews-section {
-	margin-top: 40px;
+	margin-top: 20px;
 }
 
 .reviews-title {
@@ -99,16 +99,31 @@
 	margin-bottom: 20px;
 }
 
+.reviews-empty {
+	background: #ffffff;
+	border: 1px dashed rgba(15, 31, 55, 0.18);
+	border-radius: 16px;
+	padding: 18px 16px;
+	color: #667085;
+	text-align: center;
+	font-size: 16px;
+	line-height: 1.4;
+	margin-bottom: 20px;
+	box-shadow: 4px 4px 4px 0 rgba(29, 53, 139, 0.19);
+}
+
 /* Стили для списка отзывов */
 .reviews-list {
 	margin-bottom: 40px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 }
 
 .review-item {
 	background-color: #ffffff;
 	border-radius: 16px;
 	padding: 24px;
-	margin-bottom: 16px;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 

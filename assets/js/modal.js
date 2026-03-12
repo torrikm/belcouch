@@ -6,7 +6,16 @@
 function openModal(modalId) {
 	const modal = document.getElementById(modalId);
 	if (modal) {
+		const modalWindow = modal.querySelector(".modal");
+		if (modalWindow) {
+			if (modal.dataset.modalWidth) {
+				modalWindow.style.maxWidth = modal.dataset.modalWidth;
+			} else {
+				modalWindow.style.removeProperty("max-width");
+			}
+		}
 		modal.classList.add("show");
+		document.body.style.overflow = "hidden";
 	}
 }
 
@@ -15,31 +24,80 @@ function closeModal(modalId) {
 	const modal = document.getElementById(modalId);
 	if (modal) {
 		modal.classList.remove("show");
-		// Разблокируем прокрутку основного контента
 		document.body.style.overflow = "";
 	}
 }
 
-// Закрытие модального окна при клике на оверлей
-document.addEventListener("DOMContentLoaded", function () {
-	// Получаем все модальные окна
-	const modalOverlays = document.querySelectorAll(".modal-overlay");
+function bindOverlayCloseBehavior(overlay) {
+	let backdropPressStarted = false;
+	let downX = 0;
+	let downY = 0;
 
-	modalOverlays.forEach((overlay) => {
-		// Закрытие при клике на оверлей (но не на само модальное окно)
-		overlay.addEventListener("click", function (e) {
-			if (e.target === overlay) {
+	overlay.addEventListener("mousedown", function (e) {
+		backdropPressStarted = e.target === overlay;
+		if (backdropPressStarted) {
+			downX = e.clientX;
+			downY = e.clientY;
+		}
+	});
+
+	overlay.addEventListener("mouseup", function (e) {
+		if (backdropPressStarted && e.target === overlay) {
+			const movedX = Math.abs(e.clientX - downX);
+			const movedY = Math.abs(e.clientY - downY);
+			const isTap = movedX < 5 && movedY < 5;
+
+			if (isTap) {
 				overlay.classList.remove("show");
 				document.body.style.overflow = "";
 			}
-		});
+		}
+		backdropPressStarted = false;
+	});
+}
+
+// Закрытие модального окна при клике на оверлей
+App.register("profileModals", function () {
+	// Получаем все модальные окна
+	const modalOverlays = document.querySelectorAll(".modal-overlay");
+
+	window.App.modal = {
+		open(target) {
+			const overlay =
+				typeof target === "string"
+					? document.getElementById(target)
+					: target;
+			if (!overlay) return;
+			const modalWindow = overlay.querySelector(".modal");
+			if (modalWindow) {
+				if (overlay.dataset.modalWidth) {
+					modalWindow.style.maxWidth = overlay.dataset.modalWidth;
+				} else {
+					modalWindow.style.removeProperty("max-width");
+				}
+			}
+			overlay.classList.add("show");
+			document.body.style.overflow = "hidden";
+		},
+		close(target) {
+			const overlay =
+				typeof target === "string"
+					? document.getElementById(target)
+					: target;
+			if (!overlay) return;
+			overlay.classList.remove("show");
+			document.body.style.overflow = "";
+		},
+	};
+
+	modalOverlays.forEach((overlay) => {
+		bindOverlayCloseBehavior(overlay);
 
 		// Находим кнопку закрытия внутри каждого модального окна
 		const closeBtn = overlay.querySelector(".modal-close");
 		if (closeBtn) {
 			closeBtn.addEventListener("click", function () {
-				overlay.classList.remove("show");
-				document.body.style.overflow = "";
+				window.App.modal.close(overlay);
 			});
 		}
 
@@ -47,8 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		const cancelBtn = overlay.querySelector(".btn-cancel");
 		if (cancelBtn) {
 			cancelBtn.addEventListener("click", function () {
-				overlay.classList.remove("show");
-				document.body.style.overflow = "";
+				window.App.modal.close(overlay);
 			});
 		}
 	});
@@ -62,7 +119,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		});
 	}
 
-	const editBioLink = document.querySelector(".profile-section-header .edit-link");
+	const editBioLink = document.querySelector(
+		".profile-section-header .edit-link",
+	);
 	if (editBioLink) {
 		editBioLink.addEventListener("click", function (e) {
 			e.preventDefault();
@@ -85,10 +144,36 @@ document.addEventListener("DOMContentLoaded", function () {
 	function updateProfileInfo(userData) {
 		console.log("Обновление информации профиля:", userData);
 
+		function calcAge(dateStr) {
+			if (!dateStr) return null;
+			const parts = String(dateStr).split("-");
+			if (parts.length !== 3) return null;
+			const year = Number(parts[0]);
+			const month = Number(parts[1]) - 1;
+			const day = Number(parts[2]);
+			if (!year || month < 0 || month > 11 || !day) return null;
+			const today = new Date();
+			let age = today.getFullYear() - year;
+			const m = today.getMonth() - month;
+			if (m < 0 || (m === 0 && today.getDate() < day)) {
+				age--;
+			}
+			return age >= 0 ? age : null;
+		}
+
+		function pluralYears(n) {
+			const forms = ["год", "года", "лет"];
+			const cases = [2, 0, 1, 1, 1, 2];
+			return forms[
+				n % 100 > 4 && n % 100 < 20 ? 2 : cases[Math.min(n % 10, 5)]
+			];
+		}
+
 		// Обновляем имя пользователя
 		const profileName = document.querySelector(".profile-name");
 		if (profileName) {
-			profileName.textContent = userData.first_name + " " + userData.last_name;
+			profileName.textContent =
+				userData.first_name + " " + userData.last_name;
 		}
 
 		// Обновляем город
@@ -113,10 +198,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 			// Добавляем случайный параметр к URL, чтобы избежать кеширования
 			const timestamp = new Date().getTime();
-			const avatarUrl = `../api/get_avatar.php?id=${userData.id}&t=${timestamp}`;
+			const avatarUrl = `${API_BASE_URL}/users/get_avatar.php?id=${userData.id}&t=${timestamp}`;
 
 			// Обновляем аватар в шапке профиля
-			const profileAvatar = document.querySelector(".profile-avatar-container img");
+			const profileAvatar = document.querySelector(
+				".profile-avatar-container img",
+			);
 			if (profileAvatar) {
 				console.log("Обновляем аватар в шапке профиля");
 				profileAvatar.src = avatarUrl;
@@ -130,7 +217,9 @@ document.addEventListener("DOMContentLoaded", function () {
 			}
 
 			// Если есть плейсхолдер аватара, скрываем его и показываем изображение
-			const avatarPlaceholder = document.querySelector(".profile-avatar-placeholder");
+			const avatarPlaceholder = document.querySelector(
+				".profile-avatar-placeholder",
+			);
 			if (avatarPlaceholder) {
 				console.log("Скрываем плейсхолдер аватара");
 				avatarPlaceholder.style.display = "none";
@@ -143,9 +232,14 @@ document.addEventListener("DOMContentLoaded", function () {
 					newAvatar.className = "profile-avatar";
 
 					// Добавляем изображение в контейнер
-					const avatarContainer = document.querySelector(".profile-avatar-container");
+					const avatarContainer = document.querySelector(
+						".profile-avatar-container",
+					);
 					if (avatarContainer) {
-						avatarContainer.insertBefore(newAvatar, avatarPlaceholder);
+						avatarContainer.insertBefore(
+							newAvatar,
+							avatarPlaceholder,
+						);
 					}
 				}
 			}
@@ -153,7 +247,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		// Обновляем информацию о поле
 		const genderIcon = document.querySelector(".gender-icon");
-		if (genderIcon && userData.gender && userData.gender !== "not_specified") {
+		if (
+			genderIcon &&
+			userData.gender &&
+			userData.gender !== "not_specified"
+		) {
 			const timestamp = new Date().getTime();
 			genderIcon.src = `../assets/img/icons/${userData.gender}.svg?t=${timestamp}`;
 			genderIcon.alt = userData.gender === "male" ? "Мужской" : "Женский";
@@ -162,9 +260,40 @@ document.addEventListener("DOMContentLoaded", function () {
 			genderIcon.style.display = "none";
 		}
 
+		// Обновляем возраст (и показываем/скрываем блок meta/divider)
+		const profileAge = document.querySelector(".profile-age span");
+		const profileAgeContainer = document.querySelector(".profile-age");
+		const profileMeta = document.querySelector(".profile-meta");
+		const divider = document.querySelector(".divider");
+		const age = calcAge(userData.birth_date || userData.birthdate);
+
+		if (profileAge && profileAgeContainer) {
+			if (age !== null) {
+				profileAge.textContent = `${age} ${pluralYears(age)}`;
+				profileAgeContainer.style.display = "flex";
+			} else {
+				profileAge.textContent = "";
+				profileAgeContainer.style.display = "none";
+			}
+		}
+
+		if (profileMeta) {
+			const genderVisible =
+				genderIcon && genderIcon.style.display !== "none";
+			const ageVisible =
+				profileAgeContainer &&
+				profileAgeContainer.style.display !== "none";
+			profileMeta.style.display =
+				genderVisible || ageVisible ? "flex" : "none";
+			if (divider) {
+				divider.style.display = profileMeta.style.display;
+			}
+		}
+
 		// Обновляем аватар, если он был изменен
 		if (userData.avatar_updated) {
-			const avatarImages = document.querySelectorAll("img.profile-avatar");
+			const avatarImages =
+				document.querySelectorAll("img.profile-avatar");
 			const timestamp = new Date().getTime(); // Добавляем таймстемп для обхода кеширования
 			avatarImages.forEach((img) => {
 				const src = img.src.split("?")[0]; // Удаляем старые параметры
@@ -176,49 +305,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		closeModal("edit-profile-modal");
 
 		// Показываем уведомление об успешном обновлении
-		showNotification("Профиль успешно обновлен");
-	}
-
-	// Функция для показа уведомления
-	function showNotification(message) {
-		// Проверяем, есть ли уже уведомление на странице
-		let notification = document.querySelector(".notification");
-
-		// Если нет, создаем новый элемент
-		if (!notification) {
-			notification = document.createElement("div");
-			notification.className = "notification";
-			document.body.appendChild(notification);
-
-			// Добавляем стили для уведомления
-			notification.style.position = "fixed";
-			notification.style.bottom = "20px";
-			notification.style.right = "20px";
-			notification.style.backgroundColor = "var(--hover-button)";
-			notification.style.color = "white";
-			notification.style.padding = "15px 20px";
-			notification.style.borderRadius = "8px";
-			notification.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
-			notification.style.zIndex = "2000";
-			notification.style.opacity = "0";
-			notification.style.transition = "opacity 0.3s";
-		}
-
-		// Устанавливаем текст уведомления
-		notification.textContent = message;
-
-		// Показываем уведомление
-		setTimeout(() => {
-			notification.style.opacity = "1";
-		}, 10);
-
-		// Скрываем через 3 секунды
-		setTimeout(() => {
-			notification.style.opacity = "0";
-			setTimeout(() => {
-				notification.remove();
-			}, 300);
-		}, 3000);
+		window.App.notify("Профиль успешно обновлен");
 	}
 
 	// Обработка отправки формы редактирования профиля
@@ -226,14 +313,17 @@ document.addEventListener("DOMContentLoaded", function () {
 	if (editProfileForm) {
 		editProfileForm.addEventListener("submit", function (e) {
 			e.preventDefault();
+			const cityInput = document.getElementById("city");
+			if (
+				window.App.cityAutocomplete &&
+				typeof window.App.cityAutocomplete.validateInput ===
+					"function" &&
+				!window.App.cityAutocomplete.validateInput(cityInput)
+			) {
+				return;
+			}
 
-			// Создаем объект FormData для отправки данных формы включая файлы
 			const formData = new FormData(this);
-
-			// Добавляем отладочную информацию
-			console.log("Отправка формы редактирования профиля");
-
-			// Проверяем загружаемый файл аватара
 			const avatarInput = document.getElementById("avatar-upload");
 			if (avatarInput && avatarInput.files.length > 0) {
 				const avatarFile = avatarInput.files[0];
@@ -270,7 +360,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 			// Отправляем данные на сервер
 			$.ajax({
-				url: "../api/update_profile.php",
+				xhrFields: { withCredentials: true },
+				url: API_BASE_URL + "/users/update_profile.php",
 				type: "POST",
 				data: formData,
 				processData: false,
@@ -283,14 +374,17 @@ document.addEventListener("DOMContentLoaded", function () {
 						// Обновляем данные профиля на странице без перезагрузки
 						updateProfileInfo(data.user);
 						// Показываем уведомление об успехе
-						showNotification("Профиль успешно обновлен");
+						window.App.notify("Профиль успешно обновлен");
 					} else {
-						alert("Ошибка: " + data.message);
+						window.App.notify("Ошибка: " + data.message, "error");
 					}
 				},
 				error: function (xhr, status, error) {
 					console.error("Ошибка:", error);
-					alert("Произошла ошибка при обновлении профиля");
+					window.App.notify(
+						"Произошла ошибка при обновлении профиля",
+						"error",
+					);
 				},
 			});
 		});
@@ -319,7 +413,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 
 		// Обновляем информацию об образовании
-		const educationText = document.querySelector(".detail-icon.education-icon + .detail-text");
+		const educationText = document.querySelector(
+			".detail-icon.education-icon + .detail-text",
+		);
 		if (educationText) {
 			if (userData.education) {
 				educationText.textContent = userData.education;
@@ -329,7 +425,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 
 		// Обновляем информацию о работе
-		const occupationText = document.querySelector(".detail-icon.work-icon + .detail-text");
+		const occupationText = document.querySelector(
+			".detail-icon.work-icon + .detail-text",
+		);
 		if (occupationText) {
 			if (userData.occupation) {
 				occupationText.textContent = userData.occupation;
@@ -339,7 +437,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 
 		// Обновляем информацию об интересах
-		const interestsText = document.querySelector(".detail-icon.hobby-icon + .detail-text");
+		const interestsText = document.querySelector(
+			".detail-icon.hobby-icon + .detail-text",
+		);
 		if (interestsText) {
 			if (userData.interests) {
 				interestsText.textContent = userData.interests;
@@ -352,21 +452,53 @@ document.addEventListener("DOMContentLoaded", function () {
 		closeModal("edit-bio-modal");
 
 		// Показываем уведомление об успешном обновлении
-		showNotification("Информация обновлена");
+		window.App.notify("Информация обновлена");
 	}
 
 	// Обработка отправки формы редактирования описания
 	const editBioForm = document.getElementById("edit-bio-form");
+	const descriptionField = document.getElementById("description");
+	const descriptionLengthValue = document.getElementById(
+		"description-length-value",
+	);
+	const BIO_MAX_LENGTH = 800;
+
+	function updateDescriptionLength() {
+		if (!descriptionField || !descriptionLengthValue) {
+			return;
+		}
+
+		descriptionLengthValue.textContent = descriptionField.value.length;
+	}
+
+	if (descriptionField) {
+		descriptionField.setAttribute("maxlength", BIO_MAX_LENGTH);
+		descriptionField.addEventListener("input", updateDescriptionLength);
+		updateDescriptionLength();
+	}
+
 	if (editBioForm) {
 		editBioForm.addEventListener("submit", function (e) {
 			e.preventDefault();
+
+			if (
+				descriptionField &&
+				descriptionField.value.length > BIO_MAX_LENGTH
+			) {
+				window.App.notify(
+					"Описание не должно превышать 800 символов",
+					"error",
+				);
+				return;
+			}
 
 			// Создаем объект FormData для отправки данных формы
 			const formData = new FormData(this);
 
 			// Отправляем данные на сервер
 			$.ajax({
-				url: "../api/update_bio.php",
+				xhrFields: { withCredentials: true },
+				url: API_BASE_URL + "/users/update_bio.php",
 				type: "POST",
 				data: formData,
 				processData: false,
@@ -379,12 +511,15 @@ document.addEventListener("DOMContentLoaded", function () {
 						updateBioInfo(data.user);
 					} else {
 						// Если возникла ошибка, показываем её пользователю
-						alert("Ошибка: " + data.message);
+						window.App.notify("Ошибка: " + data.message, "error");
 					}
 				},
 				error: function (xhr, status, error) {
 					console.error("Ошибка:", error);
-					alert("Произошла ошибка при обновлении описания");
+					window.App.notify(
+						"Произошла ошибка при обновлении описания",
+						"error",
+					);
 				},
 			});
 		});
@@ -396,7 +531,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		// Валидация совпадения паролей
 		const newPassword = document.getElementById("new_password");
 		const confirmPassword = document.getElementById("confirm_password");
-		const passwordMatchError = document.getElementById("password-match-error");
+		const passwordMatchError = document.getElementById(
+			"password-match-error",
+		);
 
 		// Проверка совпадения паролей при вводе
 		confirmPassword.addEventListener("input", function () {
@@ -409,7 +546,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		// Проверка совпадения паролей при изменении нового пароля
 		newPassword.addEventListener("input", function () {
-			if (confirmPassword.value && newPassword.value !== confirmPassword.value) {
+			if (
+				confirmPassword.value &&
+				newPassword.value !== confirmPassword.value
+			) {
 				passwordMatchError.style.display = "block";
 			} else if (confirmPassword.value) {
 				passwordMatchError.style.display = "none";
@@ -428,7 +568,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 			// Проверка минимальной длины пароля
 			if (newPassword.value.length < 8) {
-				alert("Пароль должен содержать минимум 8 символов");
+				window.App.notify(
+					"Пароль должен содержать минимум 8 символов",
+					"error",
+				);
 				return;
 			}
 
@@ -437,7 +580,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 			// Отправляем данные на сервер
 			$.ajax({
-				url: "../api/change_password.php",
+				xhrFields: { withCredentials: true },
+				url: API_BASE_URL + "/users/change_password.php",
 				type: "POST",
 				data: formData,
 				processData: false,
@@ -446,15 +590,17 @@ document.addEventListener("DOMContentLoaded", function () {
 					if (data.success) {
 						// Если обновление прошло успешно, закрываем модальное окно
 						closeModal("change-password-modal");
-						alert("Пароль успешно изменен");
+						window.App.notify("Пароль успешно изменен");
 					} else {
-						// Если возникла ошибка, показываем её пользователю
-						alert("Ошибка: " + data.message);
+						window.App.notify("Ошибка: " + data.message, "error");
 					}
 				},
 				error: function (xhr, status, error) {
 					console.error("Ошибка:", error);
-					alert("Произошла ошибка при изменении пароля");
+					window.App.notify(
+						"Произошла ошибка при изменении пароля",
+						"error",
+					);
 				},
 			});
 		});
@@ -468,7 +614,8 @@ document.addEventListener("DOMContentLoaded", function () {
 			if (file) {
 				const reader = new FileReader();
 				reader.onload = function (e) {
-					const currentAvatar = document.querySelector(".current-avatar");
+					const currentAvatar =
+						document.querySelector(".current-avatar");
 					if (currentAvatar.tagName === "IMG") {
 						// Если это уже изображение, обновляем его src
 						currentAvatar.src = e.target.result;
@@ -477,7 +624,10 @@ document.addEventListener("DOMContentLoaded", function () {
 						const imgElement = document.createElement("img");
 						imgElement.src = e.target.result;
 						imgElement.classList.add("current-avatar");
-						currentAvatar.parentNode.replaceChild(imgElement, currentAvatar);
+						currentAvatar.parentNode.replaceChild(
+							imgElement,
+							currentAvatar,
+						);
 					}
 				};
 				reader.readAsDataURL(file);

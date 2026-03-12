@@ -118,22 +118,22 @@
 	gap: 5px;
 }
 
-.star {
+.listing-review-block .star {
 	cursor: pointer;
 	display: inline-block;
 }
 
-.star.active .star-icon {
+.listing-review-block .star.active .star-icon {
 	content: url("../assets/img/icons/star-filled.svg");
 }
 
-.star-icon {
+.listing-review-block .star-icon {
 	width: 20px;
 	height: 20px;
 	transition: transform 0.2s;
 }
 
-.star:hover .star-icon {
+.listing-review-block .star:hover .star-icon {
 	transform: scale(1.2);
 }
 

@@ -17,11 +17,31 @@
 	border-radius: 10px;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 	width: 100%;
-	max-width: 600px;
+	max-width: 900px;
 	padding: 30px;
 	position: relative;
 	max-height: 90vh;
 	overflow-y: auto;
+}
+
+.modal::-webkit-scrollbar {
+	width: 6px;
+}
+
+.modal::-webkit-scrollbar-track {
+	background: transparent;
+	border-radius: 3px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+	background: #c0c0c0;
+	border-radius: 3px;
+}
+
+.modal::-webkit-scrollbar-thumb:hover {
+	background: #a0a0a0;
 }
 
 .modal-header {
@@ -74,7 +94,7 @@
 
 .form-control {
 	width: 100%;
-	padding: 12px 15px;
+	padding: 14px 15px;
 	border: 1px solid #ddd;
 	border-radius: 8px;
 	font-size: 16px;
@@ -213,4 +233,51 @@ textarea.form-control {
 	font-size: 14px;
 	margin-top: 5px;
 	display: none;
+}
+
+/* Стили для модальных окон авторизации */
+.auth-modal {
+	max-width: 600px;
+	padding: 40px 30px;
+}
+
+.auth-modal .modal-header {
+	justify-content: center;
+	margin-bottom: 30px;
+	position: relative;
+}
+
+.auth-modal .modal-title {
+	font-size: 28px;
+}
+
+.auth-modal .modal-close {
+	position: absolute;
+	right: 0;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.auth-modal .form-control {
+	background-color: #f8f9fa;
+	border: 1px solid #e0e0e0;
+	padding: 15px;
+}
+
+.auth-modal .form-control:focus {
+	background-color: #fff;
+	border-color: #1d358b;
+	box-shadow: 0 0 0 3px rgba(29, 53, 139, 0.1);
+}
+
+.auth-modal .btn-save {
+	padding: 15px;
+	font-size: 18px;
+	font-weight: 600;
+	border-radius: 8px;
+}
+
+.auth-modal .error-message {
+	font-size: 13px;
+	margin-top: 5px;
 }

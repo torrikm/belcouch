@@ -3,189 +3,253 @@
  * Обрабатывает фильтрацию без перезагрузки страницы с использованием AJAX
  */
 
-document.addEventListener("DOMContentLoaded", function () {
-	// Получаем форму фильтров
+App.register("proposalsFilter", function () {
 	const filtersForm = document.getElementById("filters-form");
-	// Контейнер для отображения результатов
 	const listingsContent = document.querySelector(".listings-content");
-	// Кнопка сброса фильтров
 	const resetFiltersBtn = document.querySelector(".reset-filters");
-
-	// Текущая страница пагинации
 	let currentPage = 1;
 
-	// Если форма существует, добавляем обработчик события
-	if (filtersForm) {
-		// Обработка изменений в форме (для мгновенного применения фильтров)
-		const filterInputs = filtersForm.querySelectorAll(
-			'select, input[type="number"], input[type="text"]'
-		);
-		filterInputs.forEach((input) => {
-			input.addEventListener("change", function () {
-				currentPage = 1; // Сбрасываем на первую страницу при изменении фильтров
-				applyFilters();
-			});
-		});
+	if (!filtersForm || !listingsContent) {
+		return;
+	}
 
-		// Обработка чекбоксов (с небольшой задержкой для удобства)
-		const checkboxes = filtersForm.querySelectorAll('input[type="checkbox"]');
-		checkboxes.forEach((checkbox) => {
-			checkbox.addEventListener("change", function () {
-				currentPage = 1; // Сбрасываем на первую страницу при изменении фильтров
-				applyFilters();
+	function initGuestRanges(form, onRangeChange) {
+		const ranges = form.querySelectorAll(".guest-range");
+		ranges.forEach((rangeBox) => {
+			const minLimit = Number(rangeBox.dataset.min || 1);
+			const maxLimit = Number(rangeBox.dataset.max || 20);
+			const minSlider = rangeBox.querySelector(".guest-range-min");
+			const maxSlider = rangeBox.querySelector(".guest-range-max");
+			const minInput = rangeBox.querySelector('input[name="min_guests"]');
+			const maxInput = rangeBox.querySelector('input[name="max_guests"]');
+			const minValue = rangeBox.querySelector(".guest-range-min-value");
+			const maxValue = rangeBox.querySelector(".guest-range-max-value");
+
+			if (!minSlider || !maxSlider || !minInput || !maxInput) {
+				return;
+			}
+
+			const syncRange = function (source) {
+				let min = Number(minSlider.value);
+				let max = Number(maxSlider.value);
+
+				if (min > max) {
+					if (source === "min") {
+						max = min;
+						maxSlider.value = String(max);
+					} else {
+						min = max;
+						minSlider.value = String(min);
+					}
+				}
+
+				min = Math.max(minLimit, Math.min(min, maxLimit));
+				max = Math.max(minLimit, Math.min(max, maxLimit));
+
+				minInput.value = String(min);
+				maxInput.value = String(max);
+
+				if (minValue) minValue.textContent = String(min);
+				if (maxValue) maxValue.textContent = String(max);
+			};
+
+			syncRange("");
+
+			minSlider.addEventListener("input", function () {
+				syncRange("min");
 			});
+			maxSlider.addEventListener("input", function () {
+				syncRange("max");
+			});
+			minSlider.addEventListener("change", onRangeChange);
+			maxSlider.addEventListener("change", onRangeChange);
 		});
 	}
 
-	// Обработка сброса фильтров
-	if (resetFiltersBtn) {
-		resetFiltersBtn.addEventListener("click", function (e) {
-			e.preventDefault();
-			filtersForm.reset();
-			currentPage = 1;
-			applyFilters();
-		});
-	}
-
-	// Функция для применения фильтров
 	function applyFilters() {
-		// Показываем индикатор загрузки
-		if (listingsContent) {
-			listingsContent.innerHTML =
-				'<div class="loading-indicator">Загрузка результатов...</div>';
-		}
+		listingsContent.innerHTML =
+			'<div class="loading-indicator">Загрузка результатов...</div>';
 
-		// Собираем данные формы
 		const formData = new FormData(filtersForm);
 		formData.append("page", currentPage);
 
-		// Отправляем AJAX запрос с использованием jQuery
 		$.ajax({
-			url: "api/get_filtered_listings.php",
+			xhrFields: { withCredentials: true },
+			url: API_BASE_URL + "/get_filtered_listings.php",
 			type: "POST",
 			data: formData,
-			processData: false, // Важно для FormData
-			contentType: false, // Важно для FormData
+			processData: false,
+			contentType: false,
 			dataType: "json",
-			success: function(data) {
-				if (data.success && listingsContent) {
-					// Обновляем содержимое
+			success: function (data) {
+				if (data.success) {
 					listingsContent.innerHTML = data.html;
-
-					// Обновляем URL с параметрами фильтров (для возможности поделиться ссылкой)
 					updateUrlWithFilters(formData);
-
-					// Добавляем обработчики для пагинации
 					setupPagination();
-
-					// Обновляем кнопку сброса фильтров
 					updateResetButton(formData);
+					document.dispatchEvent(new CustomEvent("contentUpdated"));
+					return;
+				}
 
-					// Вызываем событие обновления контента для переинициализации обработчиков
-					const event = new CustomEvent('contentUpdated');
-					document.dispatchEvent(event);
-				} else {
-					console.error("Ошибка при получении данных");
-				}
+				console.error("Ошибка при получении данных");
 			},
-			error: function(xhr, status, error) {
+			error: function (xhr, status, error) {
 				console.error("Ошибка при выполнении запроса:", error);
-				if (listingsContent) {
-					listingsContent.innerHTML =
-						'<div class="error-message">Произошла ошибка при загрузке данных. Пожалуйста, попробуйте позже.</div>';
-				}
-			}
+				listingsContent.innerHTML =
+					'<div class="error-message">Произошла ошибка при загрузке данных. Пожалуйста, попробуйте позже.</div>';
+			},
 		});
 	}
 
-	// Функция для обновления URL с параметрами фильтров
 	function updateUrlWithFilters(formData) {
 		const params = new URLSearchParams();
+		const defaultMin = String(
+			filtersForm.querySelector(".guest-range")?.dataset.min || "1",
+		);
+		const defaultMax = String(
+			filtersForm.querySelector(".guest-range")?.dataset.max || "20",
+		);
 
-		// Добавляем все параметры из формы
 		for (const [key, value] of formData.entries()) {
-			// Пропускаем пустые значения и страницу
+			if (key === "min_guests" && String(value) === defaultMin) {
+				continue;
+			}
+			if (key === "max_guests" && String(value) === defaultMax) {
+				continue;
+			}
+
 			if (value && key !== "page") {
-				// Для массивов (чекбоксы) добавляем несколько параметров с одинаковым именем
 				if (key.endsWith("[]")) {
-					const cleanKey = key.replace("[]", "");
-					params.append(cleanKey, value);
+					params.append(key.replace("[]", ""), value);
 				} else {
 					params.set(key, value);
 				}
 			}
 		}
 
-		// Если текущая страница не 1, добавляем её в URL
 		if (currentPage > 1) {
 			params.set("page", currentPage);
 		}
 
-		// Обновляем URL без перезагрузки страницы
 		const newUrl =
-			window.location.pathname + (params.toString() ? "?" + params.toString() : "");
+			window.location.pathname +
+			(params.toString() ? "?" + params.toString() : "");
 		window.history.pushState({}, "", newUrl);
 	}
 
-	// Функция для настройки обработчиков пагинации
 	function setupPagination() {
 		const paginationButtons = document.querySelectorAll(".pagination-btn");
 
 		paginationButtons.forEach((button) => {
 			button.addEventListener("click", function () {
-				// Получаем номер страницы из атрибута data-page
-				const page = parseInt(this.getAttribute("data-page"));
+				const page = parseInt(this.getAttribute("data-page"), 10);
 				if (page && page !== currentPage) {
 					currentPage = page;
-					// Прокручиваем страницу вверх для удобства
 					window.scrollTo({
 						top: 0,
 						behavior: "smooth",
 					});
-					// Применяем фильтры с новой страницей
 					applyFilters();
 				}
 			});
 		});
 	}
 
-	// Функция для обновления кнопки сброса фильтров
 	function updateResetButton(formData) {
 		const resetBtn = document.querySelector(".reset-filters");
 		let hasActiveFilters = false;
+		const defaultMin = String(
+			filtersForm.querySelector(".guest-range")?.dataset.min || "1",
+		);
+		const defaultMax = String(
+			filtersForm.querySelector(".guest-range")?.dataset.max || "20",
+		);
 
-		// Проверяем, есть ли активные фильтры
 		for (const [key, value] of formData.entries()) {
+			if (key === "min_guests" && String(value) === defaultMin) {
+				continue;
+			}
+			if (key === "max_guests" && String(value) === defaultMax) {
+				continue;
+			}
+
 			if (value && key !== "page") {
 				hasActiveFilters = true;
 				break;
 			}
 		}
 
-		// Показываем или скрываем кнопку сброса
 		if (resetBtn) {
-			if (hasActiveFilters) {
-				resetBtn.style.display = "block";
-			} else {
-				resetBtn.style.display = "none";
-			}
+			resetBtn.style.display = hasActiveFilters ? "block" : "none";
 		}
 	}
 
-	// Настраиваем пагинацию при загрузке страницы
+	const filterInputs = filtersForm.querySelectorAll(
+		'select, input[type="number"], input[type="text"]',
+	);
+	filterInputs.forEach((input) => {
+		input.addEventListener("change", function () {
+			currentPage = 1;
+			applyFilters();
+		});
+	});
+
+	const checkboxes = filtersForm.querySelectorAll('input[type="checkbox"]');
+	checkboxes.forEach((checkbox) => {
+		checkbox.addEventListener("change", function () {
+			currentPage = 1;
+			applyFilters();
+		});
+	});
+
+	if (resetFiltersBtn) {
+		resetFiltersBtn.addEventListener("click", function (e) {
+			e.preventDefault();
+
+			filtersForm
+				.querySelectorAll("select")
+				.forEach((select) => (select.value = "0"));
+			filtersForm
+				.querySelectorAll('input[type="number"], input[type="text"]')
+				.forEach((input) => (input.value = ""));
+			filtersForm
+				.querySelectorAll('input[type="checkbox"]')
+				.forEach((checkbox) => (checkbox.checked = false));
+			filtersForm.querySelectorAll(".guest-range").forEach((rangeBox) => {
+				const minLimit = Number(rangeBox.dataset.min || 1);
+				const maxLimit = Number(rangeBox.dataset.max || 20);
+				const minSlider = rangeBox.querySelector(".guest-range-min");
+				const maxSlider = rangeBox.querySelector(".guest-range-max");
+				const minInput = rangeBox.querySelector('input[name="min_guests"]');
+				const maxInput = rangeBox.querySelector('input[name="max_guests"]');
+				const minValue = rangeBox.querySelector(".guest-range-min-value");
+				const maxValue = rangeBox.querySelector(".guest-range-max-value");
+
+				if (minSlider) minSlider.value = String(minLimit);
+				if (maxSlider) maxSlider.value = String(maxLimit);
+				if (minInput) minInput.value = String(minLimit);
+				if (maxInput) maxInput.value = String(maxLimit);
+				if (minValue) minValue.textContent = String(minLimit);
+				if (maxValue) maxValue.textContent = String(maxLimit);
+			});
+
+			currentPage = 1;
+			applyFilters();
+		});
+	}
+
+	initGuestRanges(filtersForm, function () {
+		currentPage = 1;
+		applyFilters();
+	});
+
 	setupPagination();
 
-	// Если в URL есть параметры, применяем фильтры при загрузке страницы
 	if (window.location.search) {
-		// Заполняем форму значениями из URL
 		const urlParams = new URLSearchParams(window.location.search);
-
-		// Устанавливаем текущую страницу из URL
 		if (urlParams.has("page")) {
-			currentPage = parseInt(urlParams.get("page")) || 1;
+			currentPage = parseInt(urlParams.get("page"), 10) || 1;
 		}
-
-		// Применяем фильтры
 		setTimeout(applyFilters, 100);
 	}
 });

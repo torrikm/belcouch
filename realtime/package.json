@@ -1,0 +1,12 @@
+{
+  "name": "belcouch-realtime",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node chat-ws-server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  }
+}

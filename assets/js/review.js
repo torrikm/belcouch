@@ -1,207 +1,221 @@
-// Скрипт для отправки отзыва с рейтингом (звёздами)
-document.addEventListener("DOMContentLoaded", function () {
+App.register("profileReview", function () {
 	const reviewForm = document.getElementById("review-form");
-	if (!reviewForm) return;
+	if (!reviewForm) {
+		return;
+	}
 
 	const reviewBlock = document.querySelector(".review-block");
-	const stars = reviewBlock.querySelectorAll(".star");
-	let currentRating = 0;
+	if (!reviewBlock) {
+		return;
+	}
 
-	// Наведение и выбор звезды
-	stars.forEach((star, idx) => {
-		star.addEventListener("mouseenter", () => {
-			highlightStars(idx + 1);
-		});
-		star.addEventListener("mouseleave", () => {
-			highlightStars(currentRating);
-		});
-		star.addEventListener("click", () => {
-			currentRating = idx + 1;
-			reviewForm.querySelector('input[name="rating"]').value = currentRating;
-		});
-	});
+	const stars = reviewBlock.querySelectorAll(".star");
+	const ratingInput = reviewForm.querySelector('input[name="rating"]');
+	const submitButton = reviewForm.querySelector('button[type="submit"]');
+	let currentRating = 0;
+	let submitted = false;
+
+	function getReviewsSection() {
+		return document.querySelector(".reviews-section");
+	}
+
+	function getReviewsList() {
+		return document.querySelector(".reviews-list");
+	}
+
+	function ensureReviewsList() {
+		let list = getReviewsList();
+		if (list) {
+			return list;
+		}
+
+		const section = getReviewsSection();
+		if (!section) {
+			return null;
+		}
+
+		list = document.createElement("div");
+		list.className = "reviews-list";
+		list.innerHTML = '<h3 class="reviews-title">Отзывы</h3>';
+
+		const formBlock = document.querySelector(".review-block");
+		if (formBlock) {
+			section.insertBefore(list, formBlock);
+		} else {
+			section.appendChild(list);
+		}
+
+		return list;
+	}
+
+	function removeEmptyState() {
+		const empty = document.querySelector(".reviews-empty");
+		if (empty) {
+			empty.remove();
+		}
+	}
+
+	function setInfoState() {
+		const currentBlock = document.querySelector(".review-block");
+		if (!currentBlock || !currentBlock.parentNode) {
+			return;
+		}
+
+		const infoBlock = document.createElement("div");
+		infoBlock.className = "profile-review-info";
+		infoBlock.innerHTML = "<p>Вы уже оставили отзыв на этого владельца.</p>";
+		currentBlock.parentNode.replaceChild(infoBlock, currentBlock);
+	}
+
+	function normalizeReview(review) {
+		const firstName = String(review?.first_name || "").trim();
+		const lastName = String(review?.last_name || "").trim();
+
+		return {
+			rater_id: review?.rater_id || 0,
+			rating: Number(review?.rating || 0),
+			comment: String(review?.comment || ""),
+			created_at: review?.created_at || new Date().toISOString(),
+			avatar_image: Boolean(review?.avatar_image),
+			full_name: `${firstName} ${lastName}`.trim() || "Пользователь",
+			initials: `${firstName.charAt(0)}${lastName.charAt(0)}` || "U",
+		};
+	}
+
+	function buildReviewItem(rawReview) {
+		const review = normalizeReview(rawReview);
+		const date = new Date(review.created_at);
+		const formattedDate = `${String(date.getDate()).padStart(2, "0")}.${String(
+			date.getMonth() + 1,
+		).padStart(2, "0")}.${date.getFullYear()}`;
+
+		const avatarHtml = review.avatar_image
+			? `<img src="${API_BASE_URL}/users/get_avatar.php?id=${review.rater_id}" alt="Аватар" class="reviewer-avatar">`
+			: `<div class="reviewer-avatar reviewer-avatar-placeholder">${review.initials}</div>`;
+
+		const starsHtml = Array.from({ length: 5 }, (_, index) => {
+			const icon = index < review.rating ? "star-filled.svg" : "star-void.svg";
+			return `<img src="../assets/img/icons/${icon}" alt="Звезда" class="review-star-icon">`;
+		}).join("");
+
+		const item = document.createElement("div");
+		item.className = "review-item";
+		item.innerHTML = `
+			<div class="review-item-header">
+				<div class="reviewer-info">
+					${avatarHtml}
+					<div class="reviewer-details">
+						<div class="reviewer-name">${review.full_name}</div>
+						<div class="review-date">${formattedDate}</div>
+					</div>
+				</div>
+				<div class="review-rating">${starsHtml}</div>
+			</div>
+			<div class="review-content">
+				<p>${review.comment.replace(/\n/g, "<br>")}</p>
+			</div>
+		`;
+
+		return item;
+	}
 
 	function highlightStars(rating) {
-		stars.forEach((star, idx) => {
-			star.classList.toggle("active", idx < rating);
+		stars.forEach((star, index) => {
+			star.classList.toggle("active", index < rating);
 		});
 	}
 
-	// Отправка формы через AJAX
-	reviewForm.addEventListener("submit", function (e) {
-		e.preventDefault();
+	function refreshSectionFromServer() {
+		const currentSection = getReviewsSection();
+		if (!currentSection) {
+			return;
+		}
 
-		// Проверка выбранного рейтинга
+		fetch(window.location.href, {
+			credentials: "same-origin",
+			headers: { "X-Requested-With": "XMLHttpRequest" },
+		})
+			.then((response) => response.text())
+			.then((html) => {
+				const parser = new DOMParser();
+				const doc = parser.parseFromString(html, "text/html");
+				const updatedSection = doc.querySelector(".reviews-section");
+				if (updatedSection) {
+					currentSection.innerHTML = updatedSection.innerHTML;
+				}
+			})
+			.catch(() => {});
+	}
+
+	stars.forEach((star, index) => {
+		star.addEventListener("mouseenter", function () {
+			highlightStars(index + 1);
+		});
+		star.addEventListener("mouseleave", function () {
+			highlightStars(currentRating);
+		});
+		star.addEventListener("click", function () {
+			currentRating = index + 1;
+			if (ratingInput) {
+				ratingInput.value = String(currentRating);
+			}
+		});
+	});
+
+	reviewForm.addEventListener("submit", function (event) {
+		event.preventDefault();
+
 		if (currentRating === 0) {
-			alert("Пожалуйста, выберите рейтинг");
+			window.App.notify("Пожалуйста, выберите рейтинг", "error");
 			return;
 		}
 
 		const formData = new FormData(reviewForm);
-		const submitButton = reviewForm.querySelector('button[type="submit"]');
-
-		// Блокируем кнопку на время отправки
 		submitButton.disabled = true;
 		submitButton.textContent = "Отправка...";
 
 		$.ajax({
-			url: "../api/submit_review.php",
+			xhrFields: { withCredentials: true },
+			url: API_BASE_URL + "/reviews/submit_review.php",
 			type: "POST",
 			data: formData,
 			processData: false,
 			contentType: false,
 			dataType: "json",
 			success: function (data) {
-				if (data.success) {
-					// Скрываем форму и показываем сообщение о том, что отзыв уже оставлен
-					const reviewBlock = document.querySelector(".review-block");
-					if (reviewBlock) {
-						// Создаем элемент с сообщением
-						const infoBlock = document.createElement("div");
-						infoBlock.className = "profile-review-info";
-						infoBlock.innerHTML = "<p>Вы уже оставили отзыв на этого владельца.</p>";
-						
-						// Заменяем форму на сообщение
-						reviewBlock.parentNode.replaceChild(infoBlock, reviewBlock);
-					}
-
-					// Показываем уведомление об успехе
-					showNotification("Спасибо за отзыв!", "success");
-
-					// Добавляем новый отзыв в список без перезагрузки
-					addNewReview(data.review);
-				} else {
-					showNotification(data.message || "Ошибка отправки", "error");
+				if (!data.success) {
+					window.App.notify(data.message || "Ошибка отправки", "error");
+					return;
 				}
+
+				submitted = true;
+				window.App.notify("Спасибо за отзыв!", "success");
+				removeEmptyState();
+
+				const list = ensureReviewsList();
+				if (list) {
+					const item = buildReviewItem(data.review || {});
+					const title = list.querySelector(".reviews-title");
+					if (title) {
+						list.insertBefore(item, title.nextSibling);
+					} else {
+						list.insertBefore(item, list.firstChild);
+					}
+				}
+
+				setInfoState();
+				setTimeout(refreshSectionFromServer, 120);
 			},
 			error: function () {
-				showNotification("Ошибка отправки", "error");
+				window.App.notify("Ошибка отправки", "error");
 			},
 			complete: function () {
-				// Разблокируем кнопку
+				if (submitted) {
+					return;
+				}
 				submitButton.disabled = false;
 				submitButton.textContent = "Отправить";
 			},
 		});
 	});
-
-	// Функция для добавления нового отзыва в список
-	function addNewReview(review) {
-		// Проверяем, есть ли список отзывов на странице
-		let reviewsList = document.querySelector(".reviews-list");
-
-		// Если списка отзывов нет, создаем его
-		if (!reviewsList) {
-			reviewsList = document.createElement("div");
-			reviewsList.className = "reviews-list";
-
-			const reviewsTitle = document.createElement("h3");
-			reviewsTitle.className = "reviews-title";
-			reviewsTitle.textContent = "Отзывы";
-
-			reviewsList.appendChild(reviewsTitle);
-
-			// Добавляем список перед формой отправки отзыва
-			const reviewsSection = document.querySelector(".reviews-section");
-			const reviewBlock = document.querySelector(".review-block");
-			reviewsSection.insertBefore(reviewsList, reviewBlock);
-		}
-
-		// Создаем элемент отзыва
-		const reviewItem = document.createElement("div");
-		reviewItem.className = "review-item";
-
-		// Форматируем дату
-		const date = new Date(review.created_at);
-		const formattedDate = `${date.getDate().toString().padStart(2, "0")}.${(date.getMonth() + 1)
-			.toString()
-			.padStart(2, "0")}.${date.getFullYear()}`;
-
-		// Создаем HTML для отзыва
-		reviewItem.innerHTML = `
-            <div class="review-item-header">
-                <div class="reviewer-info">
-                    ${
-						review.avatar_image
-							? `<img src="../api/get_avatar.php?id=${review.rater_id}" alt="Аватар" class="reviewer-avatar">`
-							: `<div class="reviewer-avatar reviewer-avatar-placeholder">${review.first_name.charAt(
-									0
-							  )}${review.last_name.charAt(0)}</div>`
-					}
-                    <div class="reviewer-details">
-                        <div class="reviewer-name">${review.first_name} ${review.last_name}</div>
-                        <div class="review-date">${formattedDate}</div>
-                    </div>
-                </div>
-                <div class="review-rating">
-                    ${Array(5)
-						.fill(0)
-						.map(
-							(_, i) =>
-								`<img src="../assets/img/icons/${
-									i < review.rating ? "star-filled.svg" : "star-void.svg"
-								}" alt="Звезда" class="review-star-icon">`
-						)
-						.join("")}
-                </div>
-            </div>
-            <div class="review-content">
-                <p>${review.comment.replace(/\n/g, "<br>")}</p>
-            </div>
-        `;
-
-		// Добавляем новый отзыв в начало списка
-		const firstReview = reviewsList.querySelector(".review-item");
-		if (firstReview) {
-			reviewsList.insertBefore(reviewItem, firstReview);
-		} else {
-			reviewsList.appendChild(reviewItem);
-		}
-
-		// Плавно показываем новый отзыв
-		reviewItem.style.opacity = "0";
-		reviewItem.style.transform = "translateY(20px)";
-		reviewItem.style.transition = "opacity 0.5s, transform 0.5s";
-
-		setTimeout(() => {
-			reviewItem.style.opacity = "1";
-			reviewItem.style.transform = "translateY(0)";
-		}, 10);
-	}
-
-	// Функция для показа уведомлений
-	function showNotification(message, type = "success") {
-		const notification = document.createElement("div");
-		notification.className = `notification ${type}`;
-		notification.textContent = message;
-
-		// Стили уведомления
-		notification.style.position = "fixed";
-		notification.style.bottom = "20px";
-		notification.style.right = "20px";
-		notification.style.padding = "12px 20px";
-		notification.style.borderRadius = "8px";
-		notification.style.color = "#fff";
-		notification.style.zIndex = "9999";
-		notification.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
-		notification.style.opacity = "0";
-		notification.style.transition = "opacity 0.3s";
-
-		if (type === "success") {
-			notification.style.backgroundColor = "#4CAF50";
-		} else {
-			notification.style.backgroundColor = "#F44336";
-		}
-
-		document.body.appendChild(notification);
-
-		// Плавно показываем и скрываем
-		setTimeout(() => {
-			notification.style.opacity = "1";
-		}, 10);
-		setTimeout(() => {
-			notification.style.opacity = "0";
-			setTimeout(() => notification.remove(), 300);
-		}, 3000);
-	}
 });
