@@ -124,7 +124,7 @@ textarea.form-control {
 }
 
 .btn-save:hover {
-	background-color: var(--hover-button);
+	background-color: var(--primary-hover);
 }
 
 .btn-cancel {
@@ -202,8 +202,8 @@ textarea.form-control {
 /* Стили для кнопки смены пароля */
 .btn-password-change {
 	background-color: #f5f5f5;
-	color: var(--hover-button);
-	border: 1px solid var(--hover-button);
+	color: var(--primary-hover);
+	border: 1px solid var(--primary-hover);
 	border-radius: 8px;
 	padding: 12px 20px;
 	cursor: pointer;

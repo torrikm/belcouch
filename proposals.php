@@ -118,23 +118,23 @@ require_once __DIR__ . '/includes/header.php';
 								<div class="listing-host">
 									<div class="host-photo">
 										<a href="profile/about?id=<?php echo $listing['user_id']; ?>" class="host-photo-link">
-										<?php if (!empty($listing['avatar_image'])): ?>
-											<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $listing['user_id']; ?>"
-												alt="Фото пользователя" class="host-avatar">
-										<?php else: ?>
-											<div class="host-avatar-placeholder">
-												<?php
-												$initials = '';
-												if (!empty($listing['first_name'])) {
-													$initials .= mb_substr($listing['first_name'], 0, 1, 'UTF-8');
-												}
-												if (!empty($listing['last_name'])) {
-													$initials .= mb_substr($listing['last_name'], 0, 1, 'UTF-8');
-												}
-												echo htmlspecialchars($initials ?: 'U');
-												?>
-											</div>
-										<?php endif; ?>
+											<?php if (!empty($listing['avatar_image'])): ?>
+												<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $listing['user_id']; ?>"
+													alt="Фото пользователя" class="host-avatar">
+											<?php else: ?>
+												<div class="host-avatar-placeholder">
+													<?php
+													$initials = '';
+													if (!empty($listing['first_name'])) {
+														$initials .= mb_substr($listing['first_name'], 0, 1, 'UTF-8');
+													}
+													if (!empty($listing['last_name'])) {
+														$initials .= mb_substr($listing['last_name'], 0, 1, 'UTF-8');
+													}
+													echo htmlspecialchars($initials ?: 'U');
+													?>
+												</div>
+											<?php endif; ?>
 										</a>
 										<?php if (!empty($listing['is_verify'])): ?>
 											<div class="host-verification">✓</div>
@@ -315,8 +315,15 @@ require_once __DIR__ . '/includes/header.php';
 
 <div id="filters-modal" class="modal-overlay filters-modal" data-modal-width="500px">
 	<div class="modal filters-modal-content">
-		<button type="button" class="modal-close close-modal">&times;</button>
-		<h3>Фильтры</h3>
+		<div class="modal-header">
+			<h3>Фильтры</h3>
+			<button type="button" class="modal-close close-modal">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
+		</div>
 
 		<form id="mobile-filters-form" method="get" action="proposals.php">
 			<div class="filter-group">

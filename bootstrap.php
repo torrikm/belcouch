@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/includes/db.php';
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+	require_once __DIR__ . '/vendor/autoload.php';
+}
 require_once __DIR__ . '/app/Core/JsonResponse.php';
 require_once __DIR__ . '/app/Support/Csrf.php';
 require_once __DIR__ . '/app/Modules/Auth/Actions/LoginAction.php';
@@ -36,6 +39,9 @@ require_once __DIR__ . '/app/Modules/Admin/Actions/CreateInitialAdminAction.php'
 require_once __DIR__ . '/app/Modules/Admin/Actions/SubmitVerificationRequestAction.php';
 require_once __DIR__ . '/app/Modules/Admin/Actions/GetVerificationDocumentAction.php';
 require_once __DIR__ . '/app/Modules/Admin/Actions/ModerateVerificationAction.php';
+require_once __DIR__ . '/app/Modules/Admin/Actions/ManualVerificationAction.php';
+require_once __DIR__ . '/app/Modules/Support/Services/SupportService.php';
+require_once __DIR__ . '/app/Modules/Support/Actions/SubmitSupportRequestAction.php';
 
 if (session_status() === PHP_SESSION_NONE) {
 	session_start();

@@ -220,8 +220,8 @@ CREATE TABLE IF NOT EXISTS message_attachments (
 CREATE TABLE IF NOT EXISTS verification_requests (
   id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   user_id int(11) NOT NULL,
-  document_image longblob NOT NULL,
-  document_mime varchar(100) NOT NULL,
+  document_image longblob NULL,
+  document_mime varchar(100) NULL,
   status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
   admin_note text DEFAULT NULL,
   reviewed_by int(11) DEFAULT NULL,

@@ -12,7 +12,7 @@
 	font-weight: 600;
 	font-size: 40px;
 	line-height: 49px;
-	color: #0f1f37;
+	color: var(--primary-color);
 	margin-bottom: 30px;
 	text-align: center;
 }
@@ -20,6 +20,7 @@
 .search-form-container {
 	width: 100%;
 	max-width: 800px;
+	margin: 0 auto;
 	position: relative;
 }
 
@@ -41,7 +42,7 @@
 	border-radius: 36.5px;
 	font-family: "Montserrat", sans-serif;
 	font-size: 20px;
-	color: #0f1f37;
+	color: var(--primary-color);
 	box-shadow: 4px 4px 4px 0px rgba(29, 53, 139, 0.19);
 }
 
@@ -101,7 +102,7 @@
 	font-family: "Montserrat", sans-serif;
 	font-weight: 600;
 	font-size: 16px;
-	color: #0f1f37;
+	color: var(--primary-color);
 	margin: 0 0 5px 0;
 }
 
@@ -155,8 +156,6 @@
 
 /* Второй блок - слайдер */
 .slider-section {
-	margin-top: 40px;
-	margin-bottom: 40px;
 }
 
 .slider-container {
@@ -189,7 +188,11 @@
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background: linear-gradient(to top, rgba(15, 21, 43, 1), rgba(51, 72, 145, 0));
+	background: linear-gradient(
+		to top,
+		rgba(15, 21, 43, 1),
+		rgba(51, 72, 145, 0)
+	);
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-end;
@@ -258,7 +261,6 @@
 
 /* Третий блок - преимущества */
 .features-section {
-	margin-top: 114px;
 }
 
 .features-container {
@@ -292,7 +294,7 @@
 .feature-text {
 	font-family: "Montserrat", sans-serif;
 	font-size: 18px;
-	color: #0f1f37;
+	color: var(--primary-color);
 	line-height: 1.4;
 }
 
@@ -309,10 +311,8 @@
 }
 
 /* Четвертый блок - опрос и QR-код */
-.survey-section {
+.survey-section .container{
 	position: relative;
-	margin-top: 100px;
-	margin-bottom: 80px;
 }
 
 .survey-left,
@@ -339,7 +339,7 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	/* box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); */
+	gap: 10px;
 	width: 100%;
 }
 
@@ -347,6 +347,7 @@
 	display: flex;
 	align-items: start;
 	justify-content: space-between;
+	gap: 10px;
 	max-width: 900px;
 	width: 100%;
 	padding: 21px;
@@ -382,13 +383,6 @@
 	color: #000000;
 }
 
-.survey-arrow {
-	position: absolute;
-	opacity: 0.7;
-	top: 67px;
-	right: 222px;
-}
-
 .survey-qr {
 	display: flex;
 	justify-content: center;
@@ -413,15 +407,6 @@
 	object-fit: contain;
 }
 
-/* Адаптивные стили для блока survey-container */
-@media (max-width: 1024px) {
-	.survey-arrow {
-		top: 50px;
-		right: 180px;
-		width: 120px;
-	}
-}
-
 @media (max-width: 900px) {
 	.survey-container {
 		flex-direction: column;
@@ -435,10 +420,6 @@
 		flex-direction: column;
 		align-items: center;
 		text-align: center;
-	}
-
-	.survey-arrow {
-		display: none;
 	}
 
 	.survey-left {
@@ -484,7 +465,6 @@
 
 /* Стили для секции с популярными направлениями */
 .regions-section {
-	margin: 80px 0;
 }
 
 .regions-title {
@@ -509,7 +489,9 @@
 	overflow: hidden;
 	position: relative;
 	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-	transition: transform 0.3s ease, box-shadow 0.3s ease;
+	transition:
+		transform 0.3s ease,
+		box-shadow 0.3s ease;
 	background-color: #fff;
 	display: flex;
 	flex-direction: column;
@@ -517,7 +499,7 @@
 }
 
 .region-card:hover {
-	transform: translateY(-10px);
+	transform: translateY(-2px);
 	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
@@ -574,8 +556,6 @@
 
 @media (max-width: 576px) {
 	.regions-section {
-		margin: 50px 0;
-		padding: 40px 0;
 	}
 
 	.regions-grid {

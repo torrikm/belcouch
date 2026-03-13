@@ -13,8 +13,10 @@ $additionalJs = ['assets/js/chat-page.js'];
 $currentUserId = (int) $_SESSION['user_id'];
 $selectedUserId = isset($_GET['user_id']) ? (int) $_GET['user_id'] : 0;
 $selectedListingId = isset($_GET['listing_id']) ? (int) $_GET['listing_id'] : 0;
+$selectedIsSupport = !empty($_GET['support']);
 $selectedMessages = [];
 $readIds = [];
+$selectedSupportLockDenied = null;
 
 if ($selectedUserId === $currentUserId) {
 	$selectedUserId = 0;
@@ -22,19 +24,59 @@ if ($selectedUserId === $currentUserId) {
 }
 
 $chatService = new ChatService();
+$supportService = new SupportService();
+$supportChatAdmin = $supportService->getSupportChatAdmin();
+$supportAdminId = (int) ($supportChatAdmin['id'] ?? 0);
+$currentUserIsAdmin = AdminAccess::isAdmin();
 $selectedUser = $selectedUserId > 0 ? $chatService->getUserPreview($selectedUserId) : null;
 $wsTs = time();
 
+if ($selectedIsSupport && !$currentUserIsAdmin && $selectedUser !== null) {
+	$selectedUser = [
+		'id' => 0,
+		'first_name' => 'Поддержка',
+		'last_name' => 'BelCouch',
+		'full_name' => 'Поддержка BelCouch',
+		'role' => 'support',
+		'is_admin' => false,
+		'has_avatar' => false,
+		'is_verify' => false,
+		'is_online' => false,
+		'city' => '',
+		'region_name' => '',
+	];
+}
+
+if ($selectedIsSupport && $currentUserIsAdmin && $selectedUserId > 0 && $selectedUser !== null) {
+	$lockResult = $chatService->acquireSupportConversationLock($currentUserId, $selectedUserId);
+	if (empty($lockResult['acquired'])) {
+		$selectedSupportLockDenied = $lockResult['lock'] ?? null;
+		$selectedUserId = 0;
+		$selectedUser = null;
+		$selectedIsSupport = false;
+	}
+}
+
 if ($selectedUserId > 0 && $selectedUserId !== $currentUserId && $selectedUser !== null) {
-	$readIds = $chatService->markConversationAsRead($currentUserId, $selectedUserId);
-	$selectedMessages = $chatService->getMessages($currentUserId, $selectedUserId);
+	$readIds = $chatService->markConversationAsRead($currentUserId, $selectedUserId, $selectedIsSupport);
+	$selectedMessages = $chatService->getMessages($currentUserId, $selectedUserId, 0, $selectedIsSupport);
 
 	if (!empty($readIds)) {
+		$notifyUserIds = [$selectedUserId];
+		if ($selectedIsSupport) {
+			$db = new Database();
+			$rows = $db->getAll("SELECT id FROM users WHERE role = 'admin'");
+			$notifyUserIds = array_map(static function (array $row): int {
+				return (int) ($row['id'] ?? 0);
+			}, $rows);
+			$notifyUserIds[] = $selectedUserId;
+		}
 		ChatRealtimeNotifier::notifyUsers(
-			[$selectedUserId],
+			$notifyUserIds,
 			[
 				'user_id' => $currentUserId,
 				'partner_id' => $selectedUserId,
+				'is_support' => $selectedIsSupport,
 				'message_ids' => $readIds,
 			],
 			'chat:messages_read'
@@ -59,7 +101,11 @@ $initialOnlineIds = array_values(array_unique($initialOnlineIds));
 
 $chatBootstrap = [
 	'currentUserId' => $currentUserId,
+	'currentUserIsAdmin' => $currentUserIsAdmin,
+	'supportAdminId' => $supportAdminId > 0 ? $supportAdminId : null,
 	'selectedUserId' => $selectedUserId,
+	'selectedIsSupport' => $selectedIsSupport,
+	'selectedSupportLockDenied' => $selectedSupportLockDenied,
 	'selectedListingId' => $selectedListingId > 0 ? $selectedListingId : null,
 	'selectedUser' => $selectedUser,
 	'conversations' => $conversations,
@@ -82,11 +128,19 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
 <div class="container">
-	<div class="chat-page" id="chat-page" data-chat-state='<?php echo htmlspecialchars(json_encode($chatBootstrap, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>'>
+	<div class="chat-page <?php echo $selectedUserId === 0 ? 'is-sidebar-open' : 'is-chat-open'; ?>" id="chat-page" data-chat-state='<?php echo htmlspecialchars(json_encode($chatBootstrap, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>'>
 		<aside class="chat-sidebar" id="chat-sidebar">
 			<div class="chat-sidebar-header">
-				<input type="search" class="chat-search-input" id="chat-search-input" placeholder="Поиск по чатам">
+				<div class="chat-sidebar-header-row">
+					<input type="search" class="chat-search-input" id="chat-search-input" placeholder="Поиск по чатам">
+					<button type="button" class="chat-sidebar-close" data-action="close-sidebar" aria-label="Закрыть список чатов">
+						<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+							<path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+						</svg>
+					</button>
+				</div>
 			</div>
+			<div class="chat-sidebar-tabs" id="chat-sidebar-tabs"></div>
 			<div class="chat-conversations" id="chat-conversations"></div>
 		</aside>
 
@@ -96,6 +150,7 @@ require_once __DIR__ . '/includes/header.php';
 			<div class="chat-context-menu" id="chat-context-menu" hidden></div>
 			<form class="chat-compose" id="chat-compose-form">
 				<input type="hidden" name="user_id" id="chat-user-id" value="<?php echo $selectedUserId > 0 ? $selectedUserId : ''; ?>">
+				<input type="hidden" name="support" id="chat-support-flag" value="<?php echo $selectedIsSupport ? '1' : ''; ?>">
 				<input type="hidden" name="listing_id" id="chat-listing-id" value="<?php echo $selectedListingId > 0 ? $selectedListingId : ''; ?>">
 				<input type="hidden" name="reply_to_message_id" id="chat-reply-to-message-id" value="">
 				<div class="chat-compose-state" id="chat-compose-state"></div>

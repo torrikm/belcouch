@@ -2,7 +2,7 @@
 
 :root {
 	--housing-surface: #ffffff;
-	--housing-ink: #0f1f37;
+	--housing-ink: var(--primary-color);
 	--housing-muted: #5b6777;
 	--housing-line: rgba(15, 31, 55, 0.12);
 	--housing-shadow: 4px 4px 4px 0 rgba(29, 53, 139, 0.19);

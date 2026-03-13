@@ -55,6 +55,7 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 }
 ?>
 
+
 <div class="profile-header">
 	<div class="profile-avatar-container">
 		<?php if ($user['avatar_image']): ?>
@@ -135,33 +136,25 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 				<button id="edit-profile-btn" class="btn btn-primary">Редактировать</button>
 				<a href="<?php echo isset($root_path) ? $root_path : '../'; ?>logout" class="btn btn-outline-primary"
 					style="width: 100%; text-align: center;">Выйти</a>
-			</div>
-			<div class="verification-card">
-				<h3>Подтверждение личности</h3>
-				<p>
-					<?php if (!empty($user['is_verify'])): ?>
-						Ваш профиль подтверждён. Значок верификации уже отображается для других пользователей.
-					<?php elseif (($verificationRequest['status'] ?? '') === 'pending'): ?>
-						Ваша заявка находится на ручной проверке администратором.
-					<?php elseif (($verificationRequest['status'] ?? '') === 'rejected'): ?>
-						Заявка была отклонена. Вы можете отправить новое фото документов.
-					<?php else: ?>
-						Загрузите фото паспорта или другого документа, чтобы получить верификацию профиля.
-					<?php endif; ?>
-				</p>
-				<?php if (!empty($user['is_verify'])): ?>
-					<span class="verification-status verification-status--approved">Профиль подтверждён</span>
-				<?php elseif (!empty($verificationRequest['status'])): ?>
-					<span class="verification-status verification-status--<?php echo htmlspecialchars($verificationRequest['status']); ?>">
-						Статус: <?php echo htmlspecialchars($verificationRequest['status']); ?>
-					</span>
-				<?php endif; ?>
 				<?php if (empty($user['is_verify'])): ?>
-					<button type="button" class="btn btn-primary verification-card-button" onclick="window.App && window.App.modal ? window.App.modal.open('verification-request-modal') : null;">
-						<?php echo ($verificationRequest['status'] ?? '') === 'rejected' ? 'Отправить заново' : 'Подать заявку'; ?>
-					</button>
+					<?php if (($verificationRequest['status'] ?? '') === 'pending'): ?>
+						<button type="button" class="btn btn-outline-primary" disabled aria-disabled="true">На модерации</button>
+					<?php elseif (($verificationRequest['status'] ?? '') === 'rejected'): ?>
+						<button type="button" class="btn btn-outline-primary" onclick="window.App && window.App.modal ? window.App.modal.open('verification-request-modal') : null;">Заявка отклонена</button>
+					<?php else: ?>
+						<button type="button" class="btn btn-outline-primary" onclick="window.App && window.App.modal ? window.App.modal.open('verification-request-modal') : null;">Верификация</button>
+					<?php endif; ?>
 				<?php endif; ?>
 			</div>
+			<?php if (($verificationRequest['status'] ?? '') === 'rejected'): ?>
+				<div class="verification-rejected-note">
+					<div class="verification-rejected-note__title">Заявка отклонена</div>
+					<?php if (!empty($verificationRequest['admin_note'])): ?>
+						<div class="verification-rejected-note__label">Причина</div>
+						<div class="verification-rejected-note__text"><?php echo nl2br(htmlspecialchars((string) $verificationRequest['admin_note'])); ?></div>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
 		<?php else: ?>
 			<div class="profile-actions">
 				<a href="<?php echo isset($root_path) ? $root_path : '../'; ?>chat?user_id=<?php echo (int) $user['id']; ?>" class="btn btn-message">Написать сообщение</a>
@@ -169,6 +162,7 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 		<?php endif; ?>
 	</div>
 </div>
+
 
 <!-- Модальное окно для редактирования профиля -->
 <?php if ($isOwnProfile): ?>
@@ -201,13 +195,13 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 						<div class="form-group">
 							<label for="first_name">Имя</label>
 							<input type="text" id="first_name" name="first_name" class="form-control"
-								value="<?php echo htmlspecialchars($user['first_name']); ?>" required>
+								value="<?php echo htmlspecialchars($user['first_name']); ?>" required <?php echo !empty($user['is_verify']) ? 'readonly' : ''; ?>>
 						</div>
 
 						<div class="form-group">
 							<label for="last_name">Фамилия</label>
 							<input type="text" id="last_name" name="last_name" class="form-control"
-								value="<?php echo htmlspecialchars($user['last_name']); ?>">
+								value="<?php echo htmlspecialchars($user['last_name']); ?>" <?php echo !empty($user['is_verify']) ? 'readonly' : ''; ?>>
 						</div>
 
 						<div class="form-group">
@@ -374,8 +368,9 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 				<form id="verification-request-form" enctype="multipart/form-data">
 					<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars((string) $verificationCsrfToken); ?>">
 					<p class="verification-form-note">
-						Загрузите чёткое фото документа. Изображение будет доступно только администраторам для ручной проверки.
+						Загрузите чёткое фото документа. Имя и фамилия в профиле должны совпадать с паспортом. Изображение будет доступно только администраторам для ручной проверки.
 					</p>
+
 					<div class="form-group">
 						<label for="document_photo">Фото документа</label>
 						<div class="verification-upload">

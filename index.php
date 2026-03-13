@@ -12,8 +12,8 @@ $additionalJs = ['assets/js/slider.js'];
 include 'includes/header.php';
 ?>
 
-<div class="container">
-	<section class="search-block">
+<section class="search-block">
+	<div class="container">
 		<h1 class="search-title">НАЙДЁМ, ГДЕ ОСТАНОВИТЬСЯ!</h1>
 		<div class="search-form-container">
 			<form class="search-form" action="search.php" method="GET">
@@ -29,8 +29,8 @@ include 'includes/header.php';
 				</button>
 			</form>
 		</div>
-	</section>
-</div>
+	</div>
+</section>
 
 <section class="slider-section">
 	<div class="slider-container">
@@ -68,9 +68,8 @@ include 'includes/header.php';
 	</div>
 </section>
 
-<div class="container">
-
-	<section class="features-section">
+<section class="features-section">
+	<div class="container">
 		<div class="features-container">
 			<div class="feature-item">
 				<div class="feature-icon">
@@ -99,10 +98,12 @@ include 'includes/header.php';
 				</div>
 			</div>
 		</div>
-	</section>
+	</div>
+</section>
 
-	<section class="regions-section">
-		<h2 class="regions-title">ОБЛАСТЬ НАПРАВЛЕНИЯ</h2>
+<section class="regions-section">
+	<div class="container">
+		<h2 class="regions-title">НАПРАВЛЕНИЯ</h2>
 		<div class="regions-grid">
 			<?php if (!empty($regions_data)): ?>
 				<?php foreach ($regions_data as $region_id => $region): ?>
@@ -136,9 +137,11 @@ include 'includes/header.php';
 				<div class="region-placeholder">Регионы не найдены</div>
 			<?php endif; ?>
 		</div>
-	</section>
+	</div>
+</section>
 
-	<section class="survey-section">
+<section class="survey-section">
+	<div class="container">
 		<div class="survey-container">
 			<div class="survey-text">
 				<div class="survey-left">
@@ -159,9 +162,8 @@ include 'includes/header.php';
 				</div>
 			</div>
 		</div>
-		<img src="assets/img/icons/arrow.svg" alt="Стрелка" class="survey-arrow">
-	</section>
-</div>
+	</div>
+</section>
 
 <?php include 'includes/footer.php'; ?>
 

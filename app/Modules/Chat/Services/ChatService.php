@@ -7,96 +7,21 @@ class ChatService
 	public function __construct()
 	{
 		$this->db = new Database();
+		$this->ensureSupportChatSchemaExists();
+		$this->ensureSupportChatLocksTableExists();
 		$this->ensureMessageAttachmentsTableExists();
 	}
 
 	public function getConversationList(int $currentUserId): array
 	{
-		$stmt = $this->db->prepareAndExecute(
-			'SELECT
-                convo.partner_id,
-                u.first_name,
-                u.last_name,
-                (u.avatar_image IS NOT NULL) AS has_avatar,
-                u.is_verify,
-                u.is_online,
-                ud.city,
-                r.name AS region_name,
-                lm.id AS message_id,
-                lm.sender_id,
-                lm.receiver_id,
-                lm.listing_id,
-                lm.message,
-                lm.is_read,
-                lm.created_at,
-                lm.edited_at,
-                lm.image_path,
-                lm.deleted_at,
-                COALESCE(unread.unread_count, 0) AS unread_count
-            FROM (
-                SELECT
-                    grouped.partner_id,
-                    MAX(grouped.id) AS last_message_id
-                FROM (
-                    SELECT
-                        m.id,
-                        CASE
-                            WHEN m.sender_id = ? THEN m.receiver_id
-                            ELSE m.sender_id
-                        END AS partner_id
-                    FROM messages m
-                    WHERE m.sender_id = ? OR m.receiver_id = ?
-                ) AS grouped
-                GROUP BY grouped.partner_id
-            ) AS convo
-            JOIN messages lm ON lm.id = convo.last_message_id
-            JOIN users u ON u.id = convo.partner_id
-            LEFT JOIN user_details ud ON ud.user_id = u.id
-            LEFT JOIN regions r ON r.id = ud.region_id
-            LEFT JOIN (
-                SELECT sender_id AS partner_id, COUNT(*) AS unread_count
-                FROM messages
-                WHERE receiver_id = ? AND is_read = 0 AND deleted_at IS NULL
-                GROUP BY sender_id
-            ) AS unread ON unread.partner_id = convo.partner_id
-            ORDER BY lm.id DESC',
-			'iiii',
-			[$currentUserId, $currentUserId, $currentUserId, $currentUserId]
+		$conversations = array_merge(
+			$this->getRegularConversationList($currentUserId),
+			$this->getSupportConversationList($currentUserId)
 		);
 
-		$result = $stmt->get_result();
-		$conversations = [];
-
-		while ($row = $result->fetch_assoc()) {
-			$conversations[] = [
-				'partner' => [
-					'id' => (int) $row['partner_id'],
-					'first_name' => $row['first_name'],
-					'last_name' => $row['last_name'] ?? '',
-					'full_name' => trim($row['first_name'] . ' ' . ($row['last_name'] ?? '')),
-					'has_avatar' => (int) $row['has_avatar'] === 1,
-					'is_verify' => (int) $row['is_verify'] === 1,
-					'is_online' => (int) ($row['is_online'] ?? 0) === 1,
-					'city' => $row['city'] ?? '',
-					'region_name' => $row['region_name'] ?? '',
-				],
-				'latest_message' => [
-					'id' => (int) $row['message_id'],
-					'sender_id' => (int) $row['sender_id'],
-					'receiver_id' => (int) $row['receiver_id'],
-					'listing_id' => $row['listing_id'] !== null ? (int) $row['listing_id'] : null,
-					'message' => $row['deleted_at'] !== null ? 'Сообщение удалено' : $row['message'],
-					'image_path' => $row['deleted_at'] !== null ? null : ($row['image_path'] ?? null),
-					'is_read' => (int) $row['is_read'] === 1,
-					'created_at' => $row['created_at'],
-					'edited_at' => $row['edited_at'],
-					'deleted_at' => $row['deleted_at'],
-					'is_deleted' => $row['deleted_at'] !== null,
-					'is_outgoing' => (int) $row['sender_id'] === $currentUserId,
-				],
-				'unread_count' => (int) $row['unread_count'],
-			];
-		}
+		usort($conversations, static function (array $left, array $right): int {
+			return (int) (($right['latest_message']['id'] ?? 0)) <=> (int) (($left['latest_message']['id'] ?? 0));
+		});
 
 		return $conversations;
 	}
@@ -104,7 +29,7 @@ class ChatService
 	public function getUserPreview(int $userId): ?array
 	{
 		$stmt = $this->db->prepareAndExecute(
-			'SELECT u.id, u.first_name, u.last_name, (u.avatar_image IS NOT NULL) AS has_avatar, u.is_verify, u.is_online,
+			'SELECT u.id, u.first_name, u.last_name, u.role, (u.avatar_image IS NOT NULL) AS has_avatar, u.is_verify, u.is_online,
                 ud.city, r.name AS region_name
             FROM users u
             LEFT JOIN user_details ud ON ud.user_id = u.id
@@ -124,6 +49,8 @@ class ChatService
 			'first_name' => $user['first_name'],
 			'last_name' => $user['last_name'] ?? '',
 			'full_name' => trim($user['first_name'] . ' ' . ($user['last_name'] ?? '')),
+			'role' => (string) ($user['role'] ?? 'user'),
+			'is_admin' => (string) ($user['role'] ?? 'user') === 'admin',
 			'has_avatar' => (int) ($user['has_avatar'] ?? 0) === 1,
 			'is_verify' => (int) $user['is_verify'] === 1,
 			'is_online' => (int) ($user['is_online'] ?? 0) === 1,
@@ -132,20 +59,35 @@ class ChatService
 		];
 	}
 
-	public function getMessages(int $currentUserId, int $partnerId, int $afterId = 0): array
+	public function getMessages(int $currentUserId, int $partnerId, int $afterId = 0, bool $isSupport = false): array
 	{
-		$stmt = $this->db->prepareAndExecute(
-			$this->getMessageSelectSql() . '
-            WHERE (
+		if ($isSupport) {
+			$this->assertSupportConversationAccess($currentUserId, $partnerId);
+			$supportUserId = $this->resolveSupportConversationUserId($currentUserId, $partnerId);
+			$stmt = $this->db->prepareAndExecute(
+				$this->getMessageSelectSql() . '
+            WHERE m.is_support = 1
+            AND m.support_user_id = ?
+            AND m.id > ?
+            ORDER BY m.id ASC',
+				'ii',
+				[$supportUserId, $afterId]
+			);
+		} else {
+			$stmt = $this->db->prepareAndExecute(
+				$this->getMessageSelectSql() . '
+            WHERE m.is_support = 0
+            AND (
                 (m.sender_id = ? AND m.receiver_id = ?)
                 OR
                 (m.sender_id = ? AND m.receiver_id = ?)
             )
             AND m.id > ?
             ORDER BY m.id ASC',
-			'iiiii',
-			[$currentUserId, $partnerId, $partnerId, $currentUserId, $afterId]
-		);
+				'iiiii',
+				[$currentUserId, $partnerId, $partnerId, $currentUserId, $afterId]
+			);
+		}
 
 		$result = $stmt->get_result();
 		$messages = [];
@@ -156,12 +98,17 @@ class ChatService
 		return $this->hydrateMessagesWithAttachments($messages);
 	}
 
-	public function markConversationAsRead(int $currentUserId, int $partnerId): array
+	public function markConversationAsRead(int $currentUserId, int $partnerId, bool $isSupport = false): array
 	{
+		if ($isSupport) {
+			$this->assertSupportConversationAccess($currentUserId, $partnerId);
+			return $this->markSupportConversationAsRead($currentUserId, $partnerId);
+		}
+
 		$idsStmt = $this->db->prepareAndExecute(
 			'SELECT id
             FROM messages
-            WHERE sender_id = ? AND receiver_id = ? AND is_read = 0
+            WHERE is_support = 0 AND sender_id = ? AND receiver_id = ? AND is_read = 0
             ORDER BY id ASC',
 			'ii',
 			[$partnerId, $currentUserId]
@@ -177,7 +124,7 @@ class ChatService
 			$this->db->prepareAndExecute(
 				'UPDATE messages
                 SET is_read = 1
-                WHERE sender_id = ? AND receiver_id = ? AND is_read = 0',
+                WHERE is_support = 0 AND sender_id = ? AND receiver_id = ? AND is_read = 0',
 				'ii',
 				[$partnerId, $currentUserId]
 			);
@@ -192,7 +139,8 @@ class ChatService
 		string $message,
 		?int $listingId = null,
 		?int $replyToMessageId = null,
-		array $attachments = []
+		array $attachments = [],
+		bool $isSupport = false
 	): array {
 		$message = trim($message ?? '');
 		if ($partnerId <= 0 || $partnerId === $currentUserId) {
@@ -211,18 +159,27 @@ class ChatService
 			throw new InvalidArgumentException('Получатель не найден');
 		}
 
-		$replyTargetId = $this->resolveReplyTargetId($currentUserId, $partnerId, $replyToMessageId);
+		$replyTargetId = $this->resolveReplyTargetId($currentUserId, $partnerId, $replyToMessageId, $isSupport);
 		$primaryImagePath = !empty($attachments) ? (string) ($attachments[0]['file_path'] ?? '') : null;
+		$supportUserId = null;
 
-		$sql = 'INSERT INTO messages (sender_id, receiver_id, listing_id, message, image_path, is_read, created_at, reply_to_message_id) VALUES (?, ?, ?, ?, ?, 0, NOW(), ?)';
-		$types = 'iiissi';
+		if ($isSupport) {
+			$this->assertSupportConversationAccess($currentUserId, $partnerId);
+			$supportUserId = $this->resolveSupportConversationUserId($currentUserId, $partnerId);
+			$listingId = null;
+		}
+
+		$sql = 'INSERT INTO messages (sender_id, receiver_id, listing_id, message, image_path, is_read, created_at, reply_to_message_id, is_support, support_user_id) VALUES (?, ?, ?, ?, ?, 0, NOW(), ?, ?, ?)';
+		$types = 'iiissiii';
 		$params = [
 			$currentUserId,
 			$partnerId,
 			$listingId,
 			$message,
 			$primaryImagePath,
-			$replyTargetId
+			$replyTargetId,
+			$isSupport ? 1 : 0,
+			$supportUserId
 		];
 
 		$this->db->query('START TRANSACTION');
@@ -239,6 +196,70 @@ class ChatService
 			$this->db->query('ROLLBACK');
 			throw $exception;
 		}
+	}
+
+	public function acquireSupportConversationLock(int $currentUserId, int $partnerId): array
+	{
+		if (!$this->isAdminUser($currentUserId)) {
+			throw new InvalidArgumentException('Только администратор может занять чат поддержки');
+		}
+
+		$this->cleanupExpiredSupportConversationLocks();
+		$supportUserId = $this->resolveSupportConversationUserId($currentUserId, $partnerId);
+		$lock = $this->getSupportConversationLockRow($supportUserId);
+
+		if ($lock !== null && (int) ($lock['admin_user_id'] ?? 0) !== $currentUserId) {
+			return [
+				'acquired' => false,
+				'lock' => $this->formatSupportConversationLock($lock, $currentUserId),
+			];
+		}
+
+		$this->db->prepareAndExecute(
+			'INSERT INTO support_chat_locks (support_user_id, admin_user_id, expires_at, created_at, updated_at)
+            VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 SECOND), NOW(), NOW())
+            ON DUPLICATE KEY UPDATE
+                admin_user_id = VALUES(admin_user_id),
+                expires_at = VALUES(expires_at),
+                updated_at = NOW()',
+			'ii',
+			[$supportUserId, $currentUserId]
+		);
+
+		return [
+			'acquired' => true,
+			'lock' => $this->getSupportConversationLock($currentUserId, $partnerId),
+		];
+	}
+
+	public function refreshSupportConversationLock(int $currentUserId, int $partnerId): array
+	{
+		return $this->acquireSupportConversationLock($currentUserId, $partnerId);
+	}
+
+	public function releaseSupportConversationLock(int $currentUserId, int $partnerId): void
+	{
+		if (!$this->isAdminUser($currentUserId)) {
+			return;
+		}
+
+		$this->cleanupExpiredSupportConversationLocks();
+		$supportUserId = $this->resolveSupportConversationUserId($currentUserId, $partnerId);
+		$this->db->prepareAndExecute(
+			'DELETE FROM support_chat_locks WHERE support_user_id = ? AND admin_user_id = ?',
+			'ii',
+			[$supportUserId, $currentUserId]
+		);
+	}
+
+	public function getSupportConversationLock(int $currentUserId, int $partnerId): ?array
+	{
+		$this->cleanupExpiredSupportConversationLocks();
+		$supportUserId = $this->resolveSupportConversationUserId($currentUserId, $partnerId);
+		return $this->formatSupportConversationLock(
+			$this->getSupportConversationLockRow($supportUserId),
+			$currentUserId
+		);
 	}
 
 	public function updateMessage(int $currentUserId, int $messageId, string $message): array
@@ -362,25 +383,41 @@ class ChatService
 	private function resolveReplyTargetId(
 		int $currentUserId,
 		int $partnerId,
-		?int $replyToMessageId
+		?int $replyToMessageId,
+		bool $isSupport = false
 	): ?int {
 		if ($replyToMessageId === null || $replyToMessageId <= 0) {
 			return null;
 		}
 
-		$stmt = $this->db->prepareAndExecute(
-			'SELECT id
-            FROM messages
-            WHERE id = ?
-            AND (
-                (sender_id = ? AND receiver_id = ?)
-                OR
-                (sender_id = ? AND receiver_id = ?)
-            )
-            LIMIT 1',
-			'iiiii',
-			[$replyToMessageId, $currentUserId, $partnerId, $partnerId, $currentUserId]
-		);
+		if ($isSupport) {
+			$supportUserId = $this->resolveSupportConversationUserId($currentUserId, $partnerId);
+			$stmt = $this->db->prepareAndExecute(
+				'SELECT id
+                FROM messages
+                WHERE id = ?
+                  AND is_support = 1
+                  AND support_user_id = ?
+                LIMIT 1',
+				'ii',
+				[$replyToMessageId, $supportUserId]
+			);
+		} else {
+			$stmt = $this->db->prepareAndExecute(
+				'SELECT id
+                FROM messages
+                WHERE id = ?
+                  AND is_support = 0
+                  AND (
+                    (sender_id = ? AND receiver_id = ?)
+                    OR
+                    (sender_id = ? AND receiver_id = ?)
+                  )
+                LIMIT 1',
+				'iiiii',
+				[$replyToMessageId, $currentUserId, $partnerId, $partnerId, $currentUserId]
+			);
+		}
 
 		$row = $stmt->get_result()->fetch_assoc();
 		if (!$row) {
@@ -549,6 +586,464 @@ class ChatService
 		}
 
 		return $attachmentsMap;
+	}
+
+	private function getRegularConversationList(int $currentUserId): array
+	{
+		$stmt = $this->db->prepareAndExecute(
+			'SELECT
+                convo.partner_id,
+                u.first_name,
+                u.last_name,
+                u.role,
+                (u.avatar_image IS NOT NULL) AS has_avatar,
+                u.is_verify,
+                u.is_online,
+                ud.city,
+                r.name AS region_name,
+                lm.id AS message_id,
+                lm.sender_id,
+                lm.receiver_id,
+                lm.listing_id,
+                lm.message,
+                lm.is_read,
+                lm.created_at,
+                lm.edited_at,
+                lm.image_path,
+                lm.deleted_at,
+                COALESCE(unread.unread_count, 0) AS unread_count
+            FROM (
+                SELECT
+                    grouped.partner_id,
+                    MAX(grouped.id) AS last_message_id
+                FROM (
+                    SELECT
+                        m.id,
+                        CASE
+                            WHEN m.sender_id = ? THEN m.receiver_id
+                            ELSE m.sender_id
+                        END AS partner_id
+                    FROM messages m
+                    WHERE m.is_support = 0
+                      AND (m.sender_id = ? OR m.receiver_id = ?)
+                ) AS grouped
+                GROUP BY grouped.partner_id
+            ) AS convo
+            JOIN messages lm ON lm.id = convo.last_message_id
+            JOIN users u ON u.id = convo.partner_id
+            LEFT JOIN user_details ud ON ud.user_id = u.id
+            LEFT JOIN regions r ON r.id = ud.region_id
+            LEFT JOIN (
+                SELECT sender_id AS partner_id, COUNT(*) AS unread_count
+                FROM messages
+                WHERE is_support = 0 AND receiver_id = ? AND is_read = 0 AND deleted_at IS NULL
+                GROUP BY sender_id
+            ) AS unread ON unread.partner_id = convo.partner_id
+            ORDER BY lm.id DESC',
+			'iiii',
+			[$currentUserId, $currentUserId, $currentUserId, $currentUserId]
+		);
+
+		$result = $stmt->get_result();
+		$conversations = [];
+		while ($row = $result->fetch_assoc()) {
+			$conversations[] = $this->formatConversationRow($row, $currentUserId, false);
+		}
+
+		return $conversations;
+	}
+
+	private function getSupportConversationList(int $currentUserId): array
+	{
+		if ($this->isAdminUser($currentUserId)) {
+			$stmt = $this->db->prepareAndExecute(
+				'SELECT
+                    convo.support_user_id AS partner_id,
+                    u.first_name,
+                    u.last_name,
+                    u.role,
+                    (u.avatar_image IS NOT NULL) AS has_avatar,
+                    u.is_verify,
+                    u.is_online,
+                    ud.city,
+                    r.name AS region_name,
+                    lm.id AS message_id,
+                    lm.sender_id,
+                    lm.receiver_id,
+                    lm.listing_id,
+                    lm.message,
+                    lm.is_read,
+                    lm.created_at,
+                    lm.edited_at,
+                    lm.image_path,
+                    lm.deleted_at,
+                    COALESCE(unread.unread_count, 0) AS unread_count
+                FROM (
+                    SELECT support_user_id, MAX(id) AS last_message_id
+                    FROM messages
+                    WHERE is_support = 1 AND support_user_id IS NOT NULL
+                    GROUP BY support_user_id
+                ) AS convo
+                JOIN messages lm ON lm.id = convo.last_message_id
+                JOIN users u ON u.id = convo.support_user_id
+                LEFT JOIN user_details ud ON ud.user_id = u.id
+                LEFT JOIN regions r ON r.id = ud.region_id
+                LEFT JOIN (
+                    SELECT support_user_id, COUNT(*) AS unread_count
+                    FROM messages
+                    WHERE is_support = 1
+                      AND support_user_id IS NOT NULL
+                      AND sender_id = support_user_id
+                      AND is_read = 0
+                      AND deleted_at IS NULL
+                    GROUP BY support_user_id
+                ) AS unread ON unread.support_user_id = convo.support_user_id
+                ORDER BY lm.id DESC',
+				'',
+				[]
+			);
+
+			$result = $stmt->get_result();
+			$conversations = [];
+			while ($row = $result->fetch_assoc()) {
+				$conversations[] = $this->formatConversationRow($row, $currentUserId, true);
+			}
+
+			return $conversations;
+		}
+
+		$supportPreview = $this->buildSupportTeamPreview();
+		$supportAdmin = $this->getDefaultSupportAdminPreview();
+		$targetUserId = (int) (($supportAdmin['id'] ?? 0));
+
+		$stmt = $this->db->prepareAndExecute(
+			'SELECT
+                lm.id AS message_id,
+                lm.sender_id,
+                lm.receiver_id,
+                lm.listing_id,
+                lm.message,
+                lm.is_read,
+                lm.created_at,
+                lm.edited_at,
+                lm.image_path,
+                lm.deleted_at,
+                COALESCE(unread.unread_count, 0) AS unread_count
+            FROM (
+                SELECT MAX(id) AS last_message_id
+                FROM messages
+                WHERE is_support = 1 AND support_user_id = ?
+            ) AS convo
+            LEFT JOIN messages lm ON lm.id = convo.last_message_id
+            LEFT JOIN (
+                SELECT COUNT(*) AS unread_count
+                FROM messages
+                WHERE is_support = 1
+                  AND support_user_id = ?
+                  AND receiver_id = ?
+                  AND sender_id <> ?
+                  AND is_read = 0
+                  AND deleted_at IS NULL
+            ) AS unread ON 1 = 1',
+			'iiii',
+			[$currentUserId, $currentUserId, $currentUserId, $currentUserId]
+		);
+
+		$row = $stmt->get_result()->fetch_assoc();
+		if ((int) ($row['message_id'] ?? 0) <= 0) {
+			return [[
+				'partner' => $supportPreview,
+				'latest_message' => [
+					'id' => 0,
+					'sender_id' => 0,
+					'receiver_id' => 0,
+					'listing_id' => null,
+					'message' => '',
+					'image_path' => null,
+					'is_read' => true,
+					'created_at' => null,
+					'edited_at' => null,
+					'deleted_at' => null,
+					'is_deleted' => false,
+					'is_outgoing' => false,
+				],
+				'unread_count' => 0,
+				'is_support' => true,
+				'target_user_id' => $targetUserId,
+			]];
+		}
+
+		return [[
+			'partner' => $supportPreview,
+			'latest_message' => [
+				'id' => (int) $row['message_id'],
+				'sender_id' => (int) $row['sender_id'],
+				'receiver_id' => (int) $row['receiver_id'],
+				'listing_id' => $row['listing_id'] !== null ? (int) $row['listing_id'] : null,
+				'message' => $row['deleted_at'] !== null ? 'Сообщение удалено' : (string) ($row['message'] ?? ''),
+				'image_path' => $row['deleted_at'] !== null ? null : ($row['image_path'] ?? null),
+				'is_read' => (int) ($row['is_read'] ?? 0) === 1,
+				'created_at' => $row['created_at'] ?? null,
+				'edited_at' => $row['edited_at'] ?? null,
+				'deleted_at' => $row['deleted_at'] ?? null,
+				'is_deleted' => $row['deleted_at'] !== null,
+				'is_outgoing' => (int) ($row['sender_id'] ?? 0) === $currentUserId,
+			],
+			'unread_count' => (int) ($row['unread_count'] ?? 0),
+			'is_support' => true,
+			'target_user_id' => $targetUserId,
+		]];
+	}
+
+	private function formatConversationRow(array $row, int $currentUserId, bool $isSupport): array
+	{
+		$conversation = [
+			'partner' => [
+				'id' => (int) $row['partner_id'],
+				'first_name' => (string) ($row['first_name'] ?? ''),
+				'last_name' => (string) ($row['last_name'] ?? ''),
+				'full_name' => trim(((string) ($row['first_name'] ?? '')) . ' ' . ((string) ($row['last_name'] ?? ''))),
+				'role' => (string) ($row['role'] ?? 'user'),
+				'is_admin' => (string) ($row['role'] ?? 'user') === 'admin',
+				'has_avatar' => (int) ($row['has_avatar'] ?? 0) === 1,
+				'is_verify' => (int) ($row['is_verify'] ?? 0) === 1,
+				'is_online' => (int) ($row['is_online'] ?? 0) === 1,
+				'city' => (string) ($row['city'] ?? ''),
+				'region_name' => (string) ($row['region_name'] ?? ''),
+			],
+			'latest_message' => [
+				'id' => (int) ($row['message_id'] ?? 0),
+				'sender_id' => (int) ($row['sender_id'] ?? 0),
+				'receiver_id' => (int) ($row['receiver_id'] ?? 0),
+				'listing_id' => $row['listing_id'] !== null ? (int) $row['listing_id'] : null,
+				'message' => $row['deleted_at'] !== null ? 'Сообщение удалено' : (string) ($row['message'] ?? ''),
+				'image_path' => $row['deleted_at'] !== null ? null : ($row['image_path'] ?? null),
+				'is_read' => (int) ($row['is_read'] ?? 0) === 1,
+				'created_at' => $row['created_at'] ?? null,
+				'edited_at' => $row['edited_at'] ?? null,
+				'deleted_at' => $row['deleted_at'] ?? null,
+				'is_deleted' => $row['deleted_at'] !== null,
+				'is_outgoing' => (int) ($row['sender_id'] ?? 0) === $currentUserId,
+			],
+			'unread_count' => (int) ($row['unread_count'] ?? 0),
+			'is_support' => $isSupport,
+		];
+
+		if ($isSupport && $this->isAdminUser($currentUserId)) {
+			$conversation['support_lock'] = $this->getSupportConversationLockSnapshotBySupportUserId(
+				(int) $row['partner_id'],
+				$currentUserId
+			);
+		}
+
+		return $conversation;
+	}
+
+	private function markSupportConversationAsRead(int $currentUserId, int $partnerId): array
+	{
+		$supportUserId = $this->resolveSupportConversationUserId($currentUserId, $partnerId);
+		if ($this->isAdminUser($currentUserId)) {
+			$idsStmt = $this->db->prepareAndExecute(
+				'SELECT id
+                FROM messages
+                WHERE is_support = 1 AND support_user_id = ? AND sender_id = ? AND is_read = 0
+                ORDER BY id ASC',
+				'ii',
+				[$supportUserId, $supportUserId]
+			);
+		} else {
+			$idsStmt = $this->db->prepareAndExecute(
+				'SELECT id
+                FROM messages
+                WHERE is_support = 1 AND support_user_id = ? AND receiver_id = ? AND sender_id <> ? AND is_read = 0
+                ORDER BY id ASC',
+				'iii',
+				[$supportUserId, $currentUserId, $currentUserId]
+			);
+		}
+
+		$result = $idsStmt->get_result();
+		$messageIds = [];
+		while ($row = $result->fetch_assoc()) {
+			$messageIds[] = (int) $row['id'];
+		}
+
+		if (!empty($messageIds)) {
+			if ($this->isAdminUser($currentUserId)) {
+				$this->db->prepareAndExecute(
+					'UPDATE messages
+                    SET is_read = 1
+                    WHERE is_support = 1 AND support_user_id = ? AND sender_id = ? AND is_read = 0',
+					'ii',
+					[$supportUserId, $supportUserId]
+				);
+			} else {
+				$this->db->prepareAndExecute(
+					'UPDATE messages
+                    SET is_read = 1
+                    WHERE is_support = 1 AND support_user_id = ? AND receiver_id = ? AND sender_id <> ? AND is_read = 0',
+					'iii',
+					[$supportUserId, $currentUserId, $currentUserId]
+				);
+			}
+		}
+
+		return $messageIds;
+	}
+
+	private function resolveSupportConversationUserId(int $currentUserId, int $partnerId): int
+	{
+		$currentIsAdmin = $this->isAdminUser($currentUserId);
+		$partner = $this->getUserPreview($partnerId);
+		if ($partner === null) {
+			throw new InvalidArgumentException('Получатель не найден');
+		}
+
+		$partnerIsAdmin = !empty($partner['is_admin']);
+		if ($currentIsAdmin && !$partnerIsAdmin) {
+			return $partnerId;
+		}
+
+		if (!$currentIsAdmin && $partnerIsAdmin) {
+			return $currentUserId;
+		}
+
+		throw new InvalidArgumentException('Чат поддержки доступен только между пользователем и администратором');
+	}
+
+	private function assertSupportConversationAccess(int $currentUserId, int $partnerId): void
+	{
+		if (!$this->isAdminUser($currentUserId)) {
+			return;
+		}
+
+		$supportUserId = $this->resolveSupportConversationUserId($currentUserId, $partnerId);
+		$lock = $this->getSupportConversationLockSnapshotBySupportUserId($supportUserId, $currentUserId);
+		if ($lock !== null && !empty($lock['is_locked']) && empty($lock['is_mine'])) {
+			throw new InvalidArgumentException('Чат поддержки уже занят другим администратором');
+		}
+	}
+
+	private function getSupportConversationLockSnapshotBySupportUserId(int $supportUserId, int $currentUserId): ?array
+	{
+		$this->cleanupExpiredSupportConversationLocks();
+		return $this->formatSupportConversationLock(
+			$this->getSupportConversationLockRow($supportUserId),
+			$currentUserId
+		);
+	}
+
+	private function getSupportConversationLockRow(int $supportUserId): ?array
+	{
+		$stmt = $this->db->prepareAndExecute(
+			'SELECT l.support_user_id, l.admin_user_id, l.expires_at, l.updated_at,
+                u.first_name, u.last_name
+            FROM support_chat_locks l
+            JOIN users u ON u.id = l.admin_user_id
+            WHERE l.support_user_id = ?
+            LIMIT 1',
+			'i',
+			[$supportUserId]
+		);
+
+		$row = $stmt->get_result()->fetch_assoc();
+		return $row ?: null;
+	}
+
+	private function formatSupportConversationLock(?array $row, int $currentUserId): ?array
+	{
+		if ($row === null) {
+			return null;
+		}
+
+		$adminUserId = (int) ($row['admin_user_id'] ?? 0);
+
+		return [
+			'support_user_id' => (int) ($row['support_user_id'] ?? 0),
+			'admin_user_id' => $adminUserId,
+			'admin_name' => trim(((string) ($row['first_name'] ?? '')) . ' ' . ((string) ($row['last_name'] ?? ''))),
+			'expires_at' => $row['expires_at'] ?? null,
+			'updated_at' => $row['updated_at'] ?? null,
+			'is_locked' => $adminUserId > 0,
+			'is_mine' => $adminUserId === $currentUserId,
+		];
+	}
+
+	private function cleanupExpiredSupportConversationLocks(): void
+	{
+		$this->db->query('DELETE FROM support_chat_locks WHERE expires_at <= NOW()');
+	}
+
+	private function buildSupportTeamPreview(): array
+	{
+		return [
+			'id' => 0,
+			'first_name' => 'Поддержка',
+			'last_name' => 'BelCouch',
+			'full_name' => 'Поддержка BelCouch',
+			'role' => 'support',
+			'is_admin' => false,
+			'has_avatar' => false,
+			'is_verify' => false,
+			'is_online' => false,
+			'city' => '',
+			'region_name' => '',
+		];
+	}
+
+	private function getDefaultSupportAdminPreview(): ?array
+	{
+		$supportService = new SupportService();
+		$supportAdmin = $supportService->getSupportChatAdmin();
+		if (!$supportAdmin) {
+			return null;
+		}
+
+		return $this->getUserPreview((int) $supportAdmin['id']);
+	}
+
+	private function isAdminUser(int $userId): bool
+	{
+		$user = $this->getUserPreview($userId);
+		return !empty($user['is_admin']);
+	}
+
+	private function ensureSupportChatSchemaExists(): void
+	{
+		$columns = $this->db->getAll(
+			"SELECT COLUMN_NAME
+             FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = '" . $this->db->escapeString(DB_NAME) . "'
+               AND TABLE_NAME = 'messages'
+               AND COLUMN_NAME IN ('is_support', 'support_user_id')"
+		);
+
+		$existing = array_map(static function (array $row): string {
+			return (string) ($row['COLUMN_NAME'] ?? '');
+		}, $columns);
+
+		if (!in_array('is_support', $existing, true)) {
+			$this->db->query("ALTER TABLE messages ADD COLUMN is_support TINYINT(1) NOT NULL DEFAULT 0 AFTER reply_to_message_id");
+		}
+
+		if (!in_array('support_user_id', $existing, true)) {
+			$this->db->query("ALTER TABLE messages ADD COLUMN support_user_id INT(11) NULL AFTER is_support");
+		}
+	}
+
+	private function ensureSupportChatLocksTableExists(): void
+	{
+		$this->db->query(
+			'CREATE TABLE IF NOT EXISTS support_chat_locks (
+                support_user_id int(11) NOT NULL PRIMARY KEY,
+                admin_user_id int(11) NOT NULL,
+                expires_at datetime NOT NULL,
+                created_at timestamp NOT NULL DEFAULT current_timestamp(),
+                updated_at timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+                INDEX idx_support_chat_locks_admin_user_id (admin_user_id),
+                INDEX idx_support_chat_locks_expires_at (expires_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci'
+		);
 	}
 
 	private function detectAttachmentType(string $filePath): string

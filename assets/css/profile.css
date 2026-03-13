@@ -30,23 +30,23 @@
 .profile-avatar-container {
 	position: relative;
 	flex-shrink: 0;
+	margin-bottom: 28px;
 }
 
 /* Аватар пользователя */
 .profile-avatar {
-	width: 200px;
-	height: 200px;
+	width: 223px;
+	height: 223px;
 	border-radius: 50%;
 	object-fit: cover;
 	border: 3px solid #fff;
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-	margin-bottom: 28px;
 }
 
 /* Заглушка, если у пользователя нет аватара */
 .profile-avatar-placeholder {
-	width: 200px;
-	height: 200px;
+	width: 223px;
+	height: 223px;
 	border-radius: 50%;
 	background-color: #f0f0f0;
 	display: flex;
@@ -60,21 +60,20 @@
 /* Значок подтвержденного пользователя */
 .verified-badge {
 	position: absolute;
-	bottom: 10px;
-	right: 10px;
-	width: 30px;
-	height: 30px;
-	background-color: #fff;
+	bottom: 8px;
+	right: 8px;
+	width: 54px;
+	height: 51px;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .verified-badge img {
-	width: 20px;
-	height: 20px;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
 }
 
 /* Информация о пользователе */
@@ -140,14 +139,17 @@
 .profile-actions {
 	display: flex;
 	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
 	gap: 14px;
 }
 
 .profile-actions button,
-.profile-actions a  {
+.profile-actions a {
 	font-size: 14px;
 	padding: 4px 12px;
 	border-radius: 100px;
+	max-width: max-content;
 }
 
 /* Кнопка выхода */
@@ -174,6 +176,42 @@
 	flex-direction: column;
 	align-items: start;
 	width: 100%;
+}
+
+.verification-rejected-note {
+	margin-top: 12px;
+	padding: 14px 16px;
+	border-radius: 16px;
+	background: linear-gradient(
+		180deg,
+		rgba(255, 244, 244, 0.95) 0%,
+		rgba(255, 248, 248, 0.98) 100%
+	);
+	border: 1px solid rgba(220, 53, 69, 0.16);
+	box-shadow: 0 8px 24px rgba(220, 53, 69, 0.08);
+	max-width: 420px;
+}
+
+.verification-rejected-note__title {
+	font-size: 14px;
+	font-weight: 700;
+	color: #b42318;
+	margin-bottom: 8px;
+}
+
+.verification-rejected-note__label {
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: #d92d20;
+	margin-bottom: 4px;
+}
+
+.verification-rejected-note__text {
+	font-size: 14px;
+	line-height: 1.45;
+	color: #344054;
 }
 /* Навигация профиля */
 .profile-nav {
@@ -206,7 +244,7 @@
 
 .profile-nav-item.active {
 	color: white;
-	background-color: #0f1f37;
+	background-color: var(--primary-color);
 }
 
 /* Блок с информацией "Обо мне" */

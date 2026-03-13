@@ -4,6 +4,7 @@ App.register("chatPage", function () {
 
 	const state = JSON.parse(page.dataset.chatState || "{}");
 	const conversationsRoot = document.getElementById("chat-conversations");
+	const sidebarTabsRoot = document.getElementById("chat-sidebar-tabs");
 	const threadHeader = document.getElementById("chat-thread-header");
 	const threadBody = document.getElementById("chat-thread-body");
 	const contextMenu = document.getElementById("chat-context-menu");
@@ -11,6 +12,7 @@ App.register("chatPage", function () {
 	const composeForm = document.getElementById("chat-compose-form");
 	const composeStateRoot = document.getElementById("chat-compose-state");
 	const userIdInput = document.getElementById("chat-user-id");
+	const supportInput = document.getElementById("chat-support-flag");
 	const listingIdInput = document.getElementById("chat-listing-id");
 	const replyToInput = document.getElementById("chat-reply-to-message-id");
 	const messageInput = document.getElementById("chat-message");
@@ -51,6 +53,11 @@ App.register("chatPage", function () {
 	let conversationSearchQuery = "";
 	let selectedMediaFiles = [];
 	let typingNotifyTimer = null;
+	let activeConversationTab = "primary";
+	let selectedIsSupport = !!state.selectedIsSupport;
+	let supportLockHeartbeatTimer = null;
+	let isConversationSwitching = false;
+	let pendingSyncAfterCurrent = false;
 
 	function esc(v) {
 		return String(v)
@@ -115,6 +122,8 @@ App.register("chatPage", function () {
 			first_name: user.first_name || "",
 			last_name: user.last_name || "",
 			full_name: user.full_name || "",
+			role: user.role || "user",
+			is_admin: !!user.is_admin,
 			has_avatar: !!user.has_avatar,
 			is_online: !!user.is_online,
 			city: user.city || "",
@@ -125,7 +134,85 @@ App.register("chatPage", function () {
 		c.partner = normalizeUser(c.partner || {});
 		c.latest_message = c.latest_message || {};
 		c.unread_count = Number(c.unread_count || 0);
+		c.is_support = !!c.is_support;
+		c.target_user_id = Number(c.target_user_id || 0);
+		c.support_lock = c.support_lock || null;
 		return c;
+	}
+	function isCurrentUserAdmin() {
+		return !!state.currentUserIsAdmin;
+	}
+	function isSupportConversation(conversation) {
+		return !!(conversation || {}).is_support;
+	}
+	function isSelectedSupportChat() {
+		return !!selectedIsSupport;
+	}
+	function shouldShowPresenceForUser(user, isSupportChat) {
+		if (isSupportChat) return false;
+		return !!user && Number(user.id || 0) > 0;
+	}
+	function getConversationTab(conversation) {
+		if (isCurrentUserAdmin()) {
+			return isSupportConversation(conversation) ? "support" : "primary";
+		}
+		return "primary";
+	}
+	function getSupportDisplayName() {
+		return "Поддержка BelCouch";
+	}
+	function getConversationUserId(conversation) {
+		if (!conversation) return 0;
+		if (
+			isSupportConversation(conversation) &&
+			Number(conversation.target_user_id || 0)
+		)
+			return Number(conversation.target_user_id || 0);
+		return Number(((conversation || {}).partner || {}).id || 0);
+	}
+	function getConversationKey(conversation) {
+		return (
+			(isSupportConversation(conversation) ? "support:" : "primary:") +
+			String(getConversationUserId(conversation))
+		);
+	}
+	function getSelectedConversationKey() {
+		if (!selectedUserId) return "";
+		return (
+			(selectedIsSupport ? "support:" : "primary:") +
+			String(selectedUserId)
+		);
+	}
+	function isSupportConversationLockedForCurrentAdmin(conversation) {
+		if (!isCurrentUserAdmin() || !isSupportConversation(conversation))
+			return false;
+		const lock = (conversation || {}).support_lock || null;
+		return !!(lock && lock.is_locked && !lock.is_mine);
+	}
+	function getSupportLockLabel(conversation) {
+		const lock = (conversation || {}).support_lock || null;
+		if (!lock || !lock.is_locked) return "";
+		return lock.is_mine ? "У вас" : "Занят";
+	}
+	function getConversationDisplayName(conversation) {
+		if (!conversation || !conversation.partner) return "Пользователь";
+		if (!isCurrentUserAdmin() && isSupportConversation(conversation)) {
+			return getSupportDisplayName();
+		}
+		return (
+			conversation.partner.full_name ||
+			conversation.partner.first_name ||
+			"Пользователь"
+		);
+	}
+	function getSelectedUserDisplayName() {
+		if (!selectedUser) return "Пользователь";
+		if (!isCurrentUserAdmin() && isSelectedSupportChat()) {
+			return getSupportDisplayName();
+		}
+		return (
+			selectedUser.full_name || selectedUser.first_name || "Пользователь"
+		);
 	}
 	function normalizeMessage(m) {
 		m.id = Number(m.id || 0);
@@ -180,6 +267,9 @@ App.register("chatPage", function () {
 		const normalizedUserId = Number(userId || 0);
 		if (!normalizedUserId) return "Пользователь";
 		if (selectedUser && Number(selectedUser.id) === normalizedUserId) {
+			if (selectedIsSupport && !isCurrentUserAdmin()) {
+				return getSupportDisplayName();
+			}
 			return (
 				selectedUser.full_name ||
 				selectedUser.first_name ||
@@ -203,6 +293,7 @@ App.register("chatPage", function () {
 	}
 	function notifyIncomingMessage(payload) {
 		const senderId = Number((payload || {}).user_id || 0);
+		const isSupport = !!(payload || {}).is_support;
 		if (!senderId || senderId === Number(state.currentUserId || 0)) return;
 		window.App.notify(
 			"Новое сообщение от " + getUserDisplayNameById(senderId),
@@ -211,7 +302,7 @@ App.register("chatPage", function () {
 				clickable: true,
 				duration: 5000,
 				onClick: function () {
-					openConversation(senderId);
+					openConversation(senderId, isSupport);
 				},
 			},
 		);
@@ -230,11 +321,9 @@ App.register("chatPage", function () {
 		const previousMap = new Map();
 
 		conversations.forEach(function (conversation) {
-			const partnerId = Number(
-				((conversation || {}).partner || {}).id || 0,
-			);
-			if (!partnerId) return;
-			previousMap.set(partnerId, {
+			const conversationKey = getConversationKey(conversation);
+			if (!conversationKey) return;
+			previousMap.set(conversationKey, {
 				unread_count: Number(conversation.unread_count || 0),
 				latest_message_id: Number(
 					((conversation || {}).latest_message || {}).id || 0,
@@ -248,12 +337,16 @@ App.register("chatPage", function () {
 
 		if (shouldNotify) {
 			normalizedConversations.forEach(function (conversation) {
-				const partnerId = Number(
-					((conversation || {}).partner || {}).id || 0,
-				);
-				if (!partnerId || partnerId === selectedUserId) return;
+				const partnerId = getConversationUserId(conversation);
+				const conversationKey = getConversationKey(conversation);
+				if (!partnerId || !conversationKey) return;
+				if (
+					partnerId === selectedUserId &&
+					isSupportConversation(conversation) === selectedIsSupport
+				)
+					return;
 
-				const previous = previousMap.get(partnerId) || {
+				const previous = previousMap.get(conversationKey) || {
 					unread_count: 0,
 					latest_message_id: 0,
 				};
@@ -276,7 +369,10 @@ App.register("chatPage", function () {
 							clickable: true,
 							duration: 5000,
 							onClick: function () {
-								openConversation(partnerId);
+								openConversation(
+									partnerId,
+									isSupportConversation(conversation),
+								);
 							},
 						},
 					);
@@ -432,13 +528,17 @@ App.register("chatPage", function () {
 
 	function getFilteredConversations() {
 		const query = conversationSearchQuery.trim().toLowerCase();
+		let filtered = conversations.filter(function (conversation) {
+			return getConversationTab(conversation) === activeConversationTab;
+		});
 		if (!query) {
-			return conversations;
+			return sortConversationsForDisplay(filtered);
 		}
-		return conversations.filter(function (conversation) {
+		filtered = filtered.filter(function (conversation) {
 			const partner = conversation.partner || {};
 			const latest = conversation.latest_message || {};
 			const haystack = [
+				getConversationDisplayName(conversation),
 				partner.full_name,
 				partner.first_name,
 				partner.last_name,
@@ -451,6 +551,59 @@ App.register("chatPage", function () {
 				.toLowerCase();
 			return haystack.includes(query);
 		});
+		return sortConversationsForDisplay(filtered);
+	}
+	function sortConversationsForDisplay(list) {
+		const nextList = Array.isArray(list) ? list.slice() : [];
+		if (!isCurrentUserAdmin()) {
+			nextList.sort(function (a, b) {
+				const aSupport = isSupportConversation(a) ? 1 : 0;
+				const bSupport = isSupportConversation(b) ? 1 : 0;
+				if (aSupport !== bSupport) {
+					return bSupport - aSupport;
+				}
+				return (
+					Number(((b || {}).latest_message || {}).id || 0) -
+					Number(((a || {}).latest_message || {}).id || 0)
+				);
+			});
+			return nextList;
+		}
+		return nextList;
+	}
+	function renderSidebarTabs() {
+		if (!sidebarTabsRoot) return;
+		if (!isCurrentUserAdmin()) {
+			sidebarTabsRoot.innerHTML = "";
+			sidebarTabsRoot.hidden = true;
+			return;
+		}
+		sidebarTabsRoot.hidden = false;
+		const primaryCount = conversations.filter(function (conversation) {
+			return getConversationTab(conversation) === "primary";
+		}).length;
+		const supportCount = conversations.filter(function (conversation) {
+			return getConversationTab(conversation) === "support";
+		}).length;
+		sidebarTabsRoot.innerHTML =
+			'<button type="button" class="chat-sidebar-tab' +
+			(activeConversationTab === "primary" ? " is-active" : "") +
+			'" data-tab="primary">Основные' +
+			(primaryCount
+				? '<span class="chat-sidebar-tab-badge">' +
+					primaryCount +
+					"</span>"
+				: "") +
+			"</button>" +
+			'<button type="button" class="chat-sidebar-tab' +
+			(activeConversationTab === "support" ? " is-active" : "") +
+			'" data-tab="support">Поддержка' +
+			(supportCount
+				? '<span class="chat-sidebar-tab-badge">' +
+					supportCount +
+					"</span>"
+				: "") +
+			"</button>";
 	}
 
 	function fmtDay(v) {
@@ -494,13 +647,23 @@ App.register("chatPage", function () {
 		if (!filteredConversations.length) {
 			conversationsRoot.innerHTML = conversationSearchQuery.trim()
 				? '<div class="chat-empty-list">Ничего не найдено.</div>'
-				: '<div class="chat-empty-list">Пока нет диалогов.</div>';
+				: activeConversationTab === "support" && isCurrentUserAdmin()
+					? '<div class="chat-empty-list">Пока нет чатов поддержки.</div>'
+					: '<div class="chat-empty-list">Пока нет диалогов.</div>';
 			return;
 		}
 		conversationsRoot.innerHTML = filteredConversations
 			.map(function (c) {
 				const u = c.partner;
-				const active = Number(u.id) === selectedUserId;
+				const conversationUserId = getConversationUserId(c);
+				const showPresence = shouldShowPresenceForUser(
+					u,
+					isSupportConversation(c),
+				);
+				const isLocked = isSupportConversationLockedForCurrentAdmin(c);
+				const active =
+					conversationUserId === selectedUserId &&
+					isSupportConversation(c) === selectedIsSupport;
 				const latest = c.latest_message || {};
 				const preview = latest.is_deleted
 					? "Сообщение удалено"
@@ -511,18 +674,33 @@ App.register("chatPage", function () {
 				return (
 					'<a class="chat-conversation' +
 					(active ? " is-active" : "") +
+					(isSupportConversation(c) ? " is-support" : "") +
+					(isLocked ? " is-locked" : "") +
+					(!isCurrentUserAdmin() && isSupportConversation(c)
+						? " is-pinned"
+						: "") +
 					'" href="/chat?user_id=' +
-					u.id +
+					conversationUserId +
+					(isSupportConversation(c) ? "&support=1" : "") +
 					'" data-user-id="' +
-					u.id +
+					conversationUserId +
+					'" data-support="' +
+					(isSupportConversation(c) ? "1" : "0") +
+					'" data-locked="' +
+					(isLocked ? "1" : "0") +
+					'" data-tab="' +
+					getConversationTab(c) +
 					'">' +
 					'<div class="chat-conversation-avatar">' +
 					avatar(u) +
-					'<span class="chat-online-dot' +
-					(isOnline(u.id) ? " is-online" : "") +
-					'"></span></div>' +
+					(showPresence
+						? '<span class="chat-online-dot' +
+							(isOnline(u.id) ? " is-online" : "") +
+							'"></span>'
+						: "") +
+					"</div>" +
 					'<div class="chat-conversation-content"><div class="chat-conversation-top"><span class="chat-conversation-name">' +
-					esc(u.full_name) +
+					esc(getConversationDisplayName(c)) +
 					'</span><span class="chat-conversation-time">' +
 					esc(fmtTime(latest.created_at)) +
 					"</span></div>" +
@@ -531,6 +709,11 @@ App.register("chatPage", function () {
 					'">' +
 					esc(preview) +
 					"</span>" +
+					(getSupportLockLabel(c)
+						? '<span class="chat-conversation-lock">' +
+							esc(getSupportLockLabel(c)) +
+							"</span>"
+						: "") +
 					(c.unread_count
 						? '<span class="chat-conversation-badge">' +
 							c.unread_count +
@@ -551,31 +734,43 @@ App.register("chatPage", function () {
 		const meta = [selectedUser.city, selectedUser.region_name]
 			.filter(Boolean)
 			.join(", ");
-		const statusText = isTyping(selectedUser.id)
-			? "Печатает…"
-			: isOnline(selectedUser.id)
-				? "В сети"
-				: "Не в сети";
+		const showPresence = shouldShowPresenceForUser(
+			selectedUser,
+			isSelectedSupportChat(),
+		);
+		const statusText = isSelectedSupportChat()
+			? ""
+			: isTyping(selectedUser.id)
+				? "Печатает…"
+				: isOnline(selectedUser.id)
+					? "В сети"
+					: "Не в сети";
 		threadHeader.innerHTML =
 			'<button type="button" data-action="open-sidebar" class="chat-mobile-list-button" aria-label="Назад к списку чатов">' +
 			'<svg class="chat-mobile-list-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>' +
 			"</button>" +
 			'<div class="chat-thread-person"><div class="chat-thread-avatar">' +
 			avatar(selectedUser) +
-			'<span class="chat-online-dot' +
-			(isOnline(selectedUser.id) ? " is-online" : "") +
-			'"></span></div>' +
+			(showPresence
+				? '<span class="chat-online-dot' +
+					(isOnline(selectedUser.id) ? " is-online" : "") +
+					'"></span>'
+				: "") +
+			"</div>" +
 			'<div class="chat-thread-person-info"><h2 class="chat-thread-name">' +
-			esc(selectedUser.full_name) +
-			'</h2><div class="chat-thread-status-row"><span class="chat-thread-status' +
-			(isTyping(selectedUser.id)
-				? " is-typing"
-				: isOnline(selectedUser.id)
-					? " is-online"
-					: "") +
-			'">' +
-			statusText +
-			"</span>" +
+			esc(getSelectedUserDisplayName()) +
+			'</h2><div class="chat-thread-status-row">' +
+			(statusText
+				? '<span class="chat-thread-status' +
+					(isTyping(selectedUser.id)
+						? " is-typing"
+						: isOnline(selectedUser.id)
+							? " is-online"
+							: "") +
+					'">' +
+					statusText +
+					"</span>"
+				: "") +
 			(meta
 				? '<span class="chat-thread-meta">' + esc(meta) + "</span>"
 				: "") +
@@ -768,21 +963,25 @@ App.register("chatPage", function () {
 		submitButton.disabled = !en;
 		if (attachButton) attachButton.disabled = !en;
 		userIdInput.value = en ? String(selectedUserId) : "";
+		if (supportInput)
+			supportInput.value = en && selectedIsSupport ? "1" : "";
 		listingIdInput.value = selectedListingId
 			? String(selectedListingId)
 			: "";
 		renderComposeState();
 	}
 	function rerender(scrollBottom) {
+		renderSidebarTabs();
 		renderConversations();
 		renderHeader();
 		renderMessages(scrollBottom);
 		syncCompose();
-		page.classList.toggle("is-chat-open", selectedUserId > 0);
-		page.classList.toggle(
-			"is-sidebar-open",
-			!isMobile() || selectedUserId <= 0,
-		);
+	}
+	function rerenderWithoutMessages() {
+		renderSidebarTabs();
+		renderConversations();
+		renderHeader();
+		syncCompose();
 	}
 	function upsert(msg, scrollBottom) {
 		const m = normalizeMessage(msg);
@@ -915,13 +1114,88 @@ App.register("chatPage", function () {
 					applyConversationsSnapshot(r.conversations || [], {
 						notify: false,
 					});
-					renderConversations();
+					syncSelectedConversationFromList();
+					rerender(false);
 				}
 			});
 	}
+	function syncSelectedConversationFromList() {
+		if (!selectedUserId) return;
+		const currentConversation = conversations.find(function (conversation) {
+			return (
+				getConversationUserId(conversation) === selectedUserId &&
+				isSupportConversation(conversation) === selectedIsSupport
+			);
+		});
+		if (!currentConversation) return;
+		if (isSupportConversationLockedForCurrentAdmin(currentConversation)) {
+			window.App.notify("Чат уже занят другим администратором", "error");
+			selectedUserId = 0;
+			selectedUser = null;
+			selectedIsSupport = false;
+			messages = [];
+			page.classList.remove("is-chat-open");
+			if (isMobile()) page.classList.add("is-sidebar-open");
+			lastMessageId = 0;
+			stopSupportLockHeartbeat();
+			const p = new URLSearchParams(window.location.search);
+			p.delete("user_id");
+			p.delete("support");
+			window.history.replaceState(
+				{},
+				"",
+				"/chat" + (p.toString() ? "?" + p.toString() : ""),
+			);
+		}
+	}
+	function acquireSupportLock(userId) {
+		const fd = new FormData();
+		fd.append("user_id", String(userId));
+		fd.append("support", "1");
+		return window.App.api.postForm(state.apiBase + "/lock.php", fd);
+	}
+	function releaseSupportLock(userId) {
+		const fd = new FormData();
+		fd.append("user_id", String(userId));
+		fd.append("support", "1");
+		return window.App.api.postForm(state.apiBase + "/unlock.php", fd);
+	}
+	function stopSupportLockHeartbeat() {
+		if (supportLockHeartbeatTimer) {
+			window.clearInterval(supportLockHeartbeatTimer);
+			supportLockHeartbeatTimer = null;
+		}
+	}
+	function startSupportLockHeartbeat() {
+		stopSupportLockHeartbeat();
+		if (!isCurrentUserAdmin() || !selectedIsSupport || !selectedUserId)
+			return;
+		supportLockHeartbeatTimer = window.setInterval(function () {
+			acquireSupportLock(selectedUserId).then(function (r) {
+				if (!(r && r.success && r.acquired)) {
+					stopSupportLockHeartbeat();
+					syncFromServer();
+				}
+			});
+		}, 10000);
+	}
+	function releaseCurrentSupportLock() {
+		stopSupportLockHeartbeat();
+		if (!isCurrentUserAdmin() || !selectedIsSupport || !selectedUserId) {
+			return Promise.resolve();
+		}
+		return releaseSupportLock(selectedUserId).finally(function () {
+			refreshConversations();
+		});
+	}
 	function syncFromServer() {
-		if (syncInFlight) return Promise.resolve();
+		if (syncInFlight) {
+			pendingSyncAfterCurrent = true;
+			return Promise.resolve();
+		}
 		syncInFlight = true;
+		const shouldReplaceMessages = isConversationSwitching;
+		const requestConversationKey = getSelectedConversationKey();
 		const req = [
 			window.App.api.fetchJson(state.apiBase + "/conversations.php"),
 		];
@@ -932,7 +1206,8 @@ App.register("chatPage", function () {
 						"/messages.php?user_id=" +
 						selectedUserId +
 						"&after_id=" +
-						lastMessageId,
+						lastMessageId +
+						(selectedIsSupport ? "&support=1" : ""),
 				),
 			);
 		return Promise.all(req)
@@ -941,14 +1216,35 @@ App.register("chatPage", function () {
 					applyConversationsSnapshot(r[0].conversations || [], {
 						notify: true,
 					});
-				if (r[1] && r[1].success)
-					(r[1].messages || []).forEach(function (m) {
-						upsert(m, true);
-					});
+				syncSelectedConversationFromList();
+				if (
+					r[1] &&
+					r[1].success &&
+					requestConversationKey &&
+					requestConversationKey === getSelectedConversationKey()
+				) {
+					if (shouldReplaceMessages) {
+						messages = (r[1].messages || []).map(normalizeMessage);
+						lastMessageId = r[1].last_id
+							? Number(r[1].last_id)
+							: messages.length
+								? Number(messages[messages.length - 1].id)
+								: 0;
+					} else {
+						(r[1].messages || []).forEach(function (m) {
+							upsert(m, true);
+						});
+					}
+				}
 				rerender(false);
 			})
 			.finally(function () {
+				isConversationSwitching = false;
 				syncInFlight = false;
+				if (pendingSyncAfterCurrent) {
+					pendingSyncAfterCurrent = false;
+					syncFromServer();
+				}
 			});
 	}
 
@@ -958,6 +1254,7 @@ App.register("chatPage", function () {
 		if (selectedUserId > 0) {
 			p.set("user_id", String(selectedUserId));
 			p.set("last_message_id", String(lastMessageId));
+			if (selectedIsSupport) p.set("support", "1");
 		}
 		stream = new EventSource(state.apiBase + "/stream.php?" + p.toString());
 		stream.addEventListener("messages", function (e) {
@@ -992,6 +1289,9 @@ App.register("chatPage", function () {
 			const p = JSON.parse(e.data || "{}");
 			if (p.event === "chat:update") return void syncFromServer();
 			if (p.event === "chat:message_created") {
+				return void syncFromServer();
+			}
+			if (p.event === "chat:support_lock_updated") {
 				return void syncFromServer();
 			}
 			if (p.event === "chat:typing") {
@@ -1044,31 +1344,85 @@ App.register("chatPage", function () {
 		window.App.api.postForm(API_BASE_URL + "/chat/typing.php", fd);
 	}
 
-	function openConversation(userId) {
+	function openConversation(userId, isSupportConversationFlag) {
 		const id = Number(userId || 0);
+		const nextIsSupport = !!isSupportConversationFlag;
 		if (!id) return;
-		if (id === selectedUserId) {
+		if (id === selectedUserId && nextIsSupport === selectedIsSupport) {
 			if (isMobile()) page.classList.remove("is-sidebar-open");
 			return;
 		}
 		const c = conversations.find(function (x) {
-			return Number(x.partner.id) === id;
+			return (
+				getConversationUserId(x) === id &&
+				isSupportConversation(x) === nextIsSupport
+			);
 		});
-		selectedUserId = id;
-		selectedUser = c
-			? normalizeUser(c.partner)
-			: normalizeUser({ id: id, full_name: "Пользователь" });
-		messages = [];
-		lastMessageId = 0;
-		replyTarget = null;
-		editTargetId = 0;
-		resetMediaPreview();
-		if (isMobile()) page.classList.remove("is-sidebar-open");
-		const p = new URLSearchParams(window.location.search);
-		p.set("user_id", String(id));
-		window.history.replaceState({}, "", "/chat?" + p.toString());
-		rerender(false);
-		syncFromServer();
+		if (c && isSupportConversationLockedForCurrentAdmin(c)) {
+			window.App.notify(
+				"Этот чат уже занят другим администратором",
+				"error",
+			);
+			return;
+		}
+		const proceed = function () {
+			if (c) {
+				activeConversationTab = getConversationTab(c);
+				selectedIsSupport = isSupportConversation(c);
+			} else {
+				selectedIsSupport = nextIsSupport;
+			}
+			selectedUserId = id;
+			selectedUser = c
+				? normalizeUser(c.partner)
+				: normalizeUser({ id: id, full_name: "Пользователь" });
+			selectedListingId = null;
+			lastMessageId = 0;
+			isConversationSwitching = true;
+			replyTarget = null;
+			editTargetId = 0;
+			resetMediaPreview();
+			startSupportLockHeartbeat();
+			page.classList.add("is-chat-open");
+			if (isMobile()) page.classList.remove("is-sidebar-open");
+			const p = new URLSearchParams(window.location.search);
+			p.set("user_id", String(id));
+			if (selectedIsSupport) p.set("support", "1");
+			else p.delete("support");
+			window.history.replaceState({}, "", "/chat?" + p.toString());
+			rerenderWithoutMessages();
+			syncFromServer();
+		};
+		if (isCurrentUserAdmin() && nextIsSupport) {
+			releaseCurrentSupportLock().finally(function () {
+				acquireSupportLock(id).then(function (r) {
+					if (!(r && r.success && r.acquired)) {
+						window.App.notify(
+							"Этот чат уже занят другим администратором",
+							"error",
+						);
+						refreshConversations();
+						return;
+					}
+					proceed();
+				});
+			});
+			return;
+		}
+		releaseCurrentSupportLock().finally(proceed);
+	}
+
+	if (selectedUserId > 0) {
+		const initialConversation = conversations.find(function (conversation) {
+			return (
+				getConversationUserId(conversation) === selectedUserId &&
+				isSupportConversation(conversation) === selectedIsSupport
+			);
+		});
+		if (initialConversation) {
+			activeConversationTab = getConversationTab(initialConversation);
+			selectedIsSupport = isSupportConversation(initialConversation);
+		}
 	}
 
 	function deleteMessage(id) {
@@ -1087,8 +1441,32 @@ App.register("chatPage", function () {
 		const a = e.target.closest(".chat-conversation");
 		if (!a) return;
 		e.preventDefault();
-		openConversation(Number(a.dataset.userId || 0));
+		if (a.dataset.locked === "1") {
+			window.App.notify(
+				"Этот чат уже занят другим администратором",
+				"error",
+			);
+			return;
+		}
+		openConversation(
+			Number(a.dataset.userId || 0),
+			a.dataset.support === "1",
+		);
 	});
+	if (sidebarTabsRoot) {
+		sidebarTabsRoot.addEventListener("click", function (e) {
+			const button = e.target.closest("[data-tab]");
+			if (!button) return;
+			activeConversationTab =
+				button.dataset.tab === "support" ? "support" : "primary";
+			if (isMobile()) {
+				page.classList.add("is-sidebar-open");
+				page.classList.remove("is-chat-open");
+			}
+			renderSidebarTabs();
+			renderConversations();
+		});
+	}
 
 	if (attachButton && imageInput) {
 		attachButton.addEventListener("click", function () {
@@ -1226,8 +1604,9 @@ App.register("chatPage", function () {
 				});
 		}
 		fd.append("user_id", String(selectedUserId));
+		if (selectedIsSupport) fd.append("support", "1");
 		fd.append("message", text);
-		if (selectedListingId)
+		if (selectedListingId && !selectedIsSupport)
 			fd.append("listing_id", String(selectedListingId));
 		if (replyTarget)
 			fd.append("reply_to_message_id", String(replyTarget.id));
@@ -1274,6 +1653,12 @@ App.register("chatPage", function () {
 		const insideMenu = !!e.target.closest(".chat-context-menu");
 		const insideMessage = !!e.target.closest(".chat-message");
 		if (!insideMenu && !insideMessage) closeContextMenu();
+
+		if (e.target.closest('[data-action="close-sidebar"]')) {
+			page.classList.remove("is-sidebar-open");
+			return;
+		}
+
 		if (
 			isMobile() &&
 			!e.target.closest(".chat-sidebar") &&
@@ -1289,7 +1674,22 @@ App.register("chatPage", function () {
 	document.addEventListener("visibilitychange", function () {
 		if (document.visibilityState === "visible") syncFromServer();
 	});
+	window.addEventListener("beforeunload", function () {
+		if (!isCurrentUserAdmin() || !selectedIsSupport || !selectedUserId)
+			return;
+		const fd = new FormData();
+		fd.append("user_id", String(selectedUserId));
+		fd.append("support", "1");
+		if (navigator.sendBeacon) {
+			navigator.sendBeacon(state.apiBase + "/unlock.php", fd);
+		}
+	});
+
+	if (state.selectedSupportLockDenied) {
+		window.App.notify("Этот чат уже занят другим администратором", "error");
+	}
 
 	rerender(true);
+	startSupportLockHeartbeat();
 	connectWebSocket();
 });

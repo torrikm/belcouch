@@ -26,6 +26,13 @@ class UpdateProfileAction
 			$db = new Database();
 			$sessionEmail = $_SESSION['email'] ?? ($_SESSION['user_email'] ?? '');
 
+			$currentUserRow = $db->prepareAndExecute('SELECT first_name, last_name, is_verify FROM users WHERE id = ?', 'i', [$userId])
+				->get_result()
+				->fetch_assoc();
+			if (!$currentUserRow) {
+				JsonResponse::send(['success' => false, 'message' => 'Пользователь не найден'], 404);
+			}
+
 			if ($_POST['email'] !== $sessionEmail) {
 				$stmt = $db->prepareAndExecute('SELECT id FROM users WHERE email = ? AND id != ?', 'si', [$_POST['email'], $userId]);
 				$stmt->store_result();
@@ -42,6 +49,12 @@ class UpdateProfileAction
 			$gender = isset($_POST['gender']) ? $_POST['gender'] : 'not_specified';
 			$birthDate = !empty($_POST['birth_date']) ? $_POST['birth_date'] : null;
 			$avatarUpdated = false;
+
+			if ((int) ($currentUserRow['is_verify'] ?? 0) === 1) {
+				if ($firstName !== $currentUserRow['first_name'] || $lastName !== $currentUserRow['last_name']) {
+					JsonResponse::send(['success' => false, 'message' => 'Изменение имени и фамилии недоступно для верифицированных аккаунтов'], 403);
+				}
+			}
 
 			if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
 				$allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];

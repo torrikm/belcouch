@@ -16,5 +16,5 @@
 
 .container-404 a {
 	text-decoration: none;
-	color: var(--hover-button);
+	color: var(--primary-hover);
 }

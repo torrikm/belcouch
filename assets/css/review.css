@@ -48,7 +48,7 @@
 
 .review-block .star:hover .star-icon,
 .review-block .star.active .star-icon {
-	content: url('../img/icons/star-filled.svg');
+	content: url("../img/icons/star-filled.svg");
 }
 
 .review-textarea {
@@ -84,7 +84,7 @@
 }
 
 .review-block .btn-primary:hover {
-	background-color: var(--hover-button);
+	background-color: var(--primary-hover);
 }
 
 /* Стили для секции отзывов */
@@ -96,7 +96,7 @@
 	font-size: 24px;
 	font-weight: 600;
 	color: #333333;
-	margin-bottom: 20px;
+	margin-bottom: 10px;
 }
 
 .reviews-empty {

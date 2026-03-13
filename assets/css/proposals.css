@@ -9,7 +9,7 @@
 :root {
 	--filters-bg: #f7f9ff;
 	--filters-surface: #ffffff;
-	--filters-text: #0f1f37;
+	--filters-text: var(--primary-color);
 	--filters-muted: #6b7892;
 	--filters-line: rgba(15, 31, 55, 0.12);
 	--filters-accent: #1d358b;
@@ -34,7 +34,7 @@
 	margin-bottom: 20px;
 	padding: 10px;
 	background-color: #f1f7ff;
-	border-radius: 5px;
+	border-radius: 16px;
 }
 
 .total-count p {
@@ -323,7 +323,7 @@
 	background-color: #334891;
 	color: white;
 	border: none;
-	border-radius: 4px;
+	border-radius: 16px;
 	padding: 8px 16px;
 	font-size: 14px;
 	font-weight: 600;
@@ -818,7 +818,7 @@
 	cursor: pointer;
 	border-radius: 14px;
 	padding: 12px 16px;
-	background: linear-gradient(135deg, #1d358b 0%, #334891 100%);
+	background: var(--primary-color);
 	font-weight: 700;
 	letter-spacing: 0.01em;
 	box-shadow: 0 10px 25px rgba(29, 53, 139, 0.28);
@@ -833,7 +833,7 @@
 	margin-bottom: 14px;
 	font-size: 20px;
 	font-weight: 800;
-	color: #0f1f37;
+	color: var(--primary-color);
 }
 
 .filters-modal .filter-group {
@@ -900,7 +900,7 @@
 }
 
 .filter-apply-btn {
-	background: linear-gradient(135deg, #1d358b 0%, #334891 100%);
+	background: var(--primary-color);
 	box-shadow: 0 8px 20px rgba(29, 53, 139, 0.26);
 	color: #fff !important;
 }

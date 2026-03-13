@@ -1,6 +1,6 @@
 /* Стили для шапки сайта */
 .site-header {
-	background-color: #0f1f37;
+	background-color: var(--primary-color);
 	color: white;
 	padding: 20px 0;
 	position: fixed;
@@ -9,7 +9,6 @@
 	right: 0;
 	z-index: 1000;
 }
-
 
 .header-container {
 	display: flex;
@@ -36,22 +35,51 @@
 .main-navigation {
 	display: flex;
 	align-items: center;
-	gap: 20px;
-
+	gap: 30px;
+	flex-grow: 1;
+	justify-content: flex-end;
+	margin-left: 30px;
 }
 
 .nav-item {
+	text-decoration: none;
+	color: #fff;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 20px;
 	display: flex;
 	align-items: center;
-	text-decoration: none;
-	color: white;
-	font-family: "Montserrat", sans-serif;
-	font-size: 14px;
-	transition: opacity 0.3s;
+	gap: 6px;
+	transition:
+		color 0.3s ease,
+		opacity 0.3s ease;
+}
+
+.nav-item-right {
+	margin-left: auto;
+}
+
+.nav-item svg {
+	flex-shrink: 0;
 }
 
 .nav-item:hover {
 	opacity: 0.8;
+}
+
+.nav-item-profile {
+	gap: 8px;
+}
+
+.header-avatar {
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.header-avatar-placeholder {
+	color: #94a3b8;
 }
 
 .nav-icon {
@@ -78,9 +106,10 @@
 
 /* Стили для подвала сайта */
 .site-footer {
-	background-color: #0f1f37;
+	background-color: var(--primary-color);
 	color: white;
 	padding: 40px 0;
+	margin-top: 60px;
 }
 
 .footer-container {
@@ -103,27 +132,41 @@
 }
 
 /* Адаптивные стили */
-@media (max-width: 768px) {
+@media (max-width: 880px) {
 	.main-navigation {
-		display: none;
 		position: absolute;
-		top: 100%;
-		left: 0;
+		top: calc(100% + 20px);
 		right: 0;
-		background-color: #0f1f37;
+		background-color: var(--primary-color);
 		flex-direction: column;
 		align-items: flex-start;
+		gap: 30px;
 		padding: 15px;
 		z-index: 100;
 		box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+		max-width: 250px;
+		width: 100%;
+		border-radius: 0 0 0 20px;
+		display: flex;
+		max-height: 0;
+		overflow: hidden;
+		padding: 0 15px;
+		opacity: 0;
+		visibility: hidden;
+		transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease, visibility 0.3s ease;
 	}
 
 	.main-navigation.active {
-		display: flex;
+		max-height: 500px;
+		opacity: 1;
+		visibility: visible;
+		padding: 15px;
 	}
 
-	.nav-item {
-		margin: 10px 0;
+	.nav-item-profile {
+		width: 100%;
+		border-top: 1px solid white;
+		padding-top: 15px;
 	}
 
 	.mobile-menu-toggle {
@@ -168,5 +211,8 @@
 
 	.site-header {
 		padding: 10px 0;
+	}
+	.main-navigation {
+		top: calc(100% + 10px);
 	}
 }

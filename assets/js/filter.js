@@ -220,10 +220,18 @@ App.register("proposalsFilter", function () {
 				const maxLimit = Number(rangeBox.dataset.max || 20);
 				const minSlider = rangeBox.querySelector(".guest-range-min");
 				const maxSlider = rangeBox.querySelector(".guest-range-max");
-				const minInput = rangeBox.querySelector('input[name="min_guests"]');
-				const maxInput = rangeBox.querySelector('input[name="max_guests"]');
-				const minValue = rangeBox.querySelector(".guest-range-min-value");
-				const maxValue = rangeBox.querySelector(".guest-range-max-value");
+				const minInput = rangeBox.querySelector(
+					'input[name="min_guests"]',
+				);
+				const maxInput = rangeBox.querySelector(
+					'input[name="max_guests"]',
+				);
+				const minValue = rangeBox.querySelector(
+					".guest-range-min-value",
+				);
+				const maxValue = rangeBox.querySelector(
+					".guest-range-max-value",
+				);
 
 				if (minSlider) minSlider.value = String(minLimit);
 				if (maxSlider) maxSlider.value = String(maxLimit);
@@ -247,9 +255,15 @@ App.register("proposalsFilter", function () {
 
 	if (window.location.search) {
 		const urlParams = new URLSearchParams(window.location.search);
-		if (urlParams.has("page")) {
-			currentPage = parseInt(urlParams.get("page"), 10) || 1;
+		const hasOnlyRegion =
+			urlParams.has("region") &&
+			Array.from(urlParams.keys()).length === 1;
+
+		if (!hasOnlyRegion) {
+			if (urlParams.has("page")) {
+				currentPage = parseInt(urlParams.get("page"), 10) || 1;
+			}
+			setTimeout(applyFilters, 100);
 		}
-		setTimeout(applyFilters, 100);
 	}
 });

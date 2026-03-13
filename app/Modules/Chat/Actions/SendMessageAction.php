@@ -15,6 +15,7 @@ class SendMessageAction
 		$replyToMessageId = isset($_POST['reply_to_message_id']) && $_POST['reply_to_message_id'] !== ''
 			? (int) $_POST['reply_to_message_id']
 			: null;
+		$isSupport = !empty($_POST['support']);
 		$message = trim($_POST['message'] ?? '');
 		$attachments = [];
 
@@ -91,13 +92,25 @@ class SendMessageAction
 		try {
 			$currentUserId = (int) $_SESSION['user_id'];
 			$service = new ChatService();
-			$sentMessage = $service->sendMessage($currentUserId, $partnerId, $message, $listingId, $replyToMessageId, $attachments);
+			$sentMessage = $service->sendMessage($currentUserId, $partnerId, $message, $listingId, $replyToMessageId, $attachments, $isSupport);
+
+			$notifyUserIds = [$partnerId, $currentUserId];
+			if ($isSupport) {
+				$db = new Database();
+				$rows = $db->getAll("SELECT id FROM users WHERE role = 'admin'");
+				$notifyUserIds = array_map(static function (array $row): int {
+					return (int) ($row['id'] ?? 0);
+				}, $rows);
+				$notifyUserIds[] = $partnerId;
+				$notifyUserIds[] = $currentUserId;
+			}
 
 			ChatRealtimeNotifier::notifyUsers(
-				[$partnerId, $currentUserId],
+				$notifyUserIds,
 				[
 					'user_id' => $currentUserId,
 					'partner_id' => $partnerId,
+					'is_support' => $isSupport,
 					'message_id' => (int) $sentMessage['id'],
 				],
 				'chat:message_created'

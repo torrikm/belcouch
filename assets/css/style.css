@@ -30,21 +30,27 @@
 	font-display: swap;
 }
 
-/* Основные стили */
-html {
-	--dark-blue-button: #0f1f37;
-	--dark-blue: #0f1f37;
-	--hover-button: #1d358b;
+:root {
+	--primary-color: #0f1f37;
+	--primary-active: #0f1f37;
+	--primary-hover: #1d358b;
+	--dark-blue-button: var(--primary-color);
+	--dark-blue: var(--primary-color);
 	--white-button: white;
 }
 
 *,
-h1,
-h2 {
+*::before,
+*::after {
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
 	font-family: "Montserrat", sans-serif;
+}
+
+h1, h2 {
+	margin: 0;
+	padding: 0;
 }
 
 body {
@@ -57,13 +63,15 @@ body {
 main {
 	flex: 1;
 	margin-top: 100px;
-	margin-bottom: 60px;
-	display: flex;
-	flex-direction: column;
 }
 
 button {
 	cursor: pointer;
+}
+
+input {
+	outline: none;
+	transition: border-color 0.3s ease;
 }
 
 .container {
@@ -71,6 +79,10 @@ button {
 	max-width: 1200px;
 	margin: 0 auto;
 	padding: 0 15px;
+}
+
+input:focus {
+	border-color: var(--primary-color);
 }
 
 a {
@@ -84,6 +96,10 @@ ul {
 
 img {
 	display: block;
+}
+
+section {
+	margin: 60px 0;
 }
 
 .btn {
@@ -102,11 +118,22 @@ img {
 }
 
 .btn:hover {
-	background-color: var(--hover-button);
+	background-color: var(--primary-hover);
 }
 
 .btn-primary {
 	background-color: var(--dark-blue-button);
+	color: var(--white-button);
+}
+
+.btn-secondary {
+	background-color: white;
+	color: var(--dark-blue-button);
+	border: 1px solid var(--dark-blue-button);
+}
+
+.btn-secondary:hover {
+	background-color: var(--primary-hover);
 	color: var(--white-button);
 }
 
@@ -117,9 +144,9 @@ img {
 }
 
 .btn-outline:hover {
-	background-color: var(--hover-button);
+	background-color: var(--primary-hover);
 	color: var(--white-button);
-	border-color: var(--hover-button);
+	border-color: var(--primary-hover);
 }
 
 .city-autocomplete {
@@ -162,7 +189,7 @@ img {
 	background: transparent;
 	text-align: left;
 	font: inherit;
-	color: #0f1f37;
+	color: var(--primary-color);
 }
 
 .city-autocomplete-option:hover,

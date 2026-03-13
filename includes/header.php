@@ -1,6 +1,19 @@
 <?php
 $root_path = isset($root_path) ? $root_path : '';
+$currentUserData = null;
 
+if (isset($_SESSION['user_id'])) {
+	try {
+		if (!class_exists('Database')) {
+			require_once __DIR__ . '/../app/Core/Database.php';
+		}
+		$db = new Database();
+		$stmt = $db->prepareAndExecute('SELECT first_name, last_name, avatar_image FROM users WHERE id = ?', 'i', [(int)$_SESSION['user_id']]);
+		$currentUserData = $stmt->get_result()->fetch_assoc();
+	} catch (Throwable $e) {
+		// Ignore
+	}
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -59,7 +72,11 @@ $root_path = isset($root_path) ? $root_path : '';
 				<a href="<?php echo $root_path; ?>about" class="nav-item">
 					О нас
 				</a>
+				<a href="<?php echo $root_path; ?>support" class="nav-item">
+					Поддержка
+				</a>
 				<?php if (isset($_SESSION['user_id'])): ?>
+
 					<a href="<?php echo $root_path; ?>chat" class="nav-item">
 						Чаты
 					</a>
@@ -68,11 +85,18 @@ $root_path = isset($root_path) ? $root_path : '';
 							Админка
 						</a>
 					<?php endif; ?>
-					<a href="<?php echo $root_path; ?>profile" class="nav-item">
-						Профиль
+					<a href="<?php echo $root_path; ?>profile" class="nav-item nav-item-profile nav-item-right">
+						<?php if ($currentUserData && !empty($currentUserData['avatar_image'])): ?>
+							<img src="<?php echo $root_path . htmlspecialchars($currentUserData['avatar_image'], ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar" class="header-avatar">
+						<?php else: ?>
+							<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="header-avatar-placeholder">
+								<path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+							</svg>
+						<?php endif; ?>
+						<span class="nav-item-name"><?php echo $currentUserData ? htmlspecialchars($currentUserData['first_name'], ENT_QUOTES, 'UTF-8') : 'Профиль'; ?></span>
 					</a>
 				<?php else: ?>
-					<a href="#" data-auth-open="login-modal" class="nav-item">
+					<a href="#" data-auth-open="login-modal" class="nav-item nav-item-right">
 						Войти
 					</a>
 				<?php endif; ?>

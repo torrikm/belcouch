@@ -42,6 +42,34 @@ class AdminVerificationService
 		return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 	}
 
+	public function findUserByEmail(string $email): ?array
+	{
+		$email = trim($email);
+		if ($email === '') {
+			return null;
+		}
+
+		$stmt = $this->db->prepareAndExecute(
+			"SELECT u.id, u.email, u.first_name, u.last_name, u.role, u.is_verify,
+                    vr.status AS latest_verification_status, vr.reviewed_at AS latest_reviewed_at
+             FROM users u
+             LEFT JOIN verification_requests vr ON vr.id = (
+                 SELECT vr2.id
+                 FROM verification_requests vr2
+                 WHERE vr2.user_id = u.id
+                 ORDER BY vr2.created_at DESC
+                 LIMIT 1
+             )
+             WHERE u.email = ?
+             LIMIT 1",
+			's',
+			[$email]
+		);
+
+		$row = $stmt->get_result()->fetch_assoc();
+		return $row ?: null;
+	}
+
 	public function getLatestUserRequest(int $userId): ?array
 	{
 		$stmt = $this->db->prepareAndExecute(
@@ -75,7 +103,32 @@ class AdminVerificationService
 		}
 
 		$this->db->prepareAndExecute('UPDATE verification_requests SET status = ?, admin_note = ?, reviewed_by = NULL, reviewed_at = NULL WHERE user_id = ? AND status = ?', 'ssis', ['rejected', 'Заявка заменена новой', $userId, 'pending']);
-		$this->db->prepareAndExecute('INSERT INTO verification_requests (user_id, document_image, document_mime, status) VALUES (?, ?, ?, ?)', 'ibss', [$userId, $imageData, $mime, 'pending']);
+
+		// Сохраняем BLOB через send_long_data, чтобы не потерять файл
+		$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+		$mysqli->set_charset('utf8');
+		if ($mysqli->connect_error) {
+			throw new Exception('Ошибка подключения к базе данных');
+		}
+
+		$stmt = $mysqli->prepare('INSERT INTO verification_requests (user_id, document_image, document_mime, status) VALUES (?, ?, ?, ?)');
+		if (!$stmt) {
+			$mysqli->close();
+			throw new Exception('Не удалось подготовить запрос сохранения файла');
+		}
+
+		$status = 'pending';
+		$null = null;
+		$stmt->bind_param('ibss', $userId, $null, $mime, $status);
+		$stmt->send_long_data(1, $imageData);
+		if (!$stmt->execute()) {
+			$error = $stmt->error;
+			$stmt->close();
+			$mysqli->close();
+			throw new Exception('Не удалось сохранить файл: ' . $error);
+		}
+		$stmt->close();
+		$mysqli->close();
 	}
 
 	public function moderate(int $requestId, string $status, ?string $adminNote, int $adminId): void
@@ -91,8 +144,45 @@ class AdminVerificationService
 		}
 
 		$note = $adminNote !== null ? trim($adminNote) : null;
-		$this->db->prepareAndExecute('UPDATE verification_requests SET status = ?, admin_note = ?, reviewed_by = ?, reviewed_at = NOW() WHERE id = ?', 'ssii', [$status, $note, $adminId, $requestId]);
+		$this->db->prepareAndExecute(
+			'UPDATE verification_requests
+			 SET status = ?, admin_note = ?, reviewed_by = ?, reviewed_at = NOW(), document_image = NULL, document_mime = NULL
+			 WHERE id = ?',
+			'ssii',
+			[$status, $note, $adminId, $requestId]
+		);
 		$this->db->prepareAndExecute('UPDATE users SET is_verify = ? WHERE id = ?', 'ii', [$status === 'approved' ? 1 : 0, (int) $request['user_id']]);
+	}
+
+	public function setManualVerification(int $userId, bool $isVerified, ?string $adminNote, int $adminId): void
+	{
+		$stmt = $this->db->prepareAndExecute(
+			'SELECT id, is_verify FROM users WHERE id = ?',
+			'i',
+			[$userId]
+		);
+		$user = $stmt->get_result()->fetch_assoc();
+		if (!$user) {
+			throw new Exception('Пользователь не найден');
+		}
+
+		$this->db->prepareAndExecute(
+			'UPDATE users SET is_verify = ? WHERE id = ?',
+			'ii',
+			[$isVerified ? 1 : 0, $userId]
+		);
+
+		$note = trim((string) $adminNote);
+		if ($note === '') {
+			$note = $isVerified ? 'Верификация выдана администратором вручную' : 'Верификация снята администратором вручную';
+		}
+
+		$this->db->prepareAndExecute(
+			'INSERT INTO verification_requests (user_id, document_image, document_mime, status, admin_note, reviewed_by, reviewed_at)
+             VALUES (?, NULL, NULL, ?, ?, ?, NOW())',
+			'issi',
+			[$userId, $isVerified ? 'approved' : 'rejected', $note, $adminId]
+		);
 	}
 
 	public function outputDocument(int $requestId): void
