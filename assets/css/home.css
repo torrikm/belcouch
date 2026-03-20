@@ -154,9 +154,6 @@
 	height: 18px;
 }
 
-/* Второй блок - слайдер */
-.slider-section {
-}
 
 .slider-container {
 	position: relative;
@@ -259,9 +256,6 @@
 	}
 }
 
-/* Третий блок - преимущества */
-.features-section {
-}
 
 .features-container {
 	display: flex;
@@ -463,10 +457,6 @@
 	}
 }
 
-/* Стили для секции с популярными направлениями */
-.regions-section {
-}
-
 .regions-title {
 	font-family: "Montserrat", sans-serif;
 	font-weight: 700;
@@ -555,9 +545,6 @@
 }
 
 @media (max-width: 576px) {
-	.regions-section {
-	}
-
 	.regions-grid {
 		grid-template-columns: 1fr;
 	}

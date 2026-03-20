@@ -98,6 +98,49 @@ class ChatService
 		return $this->hydrateMessagesWithAttachments($messages);
 	}
 
+	public function getMessagesWindow(
+		int $currentUserId,
+		int $partnerId,
+		array $options = [],
+		bool $isSupport = false
+	): array {
+		$afterId = max(0, (int) ($options['after_id'] ?? 0));
+		$beforeId = max(0, (int) ($options['before_id'] ?? 0));
+		$aroundId = max(0, (int) ($options['around_id'] ?? 0));
+		$limit = max(1, min(100, (int) ($options['limit'] ?? 50)));
+		$context = max(1, min(50, (int) ($options['context'] ?? 25)));
+
+		if ($aroundId > 0) {
+			$messages = $this->getMessagesAroundAnchor($currentUserId, $partnerId, $aroundId, $context, $isSupport);
+			return [
+				'messages' => $messages,
+				'meta' => $this->buildWindowMeta($currentUserId, $partnerId, $messages, $isSupport, $aroundId, 'around'),
+			];
+		}
+
+		if ($beforeId > 0) {
+			$messages = $this->getMessagesBeforeId($currentUserId, $partnerId, $beforeId, $limit, $isSupport);
+			return [
+				'messages' => $messages,
+				'meta' => $this->buildWindowMeta($currentUserId, $partnerId, $messages, $isSupport, null, 'before'),
+			];
+		}
+
+		if ($afterId > 0) {
+			$messages = $this->getMessagesAfterId($currentUserId, $partnerId, $afterId, $limit, $isSupport);
+			return [
+				'messages' => $messages,
+				'meta' => $this->buildWindowMeta($currentUserId, $partnerId, $messages, $isSupport, null, 'after'),
+			];
+		}
+
+		$messages = $this->getLatestMessages($currentUserId, $partnerId, $limit, $isSupport);
+		return [
+			'messages' => $messages,
+			'meta' => $this->buildWindowMeta($currentUserId, $partnerId, $messages, $isSupport, null, 'latest'),
+		];
+	}
+
 	public function markConversationAsRead(int $currentUserId, int $partnerId, bool $isSupport = false): array
 	{
 		if ($isSupport) {
@@ -365,6 +408,131 @@ class ChatService
 		return $messages[0];
 	}
 
+	private function getLatestMessages(int $currentUserId, int $partnerId, int $limit, bool $isSupport = false): array
+	{
+		return $this->getMessagesByWindowMode($currentUserId, $partnerId, 'latest', 0, $limit, $isSupport);
+	}
+
+	private function getMessagesBeforeId(int $currentUserId, int $partnerId, int $beforeId, int $limit, bool $isSupport = false): array
+	{
+		return $this->getMessagesByWindowMode($currentUserId, $partnerId, 'before', $beforeId, $limit, $isSupport);
+	}
+
+	private function getMessagesAfterId(int $currentUserId, int $partnerId, int $afterId, int $limit, bool $isSupport = false): array
+	{
+		return $this->getMessagesByWindowMode($currentUserId, $partnerId, 'after', $afterId, $limit, $isSupport);
+	}
+
+	private function getMessagesAroundAnchor(
+		int $currentUserId,
+		int $partnerId,
+		int $anchorId,
+		int $context,
+		bool $isSupport = false
+	): array {
+		$this->assertMessageBelongsToConversation($currentUserId, $partnerId, $anchorId, $isSupport);
+		$before = $this->getMessagesBeforeId($currentUserId, $partnerId, $anchorId, $context, $isSupport);
+		$missingBefore = max(0, $context - count($before));
+		$after = $this->getMessagesAfterId($currentUserId, $partnerId, $anchorId, $context + $missingBefore, $isSupport);
+		$anchor = [$this->getMessageByIdForUser($anchorId, $currentUserId)];
+
+		if (count($after) < $context + $missingBefore) {
+			$extraBefore = $this->getMessagesBeforeId(
+				$currentUserId,
+				$partnerId,
+				$before ? (int) $before[0]['id'] : $anchorId,
+				($context + $missingBefore) - count($after),
+				$isSupport
+			);
+			$before = array_merge($extraBefore, $before);
+		}
+
+		return array_merge($before, $anchor, $after);
+	}
+
+	private function getMessagesByWindowMode(
+		int $currentUserId,
+		int $partnerId,
+		string $mode,
+		int $cursorId,
+		int $limit,
+		bool $isSupport = false
+	): array {
+		$limit = max(1, min(100, $limit));
+		$params = [];
+		$types = '';
+
+		if ($isSupport) {
+			$this->assertSupportConversationAccess($currentUserId, $partnerId);
+			$supportUserId = $this->resolveSupportConversationUserId($currentUserId, $partnerId);
+			$where = 'm.is_support = 1 AND m.support_user_id = ?';
+			$params[] = $supportUserId;
+			$types .= 'i';
+		} else {
+			$where = 'm.is_support = 0 AND ((m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?))';
+			array_push($params, $currentUserId, $partnerId, $partnerId, $currentUserId);
+			$types .= 'iiii';
+		}
+
+		$order = 'm.id DESC';
+		if ($mode === 'before') {
+			$where .= ' AND m.id < ?';
+			$params[] = $cursorId;
+			$types .= 'i';
+		} elseif ($mode === 'after') {
+			$where .= ' AND m.id > ?';
+			$params[] = $cursorId;
+			$types .= 'i';
+			$order = 'm.id ASC';
+		} elseif ($mode === 'latest') {
+			// no-op
+		} else {
+			throw new InvalidArgumentException('Unsupported window mode');
+		}
+
+		$stmt = $this->db->prepareAndExecute(
+			$this->getMessageSelectSql() . '
+            WHERE ' . $where . '
+            ORDER BY ' . $order . '
+            LIMIT ?',
+			$types . 'i',
+			array_merge($params, [$limit])
+		);
+
+		$result = $stmt->get_result();
+		$messages = [];
+		while ($row = $result->fetch_assoc()) {
+			$messages[] = $this->formatMessageRow($row, $currentUserId);
+		}
+
+		if ($mode !== 'after') {
+			$messages = array_reverse($messages);
+		}
+		return $this->hydrateMessagesWithAttachments($messages);
+	}
+
+	private function buildWindowMeta(
+		int $currentUserId,
+		int $partnerId,
+		array $messages,
+		bool $isSupport = false,
+		?int $anchorId = null,
+		string $mode = 'latest'
+	): array {
+		$oldestId = !empty($messages) ? (int) $messages[0]['id'] : 0;
+		$newestId = !empty($messages) ? (int) $messages[count($messages) - 1]['id'] : 0;
+
+		return [
+			'mode' => $mode,
+			'anchor_message_id' => $anchorId,
+			'oldest_id' => $oldestId,
+			'newest_id' => $newestId,
+			'loaded_count' => count($messages),
+			'has_older' => $oldestId > 0 ? $this->conversationHasOlderMessages($currentUserId, $partnerId, $oldestId, $isSupport) : false,
+			'has_newer' => $newestId > 0 ? $this->conversationHasNewerMessages($currentUserId, $partnerId, $newestId, $isSupport) : false,
+		];
+	}
+
 	private function getOwnedMessageRow(int $currentUserId, int $messageId): ?array
 	{
 		$stmt = $this->db->prepareAndExecute(
@@ -378,6 +546,107 @@ class ChatService
 
 		$row = $stmt->get_result()->fetch_assoc();
 		return $row ?: null;
+	}
+
+	private function assertMessageBelongsToConversation(
+		int $currentUserId,
+		int $partnerId,
+		int $messageId,
+		bool $isSupport = false
+	): void {
+		if ($messageId <= 0) {
+			throw new InvalidArgumentException('Сообщение не найдено');
+		}
+
+		if ($isSupport) {
+			$supportUserId = $this->resolveSupportConversationUserId($currentUserId, $partnerId);
+			$stmt = $this->db->prepareAndExecute(
+				'SELECT id
+                FROM messages
+                WHERE id = ? AND is_support = 1 AND support_user_id = ?
+                LIMIT 1',
+				'ii',
+				[$messageId, $supportUserId]
+			);
+		} else {
+			$stmt = $this->db->prepareAndExecute(
+				'SELECT id
+                FROM messages
+                WHERE id = ?
+                  AND is_support = 0
+                  AND (
+                    (sender_id = ? AND receiver_id = ?)
+                    OR
+                    (sender_id = ? AND receiver_id = ?)
+                  )
+                LIMIT 1',
+				'iiiii',
+				[$messageId, $currentUserId, $partnerId, $partnerId, $currentUserId]
+			);
+		}
+
+		if (!$stmt->get_result()->fetch_assoc()) {
+			throw new InvalidArgumentException('Сообщение для перехода не найдено');
+		}
+	}
+
+	private function conversationHasOlderMessages(
+		int $currentUserId,
+		int $partnerId,
+		int $messageId,
+		bool $isSupport = false
+	): bool {
+		return $this->conversationHasMessagesByDirection($currentUserId, $partnerId, $messageId, '<', $isSupport);
+	}
+
+	private function conversationHasNewerMessages(
+		int $currentUserId,
+		int $partnerId,
+		int $messageId,
+		bool $isSupport = false
+	): bool {
+		return $this->conversationHasMessagesByDirection($currentUserId, $partnerId, $messageId, '>', $isSupport);
+	}
+
+	private function conversationHasMessagesByDirection(
+		int $currentUserId,
+		int $partnerId,
+		int $messageId,
+		string $operator,
+		bool $isSupport = false
+	): bool {
+		$operator = $operator === '>' ? '>' : '<';
+
+		if ($isSupport) {
+			$supportUserId = $this->resolveSupportConversationUserId($currentUserId, $partnerId);
+			$stmt = $this->db->prepareAndExecute(
+				'SELECT id
+                FROM messages
+                WHERE is_support = 1
+                  AND support_user_id = ?
+                  AND id ' . $operator . ' ?
+                LIMIT 1',
+				'ii',
+				[$supportUserId, $messageId]
+			);
+		} else {
+			$stmt = $this->db->prepareAndExecute(
+				'SELECT id
+                FROM messages
+                WHERE is_support = 0
+                  AND (
+                    (sender_id = ? AND receiver_id = ?)
+                    OR
+                    (sender_id = ? AND receiver_id = ?)
+                  )
+                  AND id ' . $operator . ' ?
+                LIMIT 1',
+				'iiiii',
+				[$currentUserId, $partnerId, $partnerId, $currentUserId, $messageId]
+			);
+		}
+
+		return (bool) $stmt->get_result()->fetch_assoc();
 	}
 
 	private function resolveReplyTargetId(

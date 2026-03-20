@@ -7,6 +7,7 @@ App.register("chatPage", function () {
 	const sidebarTabsRoot = document.getElementById("chat-sidebar-tabs");
 	const threadHeader = document.getElementById("chat-thread-header");
 	const threadBody = document.getElementById("chat-thread-body");
+	const jumpBottomButton = document.getElementById("chat-jump-bottom");
 	const contextMenu = document.getElementById("chat-context-menu");
 	const contextMenuHost = contextMenu ? contextMenu.parentElement : null;
 	const composeForm = document.getElementById("chat-compose-form");
@@ -29,6 +30,12 @@ App.register("chatPage", function () {
 	const deleteConfirm = document.getElementById("chat-delete-confirm");
 	const MAX_MEDIA_SIZE = 100 * 1024 * 1024;
 	const MAX_MEDIA_COUNT = 5;
+	const CHAT_API_BASE =
+		typeof API_BASE_URL !== "undefined"
+			? API_BASE_URL
+			: typeof API_URL !== "undefined"
+				? API_URL
+				: "/api";
 
 	let conversations = (state.conversations || []).map(normalizeConversation);
 	let selectedUserId = Number(state.selectedUserId || 0);
@@ -36,6 +43,7 @@ App.register("chatPage", function () {
 		? normalizeUser(state.selectedUser)
 		: null;
 	let messages = (state.messages || []).map(normalizeMessage);
+	let messageWindowMeta = normalizeWindowMeta(state.messageWindowMeta || {});
 	let selectedListingId = state.selectedListingId || null;
 	let stream = null;
 	let ws = null;
@@ -53,11 +61,20 @@ App.register("chatPage", function () {
 	let conversationSearchQuery = "";
 	let selectedMediaFiles = [];
 	let typingNotifyTimer = null;
+	let lastTypingSentAt = 0;
+	let lastTypingPartnerId = 0;
 	let activeConversationTab = "primary";
 	let selectedIsSupport = !!state.selectedIsSupport;
 	let supportLockHeartbeatTimer = null;
 	let isConversationSwitching = false;
 	let pendingSyncAfterCurrent = false;
+	let oldestLoadedId = Number(messageWindowMeta.oldest_id || 0);
+	let newestLoadedId = Number(messageWindowMeta.newest_id || lastMessageId);
+	let isLoadingOlderMessages = false;
+	let isLoadingNewerMessages = false;
+	let isJumpingToReply = false;
+	let lastThreadScrollTop = 0;
+	let nextNewerLoadUnlockScrollTop = null;
 
 	function esc(v) {
 		return String(v)
@@ -138,6 +155,22 @@ App.register("chatPage", function () {
 		c.target_user_id = Number(c.target_user_id || 0);
 		c.support_lock = c.support_lock || null;
 		return c;
+	}
+	function normalizeWindowMeta(meta) {
+		return {
+			mode: meta.mode || "latest",
+			loaded_count: Number(meta.loaded_count || 0),
+			oldest_id: Number(meta.oldest_id || 0),
+			newest_id: Number(meta.newest_id || 0),
+			has_older: !!meta.has_older,
+			has_newer: !!meta.has_newer,
+			anchor_message_id: meta.anchor_message_id
+				? Number(meta.anchor_message_id)
+				: null,
+		};
+	}
+	function isTailWindowMode() {
+		return !!selectedUserId && !messageWindowMeta.has_newer;
 	}
 	function isCurrentUserAdmin() {
 		return !!state.currentUserIsAdmin;
@@ -630,7 +663,7 @@ App.register("chatPage", function () {
 		if (user.has_avatar)
 			return (
 				'<img src="' +
-				API_URL +
+				CHAT_API_BASE +
 				"/users/get_avatar.php?id=" +
 				user.id +
 				'" class="chat-avatar-image" alt="' +
@@ -871,6 +904,14 @@ App.register("chatPage", function () {
 		}
 		threadBody.innerHTML = html;
 		if (scrollBottom) threadBody.scrollTop = threadBody.scrollHeight;
+		updateJumpBottomButton();
+	}
+	function updateJumpBottomButton() {
+		if (!jumpBottomButton) return;
+		const distanceToBottom =
+			threadBody.scrollHeight - threadBody.scrollTop - threadBody.clientHeight;
+		const shouldShow = distanceToBottom > 180 || messageWindowMeta.has_newer;
+		jumpBottomButton.classList.toggle("is-visible", shouldShow);
 	}
 
 	function scrollToMessage(messageId) {
@@ -983,6 +1024,67 @@ App.register("chatPage", function () {
 		renderHeader();
 		syncCompose();
 	}
+	function applyWindowMeta(meta) {
+		messageWindowMeta = normalizeWindowMeta(meta || {});
+		oldestLoadedId = Number(messageWindowMeta.oldest_id || 0);
+		newestLoadedId = Number(messageWindowMeta.newest_id || 0);
+	}
+	function replaceMessageWindow(nextMessages, meta, scrollBottom) {
+		messages = (nextMessages || []).map(normalizeMessage);
+		lastMessageId = messages.length
+			? Number(messages[messages.length - 1].id)
+			: 0;
+		applyWindowMeta(meta);
+		renderMessages(scrollBottom);
+		lastThreadScrollTop = threadBody.scrollTop;
+		nextNewerLoadUnlockScrollTop = null;
+	}
+	function prependOlderMessages(nextMessages, meta) {
+		const existingIds = new Set(
+			messages.map(function (message) {
+				return Number(message.id);
+			}),
+		);
+		const normalized = (nextMessages || [])
+			.map(normalizeMessage)
+			.filter(function (message) {
+				return !existingIds.has(Number(message.id));
+			});
+		if (!normalized.length) {
+			applyWindowMeta(meta);
+			return;
+		}
+		const previousHeight = threadBody.scrollHeight;
+		messages = normalized.concat(messages);
+		applyWindowMeta(meta);
+		renderMessages(false);
+		threadBody.scrollTop += threadBody.scrollHeight - previousHeight;
+		lastThreadScrollTop = threadBody.scrollTop;
+	}
+	function appendNewerMessages(nextMessages, meta) {
+		const existingIds = new Set(
+			messages.map(function (message) {
+				return Number(message.id);
+			}),
+		);
+		const normalized = (nextMessages || [])
+			.map(normalizeMessage)
+			.filter(function (message) {
+				return !existingIds.has(Number(message.id));
+			});
+		if (!normalized.length) {
+			applyWindowMeta(meta);
+			renderMessages(false);
+			return;
+		}
+		const previousScrollTop = threadBody.scrollTop;
+		messages = messages.concat(normalized);
+		applyWindowMeta(meta);
+		renderMessages(false);
+		threadBody.scrollTop = previousScrollTop;
+		lastThreadScrollTop = threadBody.scrollTop;
+		nextNewerLoadUnlockScrollTop = threadBody.scrollTop + 80;
+	}
 	function upsert(msg, scrollBottom) {
 		const m = normalizeMessage(msg);
 		const i = messages.findIndex(function (x) {
@@ -996,6 +1098,12 @@ App.register("chatPage", function () {
 		lastMessageId = messages.length
 			? Number(messages[messages.length - 1].id)
 			: 0;
+		oldestLoadedId = messages.length ? Number(messages[0].id) : 0;
+		newestLoadedId = lastMessageId;
+		messageWindowMeta.newest_id = newestLoadedId;
+		if (isTailWindowMode()) {
+			messageWindowMeta.has_newer = false;
+		}
 		renderMessages(scrollBottom);
 	}
 
@@ -1119,6 +1227,81 @@ App.register("chatPage", function () {
 				}
 			});
 	}
+	function buildMessagesUrl(params) {
+		const query = new URLSearchParams({
+			user_id: String(selectedUserId),
+		});
+		if (selectedIsSupport) query.set("support", "1");
+		Object.keys(params || {}).forEach(function (key) {
+			const value = params[key];
+			if (value === null || typeof value === "undefined" || value === "") return;
+			query.set(key, String(value));
+		});
+		return state.apiBase + "/messages.php?" + query.toString();
+	}
+	function fetchMessageWindow(params) {
+		if (!selectedUserId) return Promise.resolve(null);
+		return window.App.api.fetchJson(buildMessagesUrl(params)).then(function (response) {
+			return response && response.success ? response : null;
+		});
+	}
+	function loadOlderMessages() {
+		if (!selectedUserId || !oldestLoadedId || !messageWindowMeta.has_older || isLoadingOlderMessages) {
+			return Promise.resolve();
+		}
+		isLoadingOlderMessages = true;
+		return fetchMessageWindow({ before_id: oldestLoadedId, limit: 25 })
+			.then(function (response) {
+				if (!response) return;
+				prependOlderMessages(response.messages || [], response.meta || {});
+			})
+			.finally(function () {
+				isLoadingOlderMessages = false;
+			});
+	}
+	function loadNewerMessages() {
+		if (
+			!selectedUserId ||
+			!newestLoadedId ||
+			!messageWindowMeta.has_newer ||
+			isLoadingNewerMessages
+		) {
+			return Promise.resolve();
+		}
+		isLoadingNewerMessages = true;
+		return fetchMessageWindow({ after_id: newestLoadedId, limit: 25 })
+			.then(function (response) {
+				if (!response) return;
+				appendNewerMessages(response.messages || [], response.meta || {});
+			})
+			.finally(function () {
+				isLoadingNewerMessages = false;
+			});
+	}
+	function jumpToReplyMessage(messageId) {
+		const normalizedId = Number(messageId || 0);
+		if (!normalizedId || !selectedUserId) return;
+		const loadedTarget = messages.find(function (message) {
+			return Number(message.id) === normalizedId;
+		});
+		if (loadedTarget) {
+			scrollToMessage(normalizedId);
+			return;
+		}
+		if (isJumpingToReply) return;
+		isJumpingToReply = true;
+		fetchMessageWindow({ around_id: normalizedId, context: 25 })
+			.then(function (response) {
+				if (!response) return;
+				replaceMessageWindow(response.messages || [], response.meta || {}, false);
+				window.setTimeout(function () {
+					scrollToMessage(normalizedId);
+				}, 40);
+			})
+			.finally(function () {
+				isJumpingToReply = false;
+			});
+	}
 	function syncSelectedConversationFromList() {
 		if (!selectedUserId) return;
 		const currentConversation = conversations.find(function (conversation) {
@@ -1195,19 +1378,20 @@ App.register("chatPage", function () {
 		}
 		syncInFlight = true;
 		const shouldReplaceMessages = isConversationSwitching;
+		const shouldFetchTailUpdates =
+			shouldReplaceMessages ||
+			!selectedUserId ||
+			(!messageWindowMeta.has_newer && messageWindowMeta.mode !== "around");
 		const requestConversationKey = getSelectedConversationKey();
 		const req = [
 			window.App.api.fetchJson(state.apiBase + "/conversations.php"),
 		];
-		if (selectedUserId > 0)
+		if (selectedUserId > 0 && shouldFetchTailUpdates)
 			req.push(
 				window.App.api.fetchJson(
-					state.apiBase +
-						"/messages.php?user_id=" +
-						selectedUserId +
-						"&after_id=" +
-						lastMessageId +
-						(selectedIsSupport ? "&support=1" : ""),
+					shouldReplaceMessages
+						? buildMessagesUrl({ limit: 50 })
+						: buildMessagesUrl({ after_id: newestLoadedId || lastMessageId }),
 				),
 			);
 		return Promise.all(req)
@@ -1224,16 +1408,21 @@ App.register("chatPage", function () {
 					requestConversationKey === getSelectedConversationKey()
 				) {
 					if (shouldReplaceMessages) {
-						messages = (r[1].messages || []).map(normalizeMessage);
-						lastMessageId = r[1].last_id
-							? Number(r[1].last_id)
-							: messages.length
-								? Number(messages[messages.length - 1].id)
-								: 0;
+						replaceMessageWindow(
+							r[1].messages || [],
+							r[1].meta || {},
+							true,
+						);
 					} else {
 						(r[1].messages || []).forEach(function (m) {
 							upsert(m, true);
 						});
+						if (r[1].meta) {
+							messageWindowMeta.has_newer = !!r[1].meta.has_newer;
+							if (r[1].meta.newest_id) {
+								newestLoadedId = Number(r[1].meta.newest_id);
+							}
+						}
 					}
 				}
 				rerender(false);
@@ -1258,6 +1447,9 @@ App.register("chatPage", function () {
 		}
 		stream = new EventSource(state.apiBase + "/stream.php?" + p.toString());
 		stream.addEventListener("messages", function (e) {
+			if (messageWindowMeta.has_newer) {
+				return;
+			}
 			const x = JSON.parse(e.data || "{}");
 			(x.messages || []).forEach(function (m) {
 				upsert(m, true);
@@ -1335,13 +1527,24 @@ App.register("chatPage", function () {
 
 	function sendTyping() {
 		if (!selectedUserId) return;
+		const textValue = (messageInput && messageInput.value) || "";
+		if (!textValue.trim()) return;
+		const now = Date.now();
+		if (
+			lastTypingPartnerId === selectedUserId &&
+			now - lastTypingSentAt < 2500
+		) {
+			return;
+		}
+		lastTypingPartnerId = selectedUserId;
+		lastTypingSentAt = now;
 		if (typingNotifyTimer) window.clearTimeout(typingNotifyTimer);
 		typingNotifyTimer = window.setTimeout(function () {
 			typingNotifyTimer = null;
 		}, 2000);
 		const fd = new FormData();
 		fd.append("partner_id", String(selectedUserId));
-		window.App.api.postForm(API_BASE_URL + "/chat/typing.php", fd);
+		window.App.api.postForm(CHAT_API_BASE + "/chat/typing.php", fd);
 	}
 
 	function openConversation(userId, isSupportConversationFlag) {
@@ -1378,6 +1581,11 @@ App.register("chatPage", function () {
 				: normalizeUser({ id: id, full_name: "Пользователь" });
 			selectedListingId = null;
 			lastMessageId = 0;
+			oldestLoadedId = 0;
+			newestLoadedId = 0;
+			messageWindowMeta = normalizeWindowMeta({});
+			lastThreadScrollTop = 0;
+			nextNewerLoadUnlockScrollTop = null;
 			isConversationSwitching = true;
 			replyTarget = null;
 			editTargetId = 0;
@@ -1534,7 +1742,7 @@ App.register("chatPage", function () {
 			return;
 		}
 
-		if (action === "jump") return scrollToMessage(id);
+		if (action === "jump") return jumpToReplyMessage(id);
 		if (action === "reply") return setReply(id);
 		if (action === "edit") return setEdit(id);
 		if (action === "delete")
@@ -1548,7 +1756,7 @@ App.register("chatPage", function () {
 		const a = b.dataset.action;
 		const id = Number(b.dataset.messageId || contextMenuMessageId || 0);
 		closeContextMenu();
-		if (a === "jump") scrollToMessage(id);
+		if (a === "jump") jumpToReplyMessage(id);
 		if (a === "reply") setReply(contextMenuMessageId);
 		if (a === "edit") setEdit(contextMenuMessageId);
 		if (a === "delete")
@@ -1670,7 +1878,43 @@ App.register("chatPage", function () {
 		closeContextMenu();
 		if (!isMobile()) page.classList.remove("is-sidebar-open");
 	});
-	threadBody.addEventListener("scroll", closeContextMenu);
+	threadBody.addEventListener("scroll", function () {
+		closeContextMenu();
+		const currentScrollTop = threadBody.scrollTop;
+		const isScrollingDown = currentScrollTop > lastThreadScrollTop;
+		if (
+			nextNewerLoadUnlockScrollTop !== null &&
+			currentScrollTop >= nextNewerLoadUnlockScrollTop
+		) {
+			nextNewerLoadUnlockScrollTop = null;
+		}
+		if (threadBody.scrollTop < 120) {
+			loadOlderMessages();
+		}
+		const distanceToBottom =
+			threadBody.scrollHeight - threadBody.scrollTop - threadBody.clientHeight;
+		if (
+			isScrollingDown &&
+			nextNewerLoadUnlockScrollTop === null &&
+			distanceToBottom < 120
+		) {
+			loadNewerMessages();
+		}
+		lastThreadScrollTop = currentScrollTop;
+		updateJumpBottomButton();
+	});
+	if (jumpBottomButton) {
+		jumpBottomButton.addEventListener("click", function () {
+			if (messageWindowMeta.has_newer || messages.length > 100) {
+				fetchMessageWindow({ limit: 50 }).then(function (response) {
+					if (!response) return;
+					replaceMessageWindow(response.messages || [], response.meta || {}, true);
+				});
+				return;
+			}
+			threadBody.scrollTo({ top: threadBody.scrollHeight, behavior: "smooth" });
+		});
+	}
 	document.addEventListener("visibilitychange", function () {
 		if (document.visibilityState === "visible") syncFromServer();
 	});

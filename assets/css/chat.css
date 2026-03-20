@@ -379,6 +379,7 @@ body:has(.chat-page) .container {
 	grid-template-rows: auto minmax(0, 1fr) auto;
 	overflow: hidden;
 	min-height: 0;
+	position: relative;
 }
 
 .chat-thread-header {
@@ -402,7 +403,7 @@ body:has(.chat-page) .container {
 }
 .chat-thread-name {
 	margin: 0;
-	font-size: 20px;
+	font-size: 18px;
 	color: var(--chat-text);
 }
 .chat-thread-status-row {
@@ -568,6 +569,31 @@ body:has(.chat-page) .container {
 }
 .chat-context-menu[hidden] {
 	display: none;
+}
+
+.chat-jump-bottom {
+	position: absolute;
+	right: 18px;
+	bottom: 84px;
+	z-index: 6;
+	border: 0;
+	border-radius: 999px;
+	background: rgba(59, 97, 209, 0.95);
+	color: #fff;
+	padding: 10px 14px;
+	font-size: 13px;
+	font-weight: 700;
+	box-shadow: 0 14px 24px rgba(15, 31, 55, 0.2);
+	opacity: 0;
+	transform: translateY(10px);
+	pointer-events: none;
+	transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.chat-jump-bottom.is-visible {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
 }
 
 .chat-context-menu-item {
@@ -1125,6 +1151,11 @@ body:has(.chat-page) .container {
 	}
 	.chat-context-menu.is-outgoing {
 		right: 0;
+	}
+
+	.chat-jump-bottom {
+		right: 12px;
+		bottom: 74px;
 	}
 }
 

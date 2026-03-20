@@ -15,6 +15,15 @@ $selectedUserId = isset($_GET['user_id']) ? (int) $_GET['user_id'] : 0;
 $selectedListingId = isset($_GET['listing_id']) ? (int) $_GET['listing_id'] : 0;
 $selectedIsSupport = !empty($_GET['support']);
 $selectedMessages = [];
+$selectedMessagesMeta = [
+	'mode' => 'latest',
+	'loaded_count' => 0,
+	'oldest_id' => 0,
+	'newest_id' => 0,
+	'has_older' => false,
+	'has_newer' => false,
+	'anchor_message_id' => null,
+];
 $readIds = [];
 $selectedSupportLockDenied = null;
 
@@ -59,7 +68,9 @@ if ($selectedIsSupport && $currentUserIsAdmin && $selectedUserId > 0 && $selecte
 
 if ($selectedUserId > 0 && $selectedUserId !== $currentUserId && $selectedUser !== null) {
 	$readIds = $chatService->markConversationAsRead($currentUserId, $selectedUserId, $selectedIsSupport);
-	$selectedMessages = $chatService->getMessages($currentUserId, $selectedUserId, 0, $selectedIsSupport);
+	$window = $chatService->getMessagesWindow($currentUserId, $selectedUserId, ['limit' => 50], $selectedIsSupport);
+	$selectedMessages = $window['messages'] ?? [];
+	$selectedMessagesMeta = $window['meta'] ?? $selectedMessagesMeta;
 
 	if (!empty($readIds)) {
 		$notifyUserIds = [$selectedUserId];
@@ -110,6 +121,7 @@ $chatBootstrap = [
 	'selectedUser' => $selectedUser,
 	'conversations' => $conversations,
 	'messages' => $selectedMessages,
+	'messageWindowMeta' => $selectedMessagesMeta,
 	'onlineUserIds' => $initialOnlineIds,
 	'apiBase' => API_URL . '/chat',
 	'ws' => [
@@ -147,6 +159,7 @@ require_once __DIR__ . '/includes/header.php';
 		<section class="chat-main" id="chat-main">
 			<div class="chat-thread-header" id="chat-thread-header"></div>
 			<div class="chat-thread-body" id="chat-thread-body"></div>
+			<button type="button" class="chat-jump-bottom" id="chat-jump-bottom">Вниз</button>
 			<div class="chat-context-menu" id="chat-context-menu" hidden></div>
 			<form class="chat-compose" id="chat-compose-form">
 				<input type="hidden" name="user_id" id="chat-user-id" value="<?php echo $selectedUserId > 0 ? $selectedUserId : ''; ?>">

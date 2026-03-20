@@ -10,6 +10,10 @@ class GetMessagesAction
 
 		$partnerId = isset($_GET['user_id']) ? (int) $_GET['user_id'] : 0;
 		$afterId = isset($_GET['after_id']) ? (int) $_GET['after_id'] : 0;
+		$beforeId = isset($_GET['before_id']) ? (int) $_GET['before_id'] : 0;
+		$aroundId = isset($_GET['around_id']) ? (int) $_GET['around_id'] : 0;
+		$limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 50;
+		$contextSize = isset($_GET['context']) ? (int) $_GET['context'] : 25;
 		$isSupport = !empty($_GET['support']);
 
 		if ($partnerId <= 0) {
@@ -20,7 +24,19 @@ class GetMessagesAction
 			$service = new ChatService();
 			$currentUserId = (int) $_SESSION['user_id'];
 			$readIds = $service->markConversationAsRead($currentUserId, $partnerId, $isSupport);
-			$messages = $service->getMessages((int) $_SESSION['user_id'], $partnerId, $afterId, $isSupport);
+			$window = $service->getMessagesWindow(
+				$currentUserId,
+				$partnerId,
+				[
+					'after_id' => $afterId,
+					'before_id' => $beforeId,
+					'around_id' => $aroundId,
+					'limit' => $limit,
+					'context' => $contextSize,
+				],
+				$isSupport
+			);
+			$messages = $window['messages'];
 
 			if (!empty($readIds)) {
 				$notifyUserIds = [$partnerId];
@@ -47,6 +63,7 @@ class GetMessagesAction
 				'success' => true,
 				'messages' => $messages,
 				'last_id' => empty($messages) ? $afterId : (int) end($messages)['id'],
+				'meta' => $window['meta'] ?? [],
 			]);
 		} catch (InvalidArgumentException $exception) {
 			JsonResponse::send(['success' => false, 'message' => $exception->getMessage()], 422);

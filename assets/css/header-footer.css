@@ -29,13 +29,12 @@
 
 .logo-img {
 	height: 32px;
-	margin: 0 5px;
 }
 
 .main-navigation {
 	display: flex;
 	align-items: center;
-	gap: 30px;
+	gap: 20px;
 	flex-grow: 1;
 	justify-content: flex-end;
 	margin-left: 30px;
@@ -45,7 +44,7 @@
 	text-decoration: none;
 	color: #fff;
 	font-weight: 500;
-	font-size: 16px;
+	font-size: 14px;
 	line-height: 20px;
 	display: flex;
 	align-items: center;
@@ -108,7 +107,7 @@
 .site-footer {
 	background-color: var(--primary-color);
 	color: white;
-	padding: 40px 0;
+	padding: 20px 0;
 	margin-top: 60px;
 }
 
@@ -128,7 +127,7 @@
 
 .footer-copyright {
 	font-family: "Montserrat", sans-serif;
-	font-size: 16px;
+	font-size: 12px;
 }
 
 /* Адаптивные стили */
@@ -214,5 +213,49 @@
 	}
 	.main-navigation {
 		top: calc(100% + 10px);
+	}
+}
+
+.global-scroll-top {
+	position: fixed;
+	right: 20px;
+	bottom: 20px;
+	width: 44px;
+	height: 44px;
+	border: 0;
+	border-radius: 50%;
+	background: var(--primary-color);
+	color: #fff;
+	font-size: 22px;
+	line-height: 1;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+	opacity: 0;
+	transform: translateY(10px);
+	pointer-events: none;
+	transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+	z-index: 1200;
+}
+
+.global-scroll-top.is-visible {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+}
+
+.global-scroll-top:hover {
+	background: #2745aa;
+}
+
+@media (max-width: 640px) {
+	.global-scroll-top {
+		right: 14px;
+		bottom: 14px;
+		width: 40px;
+		height: 40px;
+		font-size: 20px;
 	}
 }

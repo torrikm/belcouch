@@ -213,7 +213,7 @@ try {
 				<?php if (!empty($rules)): ?>
 					<?php foreach ($rules as $rule): ?>
 						<div class="rule-item">
-							<img src="../assets/img/icons/<?php echo $rule['icon']; ?>" alt="<?php echo $rule['name']; ?>">
+							<img src="../assets/img/icons/rules/<?php echo $rule['icon']; ?>" alt="<?php echo $rule['name']; ?>">
 							<span><?php echo htmlspecialchars($rule['name']); ?></span>
 						</div>
 					<?php endforeach; ?>
@@ -229,7 +229,7 @@ try {
 				<?php if (!empty($amenities)): ?>
 					<?php foreach ($amenities as $amenity): ?>
 						<div class="amenity-item">
-							<img src="../assets/img/icons/<?php echo $amenity['icon']; ?>"
+							<img src="../assets/img/icons/amenities<?php echo $amenity['icon']; ?>"
 								alt="<?php echo $amenity['name']; ?>">
 							<span><?php echo htmlspecialchars($amenity['name']); ?></span>
 						</div>

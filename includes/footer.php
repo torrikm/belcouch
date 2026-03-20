@@ -18,6 +18,16 @@
 	</div>
 </footer>
 
+<button
+	id="global-scroll-top"
+	class="global-scroll-top"
+	type="button"
+	aria-label="Вернуться наверх"
+	title="Наверх"
+>
+	↑
+</button>
+
 <!-- Модальное окно входа -->
 <div id="login-modal" class="modal-overlay">
 	<div class="modal auth-modal">
@@ -112,6 +122,7 @@
 <script src="<?php echo $root_path; ?>assets/js/city-autocomplete.js"></script>
 <script src="<?php echo $root_path; ?>assets/js/mobile-menu.js"></script>
 <script src="<?php echo $root_path; ?>assets/js/modal.js"></script>
+<script src="<?php echo $root_path; ?>assets/js/scroll-top.js"></script>
 
 <script src="<?php echo $root_path; ?>assets/js/auth.js"></script>
 <script src="<?php echo $root_path; ?>assets/js/custom-select.js"></script>
