@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-03-21T19:47:00.000Z" agent="5.0" etag="def456" version="21.6.5" type="device">
+  <diagram name="BelCouch User Roles" id="belcouch-roles">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Гость (человечек) -->
+        <mxCell id="guest-shape" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="100" y="80" width="30" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guest-label" value="ГОСТЬ&#xa;(неавторизованный)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="150" width="90" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Возможности гостя (овалы) -->
+        <mxCell id="guest-view-oval" value="Просмотр объявлений" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="220" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guest-search-oval" value="Поиск и фильтрация" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guest-reviews-oval" value="Чтение отзывов" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="340" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guest-register-oval" value="Регистрация" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="400" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Авторизованный пользователь (человечек) -->
+        <mxCell id="user-shape" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="400" y="80" width="30" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-label" value="ПОЛЬЗОВАТЕЛЬ&#xa;(авторизованный)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="370" y="150" width="90" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Возможности пользователя (овалы) -->
+        <mxCell id="user-profile-oval" value="Личный профиль" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="310" y="220" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-favorites-oval" value="Избранное" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="310" y="280" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-chat-oval" value="Чат с владельцами" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="310" y="340" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-reviews-oval" value="Отзывы о владельцах" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="310" y="400" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-verification-oval" value="Верификация" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="310" y="460" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Владелец жилья (человечек) -->
+        <mxCell id="owner-shape" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="700" y="80" width="30" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-label" value="ВЛАДЕЛЕЦ&#xa;жилья" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="680" y="150" width="70" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Возможности владельца (овалы) -->
+        <mxCell id="owner-listings-oval" value="Размещение объявлений" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="610" y="220" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-manage-oval" value="Управление объявлениями" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="610" y="280" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-applications-oval" value="Обработка заявок" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="610" y="340" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-stats-oval" value="Статистика объявлений" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="610" y="400" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Администратор (человечек) -->
+        <mxCell id="admin-shape" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="80" width="30" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-label" value="АДМИНИСТРАТОР" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="970" y="150" width="90" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Возможности администратора (овалы) -->
+        <mxCell id="admin-users-oval" value="Управление пользователями" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="910" y="220" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-moderation-oval" value="Модерация контента" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="910" y="280" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-verification-oval" value="Верификация пользователей" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="910" y="340" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-support-oval" value="Техническая поддержка" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="910" y="400" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-stats-oval" value="Статистика и аналитика" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="910" y="460" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Стрелки наследования -->
+        <mxCell id="inheritance1" value="include" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#82b366;fontSize=10;fontStyle=2;" edge="1" parent="1" source="user-shape" target="guest-shape">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="400" y="110" as="sourcePoint" />
+            <mxPoint x="130" y="110" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="400" y="110" />
+              <mxPoint x="400" y="50" />
+              <mxPoint x="130" y="50" />
+              <mxPoint x="130" y="110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="inheritance2" value="include" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d6b656;fontSize=10;fontStyle=2;" edge="1" parent="1" source="owner-shape" target="user-shape">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="110" as="sourcePoint" />
+            <mxPoint x="430" y="110" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="700" y="110" />
+              <mxPoint x="700" y="30" />
+              <mxPoint x="430" y="30" />
+              <mxPoint x="430" y="110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="inheritance3" value="include" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#9673a6;fontSize=10;fontStyle=2;" edge="1" parent="1" source="admin-shape" target="owner-shape">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1000" y="110" as="sourcePoint" />
+            <mxPoint x="730" y="110" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1000" y="110" />
+              <mxPoint x="1000" y="10" />
+              <mxPoint x="730" y="10" />
+              <mxPoint x="730" y="110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Стрелки от человечков к возможностям -->
+        <mxCell id="guest-to-view" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#b85450;" edge="1" parent="1" source="guest-shape" target="guest-view-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guest-to-search" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#b85450;" edge="1" parent="1" source="guest-shape" target="guest-search-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guest-to-reviews" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#b85450;" edge="1" parent="1" source="guest-shape" target="guest-reviews-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guest-to-register" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#b85450;" edge="1" parent="1" source="guest-shape" target="guest-register-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-to-profile" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#82b366;" edge="1" parent="1" source="user-shape" target="user-profile-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-to-favorites" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#82b366;" edge="1" parent="1" source="user-shape" target="user-favorites-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-to-chat" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#82b366;" edge="1" parent="1" source="user-shape" target="user-chat-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-to-reviews" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#82b366;" edge="1" parent="1" source="user-shape" target="user-reviews-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-to-verification" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#82b366;" edge="1" parent="1" source="user-shape" target="user-verification-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-to-listings" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#d6b656;" edge="1" parent="1" source="owner-shape" target="owner-listings-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-to-manage" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#d6b656;" edge="1" parent="1" source="owner-shape" target="owner-manage-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-to-applications" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#d6b656;" edge="1" parent="1" source="owner-shape" target="owner-applications-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-to-stats" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#d6b656;" edge="1" parent="1" source="owner-shape" target="owner-stats-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-to-users" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#9673a6;" edge="1" parent="1" source="admin-shape" target="admin-users-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-to-moderation" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#9673a6;" edge="1" parent="1" source="admin-shape" target="admin-moderation-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-to-verification" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#9673a6;" edge="1" parent="1" source="admin-shape" target="admin-verification-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-to-support" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#9673a6;" edge="1" parent="1" source="admin-shape" target="admin-support-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-to-stats" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#9673a6;" edge="1" parent="1" source="admin-shape" target="admin-stats-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Поток работы внизу -->
+        <mxCell id="workflow-title" value="ПОТОК РАБОТЫ" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="570" width="200" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow1-oval" value="1. Поиск жилья" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="200" y="620" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow2-oval" value="2. Регистрация" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="340" y="620" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow3-oval" value="3. Контакт с владельцем" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="480" y="620" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow4-oval" value="4. Заявка" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="620" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow5-oval" value="5. Верификация" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="780" y="620" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow6-oval" value="6. Модерация" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="920" y="620" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Стрелки потока работы -->
+        <mxCell id="flow1" style="edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="workflow1-oval" target="workflow2-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow2" style="edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="workflow2-oval" target="workflow3-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow3" style="edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="workflow3-oval" target="workflow4-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow4" style="edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="workflow4-oval" target="workflow5-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow5" style="edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="workflow5-oval" target="workflow6-oval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

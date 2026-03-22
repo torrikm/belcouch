@@ -110,8 +110,10 @@ try {
 							<div class="housing-section-header">
 								<h2 class="housing-section-title">Объявление пользователя</h2>
 								<div class="housing-rating-badge">
-									<span class="housing-rating-value"><?php echo number_format((float) ($listing['avg_rating'] ?? 0), 2); ?></span>
-									<img src="../assets/img/icons/star-filled.svg" alt="Рейтинг жилья" class="housing-rating-icon">
+									<span
+										class="housing-rating-value"><?php echo number_format((float) ($listing['avg_rating'] ?? 0), 2); ?></span>
+									<img src="../assets/img/icons/star-filled.svg" alt="Рейтинг жилья"
+										class="housing-rating-icon">
 								</div>
 							</div>
 						<?php endif; ?>
@@ -142,7 +144,8 @@ try {
 												<?php endforeach; ?>
 											</div>
 											<?php if ($hasMoreThumbs): ?>
-												<button type="button" class="thumbnails-toggle" data-state="collapsed">Показать все фото</button>
+												<button type="button" class="thumbnails-toggle" data-state="collapsed">Показать все
+													фото</button>
 											<?php endif; ?>
 										<?php endif; ?>
 									</div>
@@ -165,7 +168,8 @@ try {
 										<div class="listing-details listing-details--compact">
 											<div class="detail-item">
 												<strong>Тип:</strong>
-												<span class="detail-value"><?php echo htmlspecialchars($listing['property_type_name']); ?></span>
+												<span
+													class="detail-value"><?php echo htmlspecialchars($listing['property_type_name']); ?></span>
 											</div>
 
 											<div class="detail-item">
@@ -175,13 +179,15 @@ try {
 
 											<div class="detail-item detail-item--stacked">
 												<strong>Время пребывания:</strong>
-												<span class="detail-value"><?php echo htmlspecialchars($duration_name); ?></span>
+												<span
+													class="detail-value"><?php echo htmlspecialchars($duration_name); ?></span>
 											</div>
 
 											<div class="detail-item">
 												<strong>Примечание:</strong>
 												<?php if (!empty($listing['notes'])): ?>
-													<span class="detail-value detail-value--notes"><?php echo htmlspecialchars($listing['notes']); ?></span>
+													<span
+														class="detail-value detail-value--notes"><?php echo htmlspecialchars($listing['notes']); ?></span>
 												<?php else: ?>
 													<span class="detail-value detail-value--muted">нет</span>
 												<?php endif; ?>
@@ -213,7 +219,8 @@ try {
 				<?php if (!empty($rules)): ?>
 					<?php foreach ($rules as $rule): ?>
 						<div class="rule-item">
-							<img src="../assets/img/icons/rules/<?php echo $rule['icon']; ?>" alt="<?php echo $rule['name']; ?>">
+							<img src="../assets/img/icons/rules/<?php echo $rule['icon']; ?>"
+								alt="<?php echo $rule['name']; ?>">
 							<span><?php echo htmlspecialchars($rule['name']); ?></span>
 						</div>
 					<?php endforeach; ?>
@@ -229,7 +236,7 @@ try {
 				<?php if (!empty($amenities)): ?>
 					<?php foreach ($amenities as $amenity): ?>
 						<div class="amenity-item">
-							<img src="../assets/img/icons/amenities<?php echo $amenity['icon']; ?>"
+							<img src="../assets/img/icons/amenities/<?php echo $amenity['icon']; ?>"
 								alt="<?php echo $amenity['name']; ?>">
 							<span><?php echo htmlspecialchars($amenity['name']); ?></span>
 						</div>
@@ -251,8 +258,8 @@ try {
 							<div class="review-item-header">
 								<div class="reviewer-info">
 									<?php if ($review['avatar_image']): ?>
-										<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $review['user_id']; ?>" alt="Аватар"
-											class="reviewer-avatar">
+										<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $review['user_id']; ?>"
+											alt="Аватар" class="reviewer-avatar">
 									<?php else: ?>
 										<div class="reviewer-avatar reviewer-avatar-placeholder">
 											<?php echo mb_substr($review['first_name'], 0, 1) . mb_substr($review['last_name'], 0, 1); ?>
@@ -322,14 +329,16 @@ try {
 			<div class="modal-header">
 				<h2 id="housing-modal-title" class="modal-title">Добавить объявление</h2>
 				<button type="button" class="modal-close">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="18" y1="6" x2="6" y2="18"></line>
 						<line x1="6" y1="6" x2="18" y2="18"></line>
 					</svg>
 				</button>
 			</div>
 			<div class="modal-body">
-				<form id="housing-form" method="post" enctype="multipart/form-data" action="<?php echo API_URL; ?>/listings/add_listing.php">
+				<form id="housing-form" method="post" enctype="multipart/form-data"
+					action="<?php echo API_URL; ?>/listings/add_listing.php">
 					<input type="hidden" id="listing_id" name="listing_id" value="">
 
 					<div class="form-group">
@@ -444,7 +453,7 @@ try {
 <?php endif; ?>
 
 <script>
-	document.addEventListener('DOMContentLoaded', function() {
+	document.addEventListener('DOMContentLoaded', function () {
 		const mainImage = document.getElementById('main-gallery-image');
 		const thumbnails = document.querySelectorAll('.thumbnail');
 		const prevButton = document.querySelector('.gallery-nav.prev');
@@ -469,19 +478,19 @@ try {
 		}
 
 		if (prevButton) {
-			prevButton.addEventListener('click', function() {
+			prevButton.addEventListener('click', function () {
 				updateMainImage(currentIndex - 1);
 			});
 		}
 
 		if (nextButton) {
-			nextButton.addEventListener('click', function() {
+			nextButton.addEventListener('click', function () {
 				updateMainImage(currentIndex + 1);
 			});
 		}
 
 		thumbnails.forEach(thumbnail => {
-			thumbnail.addEventListener('click', function() {
+			thumbnail.addEventListener('click', function () {
 				const index = parseInt(this.getAttribute('data-index'));
 				updateMainImage(index);
 			});

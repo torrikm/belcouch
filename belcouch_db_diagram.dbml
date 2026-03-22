@@ -1,0 +1,195 @@
+// BelCouch Database Schema for dbdiagram.io
+// Generated from MySQL database
+
+Table users {
+  id int [pk]
+  email varchar(255) [unique]
+  password varchar(255)
+  first_name varchar(100)
+  last_name varchar(100)
+  role enum('user', 'admin') [default: 'user']
+  is_verified boolean [default: false]
+  avatar_path varchar(255)
+  created_at datetime
+  updated_at datetime
+}
+
+Table user_details {
+  id int [pk]
+  user_id int [ref: > users.id]
+  bio text
+  phone varchar(20)
+  region_id int [ref: > regions.id]
+  birth_date date
+  gender enum('male', 'female', 'other')
+  created_at datetime
+  updated_at datetime
+}
+
+Table user_ratings {
+  id int [pk]
+  user_id int [ref: > users.id]
+  rater_id int [ref: > users.id]
+  rating int
+  comment text
+  created_at datetime
+  updated_at datetime
+}
+
+Table verification_requests {
+  id int [pk]
+  user_id int [ref: > users.id]
+  document_image longblob
+  status enum('pending', 'approved', 'rejected') [default: 'pending']
+  reviewed_by int [ref: > users.id]
+  reviewed_at datetime
+  created_at datetime
+  updated_at datetime
+}
+
+Table regions {
+  id int [pk]
+  name varchar(100) [unique]
+  code varchar(50) [unique]
+}
+
+Table property_types {
+  id int [pk]
+  name varchar(100) [unique]
+}
+
+Table stay_durations {
+  id int [pk]
+  name varchar(100) [unique]
+  days int
+}
+
+Table listings {
+  id int [pk]
+  user_id int [ref: > users.id]
+  title varchar(255)
+  description text
+  price decimal(10,2)
+  address text
+  region_id int [ref: > regions.id]
+  property_type_id int [ref: > property_types.id]
+  stay_duration_id int [ref: > stay_durations.id]
+  bedrooms int
+  bathrooms int
+  max_guests int
+  is_available boolean [default: true]
+  created_at datetime
+  updated_at datetime
+}
+
+Table listing_amenities {
+  id int [pk]
+  listing_id int [ref: > listings.id]
+  amenity_id int [ref: > amenities.id]
+}
+
+Table amenities {
+  id int [pk]
+  name varchar(255)
+  icon varchar(100)
+}
+
+Table listing_rules {
+  id int [pk]
+  listing_id int [ref: > listings.id]
+  rule_id int [ref: > rules.id]
+}
+
+Table rules {
+  id int [pk]
+  name varchar(255)
+  icon varchar(100)
+}
+
+Table listing_ratings {
+  id int [pk]
+  listing_id int [ref: > listings.id]
+  user_id int [ref: > users.id]
+  rating int
+  comment text
+  created_at datetime
+  updated_at datetime
+}
+
+Table favorites {
+  id int [pk]
+  user_id int [ref: > users.id]
+  listing_id int [ref: > listings.id]
+  created_at datetime
+  indexes {
+    (user_id, listing_id) [unique]
+  }
+}
+
+Table messages {
+  id int [pk]
+  sender_id int [ref: > users.id]
+  receiver_id int [ref: > users.id]
+  listing_id int [ref: > listings.id]
+  message text
+  image_path varchar(255)
+  is_read boolean [default: false]
+  reply_to_message_id int [ref: > messages.id]
+  is_support boolean [default: false]
+  support_user_id int [ref: > users.id]
+  deleted_at datetime
+  edited_at datetime
+  created_at datetime
+  indexes {
+    (sender_id, receiver_id, id)
+    (receiver_id, sender_id, is_read, id)
+  }
+}
+
+Table message_attachments {
+  id int [pk]
+  message_id int [ref: > messages.id]
+  file_path varchar(255)
+  file_type varchar(50)
+  file_size int
+  sort_order int [default: 0]
+  indexes {
+    (message_id, sort_order, id)
+  }
+}
+
+Table support_chat_locks {
+  support_user_id int [pk, ref: > users.id]
+  admin_user_id int [ref: > users.id]
+  expires_at datetime
+  created_at datetime
+  indexes {
+    (admin_user_id)
+    (expires_at)
+  }
+}
+
+Table slider_images {
+  id int [pk]
+  title varchar(255)
+  image mediumblob
+  created_at datetime
+}
+
+// Enums
+enum users.role {
+  user
+  admin
+}
+
+enum user_details.gender {
+  male
+  female
+  other
+}
+
+enum verification_requests.status {
+  pending
+  approved
+  rejected
+}

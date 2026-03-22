@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-03-21T19:37:00.000Z" agent="5.0" etag="abc123" version="21.6.5" type="device">
+  <diagram name="BelCouch User Roles" id="belcouch-roles">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Гость (неавторизованный пользователь) -->
+        <mxCell id="guest" value="НЕЗАРЕГИСТРИРОВАННЫЙ&#xa;ПОЛЬЗОВАТЕЛЬ (ГОСТЬ)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="180" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Возможности гостя -->
+        <mxCell id="guest-features" value="Возможности гостя:" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="150" width="200" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guest-view" value="• Просмотр объявлений" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="190" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guest-search" value="• Поиск и фильтрация" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="230" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guest-reviews" value="• Чтение отзывов" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="270" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guest-register" value="• Регистрация" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="310" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Авторизованный пользователь -->
+        <mxCell id="user" value="АВТОРИЗОВАННЫЙ&#xa;ПОЛЬЗОВАТЕЛЬ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="50" width="180" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Возможности пользователя -->
+        <mxCell id="user-features" value="Возможности пользователя:" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="150" width="200" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-guest-include" value="include" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="280" y="85" width="60" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-profile" value="• Личный профиль" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="360" y="190" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-favorites" value="• Избранное" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="360" y="230" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-chat" value="• Чат с владельцами" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="360" y="270" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-reviews" value="• Отзывы о владельцах" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="360" y="310" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-verification" value="• Верификация" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="360" y="350" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Владелец -->
+        <mxCell id="owner" value="ВЛАДЕЛЕЦ ЖИЛЬЯ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="650" y="50" width="180" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Возможности владельца -->
+        <mxCell id="owner-features" value="Возможности владельца:" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="650" y="150" width="200" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-user-include" value="include" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="580" y="85" width="60" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-listings" value="• Размещение объявлений" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="190" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-manage" value="• Управление объявлениями" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="230" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-applications" value="• Обработка заявок" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="270" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="owner-stats" value="• Статистика объявлений" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="310" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Администратор -->
+        <mxCell id="admin" value="АДМИНИСТРАТОР" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="50" width="180" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Возможности администратора -->
+        <mxCell id="admin-features" value="Возможности администратора:" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="150" width="200" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-user-include" value="include" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="880" y="85" width="60" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-users" value="• Управление пользователями" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="960" y="190" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-moderation" value="• Модерация контента" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="960" y="230" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-verification" value="• Верификация пользователей" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="960" y="270" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-support" value="• Техническая поддержка" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="960" y="310" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-stats" value="• Статистика и аналитика" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="960" y="350" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Ограничения -->
+        <mxCell id="restrictions" value="ОГРАНИЧЕНИЯ ДОСТУПА" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="450" width="300" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="guest-restrictions" value="Гость:&#xa;• Нет доступа к личному кабинету&#xa;• Нельзя создавать объявления&#xa;• Нельзя писать сообщения" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="50" y="500" width="200" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-restrictions" value="Пользователь:&#xa;• Только свои объявления&#xa;• Только свои данные профиля&#xa;• Ограниченный доступ к админке" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="350" y="500" width="200" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin-restrictions" value="Администратор:&#xa;• Полный доступ ко всем функциям&#xa;• Управление системой&#xa;• Модерация всего контента" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="650" y="500" width="200" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Стрелки наследования -->
+        <mxCell id="edge1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="user" target="guest">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="350" y="90" as="sourcePoint" />
+            <mxPoint x="230" y="90" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="edge2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d6b656;" edge="1" parent="1" source="owner" target="user">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="650" y="90" as="sourcePoint" />
+            <mxPoint x="530" y="90" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="edge3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#9673a6;" edge="1" parent="1" source="admin" target="owner">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="950" y="90" as="sourcePoint" />
+            <mxPoint x="830" y="90" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Поток работы -->
+        <mxCell id="workflow" value="ПОТОК РАБОТЫ" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="450" width="200" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow1" value="1. Поиск жилья" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="900" y="500" width="120" height="25" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow2" value="2. Регистрация" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="900" y="535" width="120" height="25" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow3" value="3. Контакт с владельцем" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="900" y="570" width="120" height="25" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow4" value="4. Заявка на проживание" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="500" width="120" height="25" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow5" value="5. Верификация" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="535" width="120" height="25" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="workflow6" value="6. Модерация" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="570" width="120" height="25" as="geometry" />
+        </mxCell>
+        
+        <!-- Стрелки потока -->
+        <mxCell id="flow1" style="edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="workflow1" target="workflow2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow2" style="edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="workflow2" target="workflow3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow3" style="edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="workflow3" target="workflow4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow4" style="edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="workflow4" target="workflow5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow5" style="edgeStyle=elbowEdgeStyle;elbow=vertical;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="workflow5" target="workflow6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
