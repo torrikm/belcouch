@@ -13,12 +13,51 @@ App.register("customSelect", function () {
 		return option ? option.textContent.trim() : "";
 	}
 
+	function getScrollContainer(element) {
+		let parent = element.parentElement;
+		while (parent) {
+			const style = window.getComputedStyle(parent);
+			const overflowY = style.overflowY;
+			if (
+				overflowY === "auto" ||
+				overflowY === "scroll" ||
+				overflowY === "overlay"
+			) {
+				return parent;
+			}
+			parent = parent.parentElement;
+		}
+		return null;
+	}
+
+	function updateOpenDirection(wrapper, list) {
+		const wrapperRect = wrapper.getBoundingClientRect();
+		const scrollContainer = getScrollContainer(wrapper);
+		const listHeight = Math.min(list.scrollHeight || 0, 260) || 200;
+
+		let spaceBelow = window.innerHeight - wrapperRect.bottom;
+		let spaceAbove = wrapperRect.top;
+
+		if (scrollContainer) {
+			const containerRect = scrollContainer.getBoundingClientRect();
+			spaceBelow = containerRect.bottom - wrapperRect.bottom;
+			spaceAbove = wrapperRect.top - containerRect.top;
+		}
+
+		if (spaceBelow < listHeight && spaceAbove > spaceBelow) {
+			wrapper.classList.add("is-open-upward");
+		} else {
+			wrapper.classList.remove("is-open-upward");
+		}
+	}
+
 	function closeAll(exceptWrapper) {
 		document
 			.querySelectorAll(".custom-select-wrapper.is-open")
 			.forEach((wrapper) => {
 				if (wrapper !== exceptWrapper) {
 					wrapper.classList.remove("is-open");
+					// is-open-upward оставляем для корректной анимации закрытия
 				}
 			});
 	}
@@ -119,6 +158,11 @@ App.register("customSelect", function () {
 		trigger.addEventListener("click", function () {
 			const willOpen = !wrapper.classList.contains("is-open");
 			closeAll(wrapper);
+
+			if (willOpen) {
+				updateOpenDirection(wrapper, list);
+			}
+
 			wrapper.classList.toggle("is-open", willOpen);
 			trigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
 		});

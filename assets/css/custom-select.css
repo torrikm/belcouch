@@ -119,6 +119,22 @@
 	transform: translateY(0);
 }
 
+/* Стили для открытия вверх */
+.custom-select-wrapper.is-open-upward .custom-select-dropdown {
+	top: auto;
+	bottom: calc(100% + 8px);
+	transform: translateY(0);
+}
+
+.custom-select-wrapper.is-open-upward .custom-select-trigger-icon {
+	transform: rotate(-45deg) translateY(2px);
+}
+
+/* Возврат стрелки в исходное положение при закрытии */
+.custom-select-wrapper:not(.is-open) .custom-select-trigger-icon {
+	transform: rotate(45deg) translateY(-2px);
+}
+
 .custom-select-option {
 	width: 100%;
 	display: block;

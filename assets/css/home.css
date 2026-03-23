@@ -52,27 +52,39 @@
 
 .search-results {
 	position: absolute;
-	top: 100%;
+	top: calc(100% + 10px);
 	left: 0;
 	right: 0;
 	background-color: #ffffff;
-	border-radius: 0 0 15px 15px;
+	border-radius: 15px;
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 	z-index: 10;
 	overflow: hidden;
 	display: none;
 	max-height: 300px;
 	overflow-y: auto;
+	padding: 10px;
 }
 
 .search-results.active {
 	display: block;
 }
 
+.search-no-results {
+	padding: 10px 20px;
+	text-align: center;
+	font-family: "Montserrat", sans-serif;
+	font-size: 16px;
+	color: #666666;
+	background-color: #f9f9f9;
+	border-radius: 10px;
+}
+
 .search-result-item {
 	display: flex;
 	align-items: center;
 	padding: 12px 15px;
+	border-radius: 15px;
 	cursor: pointer;
 	transition: background-color 0.2s ease;
 	border-bottom: 1px solid #f1f1f1;
@@ -184,7 +196,11 @@
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background: linear-gradient(to top, rgba(15, 21, 43, 1), rgba(51, 72, 145, 0));
+	background: linear-gradient(
+		to top,
+		rgba(15, 21, 43, 1),
+		rgba(51, 72, 145, 0)
+	);
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-end;
