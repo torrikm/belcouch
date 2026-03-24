@@ -137,7 +137,7 @@ require_once __DIR__ . '/includes/header.php';
 											<?php endif; ?>
 										</a>
 										<?php if (!empty($listing['is_verify'])): ?>
-											<div class="verified-badge">
+											<div class="proposals-verified-badge">
 												<img src="assets/img/icons/verified.svg" alt="Проверенный пользователь">
 											</div>
 										<?php endif; ?>
