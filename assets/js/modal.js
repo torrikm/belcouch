@@ -169,6 +169,73 @@ App.register("profileModals", function () {
 			];
 		}
 
+		function ensureProfileInfoContainer() {
+			return document.querySelector(".profile-info");
+		}
+
+		function getProfileRatingContainer() {
+			return document.querySelector(".profile-rating-container");
+		}
+
+		function ensureProfileLocationBlock() {
+			let profileLocation = document.querySelector(".profile-location");
+			if (profileLocation) {
+				return profileLocation;
+			}
+
+			const profileInfo = ensureProfileInfoContainer();
+			if (!profileInfo) {
+				return null;
+			}
+
+			profileLocation = document.createElement("div");
+			profileLocation.className = "profile-location";
+			profileLocation.innerHTML =
+				'<i class="location-icon"></i><span class="profile-city"></span>';
+
+			const profileMeta = document.querySelector(".profile-meta");
+			const divider = document.querySelector(".divider");
+			const ratingContainer = getProfileRatingContainer();
+			if (profileMeta) {
+				profileInfo.insertBefore(profileLocation, profileMeta);
+			} else if (divider) {
+				profileInfo.insertBefore(profileLocation, divider);
+			} else if (ratingContainer) {
+				profileInfo.insertBefore(profileLocation, ratingContainer);
+			} else {
+				profileInfo.appendChild(profileLocation);
+			}
+
+			return profileLocation;
+		}
+
+		function ensureProfileMetaBlock() {
+			let profileMeta = document.querySelector(".profile-meta");
+			if (profileMeta) {
+				return profileMeta;
+			}
+
+			const profileInfo = ensureProfileInfoContainer();
+			if (!profileInfo) {
+				return null;
+			}
+
+			profileMeta = document.createElement("div");
+			profileMeta.className = "profile-meta";
+
+			const divider = document.querySelector(".divider");
+			const ratingContainer = getProfileRatingContainer();
+			if (divider) {
+				profileInfo.insertBefore(profileMeta, divider);
+			} else if (ratingContainer) {
+				profileInfo.insertBefore(profileMeta, ratingContainer);
+			} else {
+				profileInfo.appendChild(profileMeta);
+			}
+
+			return profileMeta;
+		}
+
 		// Обновляем имя пользователя
 		const profileName = document.querySelector(".profile-name");
 		if (profileName) {
@@ -177,17 +244,20 @@ App.register("profileModals", function () {
 		}
 
 		// Обновляем город
-		const profileCity = document.querySelector(".profile-city");
-		const profileLocation = document.querySelector(".profile-location");
+		let profileLocation = document.querySelector(".profile-location");
+		const cityValue = String(userData.city || "").trim();
+		if (!profileLocation && cityValue !== "") {
+			profileLocation = ensureProfileLocationBlock();
+		}
+
 		if (profileLocation) {
-			if (userData.city && userData.city.trim() !== "") {
-				// Если город есть, показываем блок и обновляем текст
+			const profileCity = profileLocation.querySelector(".profile-city");
+			if (cityValue !== "") {
 				profileLocation.style.display = "block";
 				if (profileCity) {
-					profileCity.textContent = userData.city;
+					profileCity.textContent = cityValue;
 				}
 			} else {
-				// Если города нет, скрываем блок
 				profileLocation.style.display = "none";
 			}
 		}
@@ -246,26 +316,47 @@ App.register("profileModals", function () {
 		}
 
 		// Обновляем информацию о поле
-		const genderIcon = document.querySelector(".gender-icon");
-		if (
-			genderIcon &&
-			userData.gender &&
-			userData.gender !== "not_specified"
-		) {
+		let genderIcon = document.querySelector(".gender-icon");
+		const genderValue = String(userData.gender || "not_specified");
+		if (!genderIcon && genderValue !== "not_specified") {
+			const profileMeta = ensureProfileMetaBlock();
+			if (profileMeta) {
+				const genderBlock = document.createElement("div");
+				genderBlock.className = "profile-gender";
+				genderIcon = document.createElement("img");
+				genderIcon.className = "gender-icon";
+				genderIcon.alt = genderValue === "male" ? "Мужской" : "Женский";
+				genderBlock.appendChild(genderIcon);
+				profileMeta.appendChild(genderBlock);
+			}
+		}
+		if (genderIcon && genderValue !== "not_specified") {
 			const timestamp = new Date().getTime();
-			genderIcon.src = `../assets/img/icons/${userData.gender}.svg?t=${timestamp}`;
-			genderIcon.alt = userData.gender === "male" ? "Мужской" : "Женский";
+			genderIcon.src = `../assets/img/icons/${genderValue}.svg?t=${timestamp}`;
+			genderIcon.alt = genderValue === "male" ? "Мужской" : "Женский";
 			genderIcon.style.display = "inline";
 		} else if (genderIcon) {
 			genderIcon.style.display = "none";
 		}
 
 		// Обновляем возраст (и показываем/скрываем блок meta/divider)
-		const profileAge = document.querySelector(".profile-age span");
-		const profileAgeContainer = document.querySelector(".profile-age");
+		let profileAgeContainer = document.querySelector(".profile-age");
+		let profileAge = profileAgeContainer
+			? profileAgeContainer.querySelector("span")
+			: null;
 		const profileMeta = document.querySelector(".profile-meta");
 		const divider = document.querySelector(".divider");
 		const age = calcAge(userData.birth_date || userData.birthdate);
+		if (!profileAgeContainer && age !== null) {
+			const metaBlock = ensureProfileMetaBlock();
+			if (metaBlock) {
+				profileAgeContainer = document.createElement("div");
+				profileAgeContainer.className = "profile-age";
+				profileAge = document.createElement("span");
+				profileAgeContainer.appendChild(profileAge);
+				metaBlock.appendChild(profileAgeContainer);
+			}
+		}
 
 		if (profileAge && profileAgeContainer) {
 			if (age !== null) {
@@ -285,8 +376,24 @@ App.register("profileModals", function () {
 				profileAgeContainer.style.display !== "none";
 			profileMeta.style.display =
 				genderVisible || ageVisible ? "flex" : "none";
-			if (divider) {
-				divider.style.display = profileMeta.style.display;
+			if (profileMeta.style.display !== "none") {
+				let profileDivider = document.querySelector(".divider");
+				if (!profileDivider) {
+					const ratingContainer = getProfileRatingContainer();
+					if (ratingContainer && profileMeta.parentNode) {
+						profileDivider = document.createElement("div");
+						profileDivider.className = "divider";
+						profileMeta.parentNode.insertBefore(
+							profileDivider,
+							ratingContainer,
+						);
+					}
+				}
+				if (profileDivider) {
+					profileDivider.style.display = "block";
+				}
+			} else if (divider) {
+				divider.style.display = "none";
 			}
 		}
 

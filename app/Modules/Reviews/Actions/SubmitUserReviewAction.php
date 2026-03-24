@@ -58,7 +58,7 @@ class SubmitUserReviewAction
 					'rater_id' => $raterId,
 					'first_name' => $userData['first_name'],
 					'last_name' => $userData['last_name'],
-					'avatar_image' => $userData['avatar_image'],
+					'avatar_image' => !empty($userData['avatar_image']),
 					'comment' => $comment,
 					'rating' => $rating,
 					'created_at' => date('Y-m-d H:i:s')
