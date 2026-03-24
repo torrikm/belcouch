@@ -269,6 +269,9 @@ App.register("profileModals", function () {
 			// Добавляем случайный параметр к URL, чтобы избежать кеширования
 			const timestamp = new Date().getTime();
 			const avatarUrl = `${API_BASE_URL}/users/get_avatar.php?id=${userData.id}&t=${timestamp}`;
+			const avatarContainer = document.querySelector(
+				".profile-avatar-container",
+			);
 
 			// Обновляем аватар в шапке профиля
 			const profileAvatar = document.querySelector(
@@ -290,28 +293,16 @@ App.register("profileModals", function () {
 			const avatarPlaceholder = document.querySelector(
 				".profile-avatar-placeholder",
 			);
-			if (avatarPlaceholder) {
+			if (avatarContainer && avatarPlaceholder && !profileAvatar) {
+				console.log("Заменяем плейсхолдер аватара на изображение");
+				const newAvatar = document.createElement("img");
+				newAvatar.src = avatarUrl;
+				newAvatar.alt = "Аватар";
+				newAvatar.className = "profile-avatar";
+				avatarContainer.replaceChild(newAvatar, avatarPlaceholder);
+			} else if (avatarPlaceholder) {
 				console.log("Скрываем плейсхолдер аватара");
 				avatarPlaceholder.style.display = "none";
-
-				// Создаем элемент изображения, если его нет
-				if (!profileAvatar) {
-					const newAvatar = document.createElement("img");
-					newAvatar.src = avatarUrl;
-					newAvatar.alt = "Аватар";
-					newAvatar.className = "profile-avatar";
-
-					// Добавляем изображение в контейнер
-					const avatarContainer = document.querySelector(
-						".profile-avatar-container",
-					);
-					if (avatarContainer) {
-						avatarContainer.insertBefore(
-							newAvatar,
-							avatarPlaceholder,
-						);
-					}
-				}
 			}
 		}
 
