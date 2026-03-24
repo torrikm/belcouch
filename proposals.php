@@ -137,7 +137,9 @@ require_once __DIR__ . '/includes/header.php';
 											<?php endif; ?>
 										</a>
 										<?php if (!empty($listing['is_verify'])): ?>
-											<div class="host-verification">✓</div>
+											<div class="verified-badge">
+												<img src="assets/img/icons/verified.svg" alt="Проверенный пользователь">
+											</div>
 										<?php endif; ?>
 									</div>
 									<div class="host-info">
@@ -153,8 +155,10 @@ require_once __DIR__ . '/includes/header.php';
 											</div>
 										<?php endif; ?>
 									</div>
-									<a href="chat?user_id=<?php echo (int) $listing['user_id']; ?>&listing_id=<?php echo (int) $listing['id']; ?>"
-										class="contact-host-btn">Написать</a>
+									<?php if (!isset($_SESSION['user_id']) || (int) $_SESSION['user_id'] !== (int) $listing['user_id']): ?>
+										<a href="chat?user_id=<?php echo (int) $listing['user_id']; ?>&listing_id=<?php echo (int) $listing['id']; ?>"
+											class="contact-host-btn">Написать</a>
+									<?php endif; ?>
 								</div>
 							</div>
 						</div>

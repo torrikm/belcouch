@@ -63,7 +63,11 @@ if (empty($listings)) {
 			}
 			$html .= '</div>';
 		}
-		$html .= '</div><a href="#" class="contact-host-btn">Написать</a></div></div></div>';
+		if (!isset($_SESSION['user_id']) || (int) $_SESSION['user_id'] !== (int) $listing['user_id']) {
+			$html .= '</div><a href="#" class="contact-host-btn">Написать</a></div></div></div>';
+		} else {
+			$html .= '</div></div></div>';
+		}
 	}
 	$html .= '</div>';
 	if ($totalPages > 1) {

@@ -148,14 +148,32 @@ App.register("housingManager", function () {
 				if (currentReviews) {
 					if (updatedReviews) {
 						currentReviews.innerHTML = updatedReviews.innerHTML;
+						const currentDetails =
+							document.querySelector(".details");
+						if (
+							currentDetails &&
+							currentReviews !== currentDetails.nextElementSibling
+						) {
+							currentDetails.insertAdjacentElement(
+								"afterend",
+								currentReviews,
+							);
+						}
 					} else {
 						currentReviews.remove();
 					}
-				} else if (updatedReviews && profileRight.parentElement) {
-					profileRight.parentElement.insertAdjacentHTML(
-						"beforeend",
-						updatedReviews.outerHTML,
-					);
+				} else if (updatedReviews) {
+					const currentDetails = document.querySelector(".details");
+					if (currentDetails && currentDetails.parentNode) {
+						currentDetails.insertAdjacentHTML(
+							"afterend",
+							updatedReviews.outerHTML,
+						);
+					} else if (profileRight.parentElement) {
+						profileRight.parentElement.appendChild(
+							updatedReviews.cloneNode(true),
+						);
+					}
 				}
 				document.dispatchEvent(new CustomEvent("contentUpdated"));
 			});

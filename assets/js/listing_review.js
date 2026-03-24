@@ -112,7 +112,8 @@ App.register("listingReview", function () {
 		).padStart(2, "0")}.${date.getFullYear()}`;
 
 		const starsHtml = Array.from({ length: 5 }, (_, i) => {
-			const icon = i < review.rating ? "star-filled.svg" : "star-void.svg";
+			const icon =
+				i < review.rating ? "star-filled.svg" : "star-void.svg";
 			return `<img src="../assets/img/icons/${icon}" alt="Звезда" class="review-star-icon">`;
 		}).join("");
 
@@ -150,6 +151,41 @@ App.register("listingReview", function () {
 			}
 			star.classList.toggle("active", filled);
 		});
+	}
+
+	function updateListingAverageRating(avgRating) {
+		const formattedRating = Number(avgRating || 0).toFixed(2);
+		document
+			.querySelectorAll(
+				".housing-rating-value, .listing-rating .rating-value",
+			)
+			.forEach((ratingNode) => {
+				ratingNode.textContent = formattedRating;
+			});
+	}
+
+	function updateProfileAverageRating(avgRating) {
+		const normalizedRating = Number(avgRating || 0);
+		const formattedRating = normalizedRating.toFixed(1).replace(".", ",");
+		const filledStars = Math.round(normalizedRating);
+
+		document
+			.querySelectorAll(".profile-rating .rating-score")
+			.forEach((ratingNode) => {
+				ratingNode.textContent = formattedRating;
+			});
+
+		document
+			.querySelectorAll(".profile-rating .rating-stars")
+			.forEach((starsContainer) => {
+				const starIcons = starsContainer.querySelectorAll(".star-icon");
+				starIcons.forEach((icon, index) => {
+					icon.src =
+						index < filledStars
+							? "../assets/img/icons/star-filled.svg"
+							: "../assets/img/icons/star-empty.svg";
+				});
+			});
 	}
 
 	function refreshSectionFromServer() {
@@ -214,13 +250,18 @@ App.register("listingReview", function () {
 			dataType: "json",
 			success: function (data) {
 				if (!data.success) {
-					window.App.notify(data.message || "Ошибка отправки", "error");
+					window.App.notify(
+						data.message || "Ошибка отправки",
+						"error",
+					);
 					return;
 				}
 
 				submitted = true;
 				window.App.notify("Спасибо за отзыв!", "success");
 				removeEmptyState();
+				updateListingAverageRating(data.avg_rating);
+				updateProfileAverageRating(data.avg_rating);
 
 				const list = ensureReviewsList();
 				if (list) {

@@ -63,7 +63,8 @@ App.register("profileReview", function () {
 
 		const infoBlock = document.createElement("div");
 		infoBlock.className = "profile-review-info";
-		infoBlock.innerHTML = "<p>Вы уже оставили отзыв на этого владельца.</p>";
+		infoBlock.innerHTML =
+			"<p>Вы уже оставили отзыв на этого владельца.</p>";
 		currentBlock.parentNode.replaceChild(infoBlock, currentBlock);
 	}
 
@@ -94,7 +95,8 @@ App.register("profileReview", function () {
 			: `<div class="reviewer-avatar reviewer-avatar-placeholder">${review.initials}</div>`;
 
 		const starsHtml = Array.from({ length: 5 }, (_, index) => {
-			const icon = index < review.rating ? "star-filled.svg" : "star-void.svg";
+			const icon =
+				index < review.rating ? "star-filled.svg" : "star-void.svg";
 			return `<img src="../assets/img/icons/${icon}" alt="Звезда" class="review-star-icon">`;
 		}).join("");
 
@@ -123,6 +125,75 @@ App.register("profileReview", function () {
 		stars.forEach((star, index) => {
 			star.classList.toggle("active", index < rating);
 		});
+	}
+
+	function pluralizeReviews(count) {
+		const forms = ["отзыв", "отзыва", "отзывов"];
+		const mod100 = count % 100;
+		if (mod100 >= 11 && mod100 <= 14) {
+			return forms[2];
+		}
+		const mod10 = count % 10;
+		if (mod10 === 1) {
+			return forms[0];
+		}
+		if (mod10 >= 2 && mod10 <= 4) {
+			return forms[1];
+		}
+		return forms[2];
+	}
+
+	function updateProfileAverageRating(avgRating, ratingCount) {
+		const normalizedRating = Number(avgRating || 0);
+		const formattedRating = normalizedRating.toFixed(1).replace(".", ",");
+		const filledStars = Math.round(normalizedRating);
+		const count = Number(ratingCount || 0);
+		const profileRatingContainer = document.querySelector(
+			".profile-rating-container",
+		);
+
+		document
+			.querySelectorAll(".profile-rating .rating-score")
+			.forEach((ratingNode) => {
+				ratingNode.textContent = formattedRating;
+			});
+
+		document
+			.querySelectorAll(".profile-rating .rating-stars")
+			.forEach((starsContainer) => {
+				const starIcons = starsContainer.querySelectorAll(".star-icon");
+				starIcons.forEach((icon, index) => {
+					icon.src =
+						index < filledStars
+							? "../assets/img/icons/star-filled.svg"
+							: "../assets/img/icons/star-empty.svg";
+				});
+			});
+
+		let countNode = document.querySelector(".profile-rating .rating-count");
+		if (!countNode && count > 0 && profileRatingContainer) {
+			const profileRating =
+				profileRatingContainer.querySelector(".profile-rating");
+			const ratingStars =
+				profileRatingContainer.querySelector(".rating-stars");
+			countNode = document.createElement("span");
+			countNode.className = "rating-count";
+			countNode.style.marginLeft = "10px";
+			if (ratingStars && ratingStars.parentNode) {
+				ratingStars.insertAdjacentElement("afterend", countNode);
+			} else if (profileRating) {
+				profileRating.appendChild(countNode);
+			}
+		}
+
+		if (countNode) {
+			if (count > 0) {
+				countNode.textContent = `(${count} ${pluralizeReviews(count)})`;
+				countNode.style.display = "inline";
+			} else {
+				countNode.style.display = "none";
+			}
+		}
 	}
 
 	function refreshSectionFromServer() {
@@ -184,13 +255,17 @@ App.register("profileReview", function () {
 			dataType: "json",
 			success: function (data) {
 				if (!data.success) {
-					window.App.notify(data.message || "Ошибка отправки", "error");
+					window.App.notify(
+						data.message || "Ошибка отправки",
+						"error",
+					);
 					return;
 				}
 
 				submitted = true;
 				window.App.notify("Спасибо за отзыв!", "success");
 				removeEmptyState();
+				updateProfileAverageRating(data.avg_rating, data.rating_count);
 
 				const list = ensureReviewsList();
 				if (list) {

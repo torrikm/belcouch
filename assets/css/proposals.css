@@ -278,19 +278,24 @@
 	font-size: 16px;
 }
 
-.host-verification {
+.verified-badge {
 	position: absolute;
-	right: -2px;
-	bottom: -2px;
-	width: 20px;
-	height: 20px;
-	border-radius: 50%;
-	background-color: #4caf50;
-	color: white;
+	right: -3px;
+	bottom: -3px;
+	width: 18px;
+	height: 18px;
 	display: flex;
+	padding: 1px;
 	align-items: center;
 	justify-content: center;
-	font-size: 12px;
+	background-color: #fff;
+	border-radius: 50%;
+}
+
+.verified-badge img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
 }
 
 .host-info {
@@ -303,7 +308,6 @@
 	font-weight: 600;
 	color: #333;
 	text-decoration: none;
-	margin-bottom: 4px;
 }
 
 .host-rating {
@@ -541,10 +545,15 @@
 		height: 36px;
 	}
 
-	.host-verification {
-		width: 16px;
-		height: 16px;
-		font-size: 10px;
+	.verified-badge {
+		right: -4px;
+		bottom: -4px;
+		width: 22px;
+		height: 22px;
+	}
+
+	.host-info {
+		flex: 1;
 	}
 }
 
