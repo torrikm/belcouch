@@ -91,6 +91,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 		$hasGender = isset($user['gender']) && $user['gender'] !== 'not_specified';
 		$age = !empty($user['birthdate']) ? calculateAge($user['birthdate']) : null;
 		$hasAge = !empty($age);
+		$displayRating = isset($user['avg_rating']) ? (float) $user['avg_rating'] : 0.0;
+		$hasRating = $displayRating > 0;
 		?>
 		<?php if ($hasGender || $hasAge): ?>
 			<div class="profile-meta">
@@ -111,17 +113,15 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 		<?php endif; ?>
 		<div class="profile-rating-container">
 			<div class="profile-rating">
-				<div class="rating-score"><?php echo number_format($user['avg_rating'] ?? 0, 1, ',', ''); ?></div>
+				<div class="rating-score"><?php echo number_format($user['avg_rating'] ?? 0, 2, '.', ''); ?></div>
 				<div class="rating-stars">
-					<?php for ($i = 1; $i <= 5; $i++): ?>
-						<?php if ($i <= $starRating): ?>
-							<img src="<?php echo isset($root_path) ? $root_path : '../'; ?>assets/img/icons/star-filled.svg"
-								alt="★" class="star-icon">
-						<?php else: ?>
-							<img src="<?php echo isset($root_path) ? $root_path : '../'; ?>assets/img/icons/star-empty.svg"
-								alt="☆" class="star-icon">
-						<?php endif; ?>
-					<?php endfor; ?>
+					<?php if ($hasRating): ?>
+						<img src="<?php echo isset($root_path) ? $root_path : '../'; ?>assets/img/icons/star-filled.svg"
+							alt="★" class="star-icon">
+					<?php else: ?>
+						<img src="<?php echo isset($root_path) ? $root_path : '../'; ?>assets/img/icons/star-empty.svg"
+							alt="☆" class="star-icon">
+					<?php endif; ?>
 				</div>
 				<?php if (isset($user['rating_count']) && $user['rating_count'] > 0): ?>
 					<span class="rating-count" style="margin-left: 10px;">(<?php echo $user['rating_count']; ?>
@@ -393,4 +393,10 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 			</div>
 		</div>
 	</div>
+<?php endif; ?>
+
+<?php if ($isOwnProfile): ?>
+	<script src="<?php echo isset($root_path) ? $root_path : '../'; ?>assets/js/profile-edit.js"></script>
+	<script src="<?php echo isset($root_path) ? $root_path : '../'; ?>assets/js/bio-edit.js"></script>
+	<script src="<?php echo isset($root_path) ? $root_path : '../'; ?>assets/js/password-change.js"></script>
 <?php endif; ?>

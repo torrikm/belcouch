@@ -63,8 +63,7 @@ App.register("profileReview", function () {
 
 		const infoBlock = document.createElement("div");
 		infoBlock.className = "profile-review-info";
-		infoBlock.innerHTML =
-			"<p>Вы уже оставили отзыв на этого владельца.</p>";
+		infoBlock.innerHTML = "<p>Вы уже оставили отзыв на этого владельца.</p>";
 		currentBlock.parentNode.replaceChild(infoBlock, currentBlock);
 	}
 
@@ -95,8 +94,7 @@ App.register("profileReview", function () {
 			: `<div class="reviewer-avatar reviewer-avatar-placeholder">${review.initials}</div>`;
 
 		const starsHtml = Array.from({ length: 5 }, (_, index) => {
-			const icon =
-				index < review.rating ? "star-filled.svg" : "star-void.svg";
+			const icon = index < review.rating ? "star-filled.svg" : "star-void.svg";
 			return `<img src="../assets/img/icons/${icon}" alt="Звезда" class="review-star-icon">`;
 		}).join("");
 
@@ -145,37 +143,28 @@ App.register("profileReview", function () {
 
 	function updateProfileAverageRating(avgRating, ratingCount) {
 		const normalizedRating = Number(avgRating || 0);
-		const formattedRating = normalizedRating.toFixed(1).replace(".", ",");
-		const filledStars = Math.round(normalizedRating);
+		const formattedRating = normalizedRating.toFixed(2);
+		const hasRating = normalizedRating > 0;
 		const count = Number(ratingCount || 0);
-		const profileRatingContainer = document.querySelector(
-			".profile-rating-container",
-		);
+		const profileRatingContainer = document.querySelector(".profile-rating-container");
 
-		document
-			.querySelectorAll(".profile-rating .rating-score")
-			.forEach((ratingNode) => {
-				ratingNode.textContent = formattedRating;
-			});
+		document.querySelectorAll(".profile-rating .rating-score").forEach((ratingNode) => {
+			ratingNode.textContent = formattedRating;
+		});
 
-		document
-			.querySelectorAll(".profile-rating .rating-stars")
-			.forEach((starsContainer) => {
-				const starIcons = starsContainer.querySelectorAll(".star-icon");
-				starIcons.forEach((icon, index) => {
-					icon.src =
-						index < filledStars
-							? "../assets/img/icons/star-filled.svg"
-							: "../assets/img/icons/star-empty.svg";
-				});
+		document.querySelectorAll(".profile-rating .rating-stars").forEach((starsContainer) => {
+			const starIcons = starsContainer.querySelectorAll(".star-icon");
+			starIcons.forEach((icon) => {
+				icon.src = hasRating
+					? "../assets/img/icons/star-filled.svg"
+					: "../assets/img/icons/star-empty.svg";
 			});
+		});
 
 		let countNode = document.querySelector(".profile-rating .rating-count");
 		if (!countNode && count > 0 && profileRatingContainer) {
-			const profileRating =
-				profileRatingContainer.querySelector(".profile-rating");
-			const ratingStars =
-				profileRatingContainer.querySelector(".rating-stars");
+			const profileRating = profileRatingContainer.querySelector(".profile-rating");
+			const ratingStars = profileRatingContainer.querySelector(".rating-stars");
 			countNode = document.createElement("span");
 			countNode.className = "rating-count";
 			countNode.style.marginLeft = "10px";
@@ -194,28 +183,6 @@ App.register("profileReview", function () {
 				countNode.style.display = "none";
 			}
 		}
-	}
-
-	function refreshSectionFromServer() {
-		const currentSection = getReviewsSection();
-		if (!currentSection) {
-			return;
-		}
-
-		fetch(window.location.href, {
-			credentials: "same-origin",
-			headers: { "X-Requested-With": "XMLHttpRequest" },
-		})
-			.then((response) => response.text())
-			.then((html) => {
-				const parser = new DOMParser();
-				const doc = parser.parseFromString(html, "text/html");
-				const updatedSection = doc.querySelector(".reviews-section");
-				if (updatedSection) {
-					currentSection.innerHTML = updatedSection.innerHTML;
-				}
-			})
-			.catch(() => {});
 	}
 
 	stars.forEach((star, index) => {
@@ -255,10 +222,7 @@ App.register("profileReview", function () {
 			dataType: "json",
 			success: function (data) {
 				if (!data.success) {
-					window.App.notify(
-						data.message || "Ошибка отправки",
-						"error",
-					);
+					window.App.notify(data.message || "Ошибка отправки", "error");
 					return;
 				}
 
@@ -279,7 +243,6 @@ App.register("profileReview", function () {
 				}
 
 				setInfoState();
-				setTimeout(refreshSectionFromServer, 120);
 			},
 			error: function () {
 				window.App.notify("Ошибка отправки", "error");

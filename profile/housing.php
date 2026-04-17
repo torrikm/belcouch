@@ -8,8 +8,8 @@
 require_once '../bootstrap.php';
 $pageTitle = "Управление жильем";
 $root_path = '../';
-$additionalJs = ['../assets/js/housing_fixed.js', '../assets/js/listing_review.js', '../assets/js/favorites.js'];
-$additionalCss = ['../assets/css/housing.css'];
+$additionalJs = ['../assets/js/housing_fixed.js', '../assets/js/listing_review.js', '../assets/js/favorites.js', '../assets/js/listing-report.js'];
+$additionalCss = ['../assets/css/profile.css', '../assets/css/proposals.css', '../assets/css/review.css', '../assets/css/housing.css', '../assets/css/housing-modal.css'];
 
 if (!isset($_SESSION['user_id']) && !isset($_GET['id'])) {
 	header('Location: ../index.php#login-modal');
@@ -26,6 +26,7 @@ try {
 	$isOwnProfile = $profileData['isOwnProfile'];
 	$starRating = $profileData['starRating'];
 	$regions = $profileService->getRegions();
+	$listingReportCsrfToken = Csrf::token();
 } catch (Exception $e) {
 	header('Location: ../index.php');
 	exit;
@@ -54,6 +55,7 @@ try {
 	$reviews = $listing ? $housingService->getListingReviews($listing_id) : [];
 	$has_reviews = !empty($reviews);
 	$can_review = $listing ? $housingService->canReviewListing($listing_id, (int) $listing['user_id']) : false;
+	$has_reported = $listing ? $housingService->hasUserReported($listing_id) : false;
 } catch (Exception $e) {
 	$has_housing = false;
 	$listing = null;
@@ -109,11 +111,16 @@ try {
 						<?php else: ?>
 							<div class="housing-section-header">
 								<h2 class="housing-section-title">Объявление пользователя</h2>
-								<div class="housing-rating-badge">
-									<span
-										class="housing-rating-value"><?php echo number_format((float) ($listing['avg_rating'] ?? 0), 2); ?></span>
-									<img src="../assets/img/icons/star-filled.svg" alt="Рейтинг жилья"
-										class="housing-rating-icon">
+								<div class="housing-section-actions">
+									<div class="housing-rating-badge">
+										<span
+											class="housing-rating-value"><?php echo number_format((float) ($listing['avg_rating'] ?? 0), 2); ?></span>
+										<img src="../assets/img/icons/star-filled.svg" alt="Рейтинг жилья"
+											class="housing-rating-icon">
+									</div>
+									<?php if (isset($_SESSION['user_id']) && (int) $_SESSION['user_id'] !== (int) $listing['user_id'] && !$has_reported): ?>
+										<button type="button" class="btn-report-listing" onclick="window.App && window.App.modal ? window.App.modal.open('listing-report-modal') : null;">Пожаловаться</button>
+									<?php endif; ?>
 								</div>
 							</div>
 						<?php endif; ?>
@@ -323,6 +330,43 @@ try {
 	<?php endif; ?>
 </div>
 
+<?php if ($has_housing && $listing && !$isOwnProfile && isset($_SESSION['user_id']) && (int) $_SESSION['user_id'] !== (int) $listing['user_id']): ?>
+	<div id="listing-report-modal" class="modal-overlay" data-modal-width="560px">
+		<div class="modal">
+			<div class="modal-header">
+				<h2 class="modal-title">Пожаловаться на объявление</h2>
+				<button type="button" class="modal-close">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form id="listing-report-form">
+					<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars((string) $listingReportCsrfToken); ?>">
+					<input type="hidden" name="listing_id" value="<?php echo (int) $listing['id']; ?>">
+					<div class="form-group">
+						<label for="listing-report-reason">Причина</label>
+						<select id="listing-report-reason" name="reason" class="form-control" required>
+							<option value="">Загрузка причин...</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="listing-report-details">Подробности</label>
+						<textarea id="listing-report-details" name="details" class="form-control" rows="5" maxlength="1000" placeholder="Коротко опишите, что именно не так"></textarea>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn-cancel">Отмена</button>
+				<button type="submit" form="listing-report-form" class="btn-save">Отправить</button>
+			</div>
+		</div>
+	</div>
+<?php endif; ?>
+
 <?php if ($isOwnProfile): ?>
 	<div id="housing-modal" class="modal-overlay">
 		<div class="modal">
@@ -453,7 +497,7 @@ try {
 <?php endif; ?>
 
 <script>
-	document.addEventListener('DOMContentLoaded', function () {
+	document.addEventListener('DOMContentLoaded', function() {
 		const mainImage = document.getElementById('main-gallery-image');
 		const thumbnails = document.querySelectorAll('.thumbnail');
 		const prevButton = document.querySelector('.gallery-nav.prev');
@@ -478,19 +522,19 @@ try {
 		}
 
 		if (prevButton) {
-			prevButton.addEventListener('click', function () {
+			prevButton.addEventListener('click', function() {
 				updateMainImage(currentIndex - 1);
 			});
 		}
 
 		if (nextButton) {
-			nextButton.addEventListener('click', function () {
+			nextButton.addEventListener('click', function() {
 				updateMainImage(currentIndex + 1);
 			});
 		}
 
 		thumbnails.forEach(thumbnail => {
-			thumbnail.addEventListener('click', function () {
+			thumbnail.addEventListener('click', function() {
 				const index = parseInt(this.getAttribute('data-index'));
 				updateMainImage(index);
 			});

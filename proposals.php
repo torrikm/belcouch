@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/includes/render_listing_card.php';
 
 $proposalsService = new ProposalsPageService();
 $pageData = $proposalsService->getPageData();
@@ -27,6 +28,7 @@ $total_listings = $pagination['total_listings'];
 $total_pages = $pagination['total_pages'];
 
 $title = 'Предложения - BelCouch';
+$additionalCss = ['assets/css/proposals.css', 'assets/css/favorites.css'];
 $additionalJs = [
 	'assets/js/filter.js',
 	'assets/js/favorites.js',
@@ -55,113 +57,13 @@ require_once __DIR__ . '/includes/header.php';
 
 				<div class="listings-list">
 					<?php foreach ($listings as $listing): ?>
-						<div class="listing-card" data-href="profile/housing?id=<?php echo $listing['user_id']; ?>">
-							<div class="listing-image">
-								<a href="profile/housing?id=<?php echo $listing['user_id']; ?>">
-									<img src="<?php echo $listing['main_image']; ?>"
-										alt="<?php echo htmlspecialchars($listing['title']); ?>">
-								</a>
-								<?php if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] != $listing['user_id']): ?>
-									<?php $is_favorite = isset($_SESSION['user_id']) && in_array((int) $listing['id'], $user_favorites, true); ?>
-									<button
-										class="favorite-btn <?php echo $is_favorite ? 'active' : ''; ?>"
-										data-id="<?php echo $listing['id']; ?>"
-										title="<?php echo $is_favorite ? 'Удалить из избранного' : 'Добавить в избранное'; ?>">
-										<?php echo $is_favorite ? '♥' : '♡'; ?>
-									</button>
-								<?php endif; ?>
-							</div>
-							<div class="listing-details">
-								<div class="listing-main-info">
-									<div class="listing-location">
-										<h3 class="city-name"><?php echo htmlspecialchars($listing['city']); ?></h3>
-										<p class="region-name"><?php echo htmlspecialchars($listing['region_name']); ?></p>
-									</div>
-
-									<div class="listing-rating">
-										<div class="rating-value"><?php echo number_format($listing['avg_rating'] ?: 0, 2); ?>
-										</div>
-										<div class="rating-stars">
-											<?php
-											$rating = $listing['avg_rating'] ?: 0;
-											for ($i = 1; $i <= 5; $i++):
-											?>
-												<img src="assets/img/icons/<?php echo ($i <= $rating) ? 'star-filled.svg' : 'star-void.svg'; ?>"
-													alt="Рейтинг" class="rating-star">
-											<?php endfor; ?>
-										</div>
-									</div>
-								</div>
-
-								<div class="listing-specifications">
-									<div class="specification-item">
-										<span class="spec-label">Тип:</span>
-										<span
-											class="spec-value"><?php echo htmlspecialchars($listing['property_type_name']); ?></span>
-									</div>
-									<div class="specification-item">
-										<span class="spec-label">Количество спальных мест:</span>
-										<span class="spec-value"><?php echo $listing['max_guests']; ?></span>
-									</div>
-									<div class="specification-item">
-										<span class="spec-label">Время пребывания:</span>
-										<span
-											class="spec-value"><?php echo htmlspecialchars($listing['stay_duration_name'] ?: 'Не указано'); ?></span>
-									</div>
-									<div class="specification-item">
-										<span class="spec-label">Примечание:</span>
-										<span
-											class="spec-value"><?php echo !empty($listing['notes']) ? htmlspecialchars(mb_substr($listing['notes'], 0, 30)) . (mb_strlen($listing['notes']) > 30 ? '...' : '') : 'нет'; ?></span>
-									</div>
-								</div>
-
-								<div class="listing-host">
-									<div class="host-photo">
-										<a href="profile/about?id=<?php echo $listing['user_id']; ?>" class="host-photo-link">
-											<?php if (!empty($listing['avatar_image'])): ?>
-												<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $listing['user_id']; ?>"
-													alt="Фото пользователя" class="host-avatar">
-											<?php else: ?>
-												<div class="host-avatar-placeholder">
-													<?php
-													$initials = '';
-													if (!empty($listing['first_name'])) {
-														$initials .= mb_substr($listing['first_name'], 0, 1, 'UTF-8');
-													}
-													if (!empty($listing['last_name'])) {
-														$initials .= mb_substr($listing['last_name'], 0, 1, 'UTF-8');
-													}
-													echo htmlspecialchars($initials ?: 'U');
-													?>
-												</div>
-											<?php endif; ?>
-										</a>
-										<?php if (!empty($listing['is_verify'])): ?>
-											<div class="proposals-verified-badge">
-												<img src="assets/img/icons/verified.svg" alt="Проверенный пользователь">
-											</div>
-										<?php endif; ?>
-									</div>
-									<div class="host-info">
-										<a href="profile/about?id=<?php echo $listing['user_id']; ?>" class="host-name">
-											<?php echo htmlspecialchars($listing['first_name'] . ' ' . $listing['last_name']); ?>
-										</a>
-										<?php if ($listing['user_rating'] > 0): ?>
-											<div class="host-rating"><?php echo number_format($listing['user_rating'], 2); ?>
-												<?php for ($i = 1; $i <= 5; $i++): ?>
-													<img src="assets/img/icons/<?php echo ($i <= $listing['user_rating']) ? 'star-filled.svg' : 'star-void.svg'; ?>"
-														alt="Рейтинг" class="rating-star">
-												<?php endfor; ?>
-											</div>
-										<?php endif; ?>
-									</div>
-									<?php if (!isset($_SESSION['user_id']) || (int) $_SESSION['user_id'] !== (int) $listing['user_id']): ?>
-										<a href="chat?user_id=<?php echo (int) $listing['user_id']; ?>&listing_id=<?php echo (int) $listing['id']; ?>"
-											class="contact-host-btn">Написать</a>
-									<?php endif; ?>
-								</div>
-							</div>
-						</div>
+						<?php
+						$isFavorite = isset($_SESSION['user_id']) && in_array((int) $listing['id'], $user_favorites, true);
+						echo renderListingCard($listing, [
+							'is_favorite' => $isFavorite,
+							'root_path' => '',
+						]);
+						?>
 					<?php endforeach; ?>
 				</div>
 
@@ -216,9 +118,7 @@ require_once __DIR__ . '/includes/header.php';
 		<div class="filters-sidebar">
 			<div class="filters-header">
 				<h3>Фильтры</h3>
-				<?php if (!empty($_GET)): ?>
-					<a href="proposals" class="reset-filters">Сбросить</a>
-				<?php endif; ?>
+				<a href="proposals" class="reset-filters">Сбросить</a>
 			</div>
 
 			<form id="filters-form" method="post" action="javascript:void(0);">

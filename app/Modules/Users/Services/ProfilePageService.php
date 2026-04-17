@@ -103,7 +103,7 @@ class ProfilePageService
 	public function getFavoriteListings(int $profileId): array
 	{
 		$sql = "SELECT l.*, l.id as listing_id, pt.name as property_type_name, r.name as region_name,
-                sd.name as stay_duration_name, u.first_name, u.last_name, u.avg_rating as user_rating, u.is_verify,
+                sd.name as stay_duration_name, u.first_name, u.last_name, COALESCE(ur.avg_rating, 0) as user_rating, u.is_verify,
                 u.avatar_image
                 FROM favorites f
                 JOIN listings l ON f.listing_id = l.id
@@ -111,6 +111,11 @@ class ProfilePageService
                 JOIN regions r ON l.region_id = r.id
                 LEFT JOIN stay_durations sd ON l.stay_duration_id = sd.id
                 JOIN users u ON l.user_id = u.id
+                LEFT JOIN (
+                    SELECT user_id, AVG(rating) as avg_rating
+                    FROM user_ratings
+                    GROUP BY user_id
+                ) ur ON ur.user_id = u.id
                 WHERE f.user_id = ?";
 
 		$stmt = $this->db->prepareAndExecute($sql, 'i', [$profileId]);

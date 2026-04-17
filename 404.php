@@ -3,6 +3,7 @@ require_once __DIR__ . '/bootstrap.php';
 
 http_response_code(404);
 
+$additionalCss = ['assets/css/404.css'];
 include 'includes/header.php';
 ?>
 <div class="container">

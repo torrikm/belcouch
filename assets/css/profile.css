@@ -117,6 +117,10 @@
 	display: flex;
 	align-items: center;
 	margin-bottom: 20px;
+	background: rgba(15, 31, 55, 0.08);
+    border: 1px solid var(--housing-line);
+	padding: 6px 10px;
+	border-radius: 100px;
 }
 
 .rating-score {

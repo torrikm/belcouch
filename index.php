@@ -7,6 +7,7 @@ $slider_images = $pageData['slider_images'];
 $regions_data = $pageData['regions_data'];
 
 $pageTitle = 'Главная';
+$additionalCss = ['assets/css/home.css'];
 $additionalJs = ['assets/js/slider.js'];
 
 include 'includes/header.php';

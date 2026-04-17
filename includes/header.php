@@ -32,19 +32,13 @@ if (isset($_SESSION['user_id'])) {
 	<title><?php echo isset($pageTitle) ? 'BelCouch - ' . $pageTitle : 'BelCouch'; ?></title>
 	<link rel="icon" type="image/svg+xml" href="<?php echo $root_path; ?>assets/img/favi.png">
 
+	<!-- Базовые стили, подключаются на всех страницах -->
 	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/style.css">
 	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/header-footer.css">
-	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/profile.css">
-	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/home.css">
 	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/modal.css">
-	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/review.css">
-	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/about-us.css">
-	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/housing-modal.css">
-	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/proposals.css">
-	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/favorites.css">
-	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/404.css">
 	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/custom-select.css">
-	<link rel="stylesheet" href="<?php echo $root_path; ?>assets/css/verification.css">
+
+	<!-- Дополнительные стили для конкретных страниц -->
 	<?php if (isset($additionalCss) && is_array($additionalCss)): ?>
 		<?php foreach ($additionalCss as $css): ?>
 			<link rel="stylesheet" href="<?php echo $css; ?>">

@@ -8,6 +8,7 @@
 require_once '../bootstrap.php';
 $pageTitle = "О пользователе";
 $root_path = '../';
+$additionalCss = ['../assets/css/profile.css', '../assets/css/review.css'];
 $additionalJs = ['../assets/js/review.js', '../assets/js/user-verification.js'];
 
 if (!isset($_GET['id']) && !isset($_SESSION['user_id'])) {

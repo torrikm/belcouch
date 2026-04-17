@@ -19,6 +19,26 @@ class AdminVerificationService
 		];
 	}
 
+	public function getVerifiedUsers(): array
+	{
+		$stmt = $this->db->query(
+			"SELECT u.id, u.email, u.first_name, u.last_name, u.role,
+					vr.status AS latest_verification_status, vr.admin_note AS latest_admin_note, vr.reviewed_at AS latest_reviewed_at
+			 FROM users u
+			 LEFT JOIN verification_requests vr ON vr.id = (
+					SELECT vr2.id
+					FROM verification_requests vr2
+					WHERE vr2.user_id = u.id
+					ORDER BY vr2.created_at DESC
+					LIMIT 1
+			 )
+			 WHERE u.is_verify = 1
+			 ORDER BY u.id DESC"
+		);
+
+		return $stmt->fetch_all(MYSQLI_ASSOC);
+	}
+
 	public function getRequests(string $status = 'pending'): array
 	{
 		$allowed = ['pending', 'approved', 'rejected'];

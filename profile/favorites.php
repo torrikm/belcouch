@@ -6,8 +6,10 @@
  */
 
 require_once '../bootstrap.php';
+require_once '../includes/render_listing_card.php';
 $pageTitle = "Избранное";
 $root_path = '../';
+$additionalCss = ['../assets/css/profile.css', '../assets/css/favorites.css', '../assets/css/proposals.css', '../assets/css/housing.css', '../assets/css/housing-modal.css'];
 $additionalJs = ['../assets/js/favorites.js'];
 
 // Проверка авторизации
@@ -81,99 +83,13 @@ try {
 
 						<div class="listings-list">
 							<?php foreach ($favorites as $listing): ?>
-								<div class="listing-card">
-									<div class="listing-image">
-										<a href="housing?id=<?php echo $listing['user_id']; ?>">
-											<img src="<?php echo $listing['main_image']; ?>"
-												alt="<?php echo htmlspecialchars($listing['title']); ?>">
-										</a>
-										<button class="favorite-btn active" data-id="<?php echo $listing['listing_id']; ?>"
-											title="Удалить из избранного">♥</button>
-									</div>
-									<div class="listing-details">
-										<div class="listing-main-info">
-											<div class="listing-location">
-												<h3 class="city-name"><?php echo htmlspecialchars($listing['city']); ?></h3>
-												<p class="region-name"><?php echo htmlspecialchars($listing['region_name']); ?></p>
-											</div>
-
-											<div class="listing-rating">
-												<div class="rating-value">
-													<?php echo number_format($listing['avg_rating'] ?: 0, 2); ?>
-												</div>
-												<div class="rating-stars">
-													<?php
-													$rating = $listing['avg_rating'] ?: 0;
-													for ($i = 1; $i <= 5; $i++): ?>
-														<img src="../assets/img/icons/<?php echo ($i <= $rating) ? 'star-filled.svg' : 'star-void.svg'; ?>"
-															alt="Рейтинг" class="rating-star">
-													<?php endfor; ?>
-												</div>
-											</div>
-										</div>
-
-										<div class="listing-specifications">
-											<div class="specification-item">
-												<span class="spec-label">Тип:</span>
-												<span class="spec-value"><?php echo htmlspecialchars($listing['property_type_name']); ?></span>
-											</div>
-											<div class="specification-item">
-												<span class="spec-label">Количество спальных мест:</span>
-												<span class="spec-value"><?php echo $listing['max_guests']; ?></span>
-											</div>
-											<div class="specification-item">
-												<span class="spec-label">Время пребывания:</span>
-												<span class="spec-value"><?php echo htmlspecialchars($listing['stay_duration_name'] ?: 'Не указано'); ?></span>
-											</div>
-											<div class="specification-item">
-												<span class="spec-label">Примечание:</span>
-												<span class="spec-value"><?php echo !empty($listing['notes']) ? htmlspecialchars(mb_substr($listing['notes'], 0, 30)) . (mb_strlen($listing['notes']) > 30 ? '...' : '') : 'нет'; ?></span>
-											</div>
-										</div>
-
-										<div class="listing-host">
-											<div class="host-photo">
-												<?php if (isset($listing['avatar_image']) && $listing['avatar_image']): ?>
-													<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $listing['user_id']; ?>"
-														alt="Фото пользователя" class="host-avatar">
-												<?php else: ?>
-													<div class="host-avatar-placeholder">
-														<?php
-														$initials = '';
-														if (!empty($listing['first_name'])) {
-															$initials .= mb_substr($listing['first_name'], 0, 1, 'UTF-8');
-														}
-														if (!empty($listing['last_name'])) {
-															$initials .= mb_substr($listing['last_name'], 0, 1, 'UTF-8');
-														}
-														echo htmlspecialchars($initials ?: 'U');
-														?>
-													</div>
-												<?php endif; ?>
-												<?php if (isset($listing['is_verify']) && $listing['is_verify']): ?>
-													<div class="host-verification">✓</div>
-												<?php endif; ?>
-											</div>
-											<div class="host-info">
-												<a href="housing?id=<?php echo $listing['user_id']; ?>" class="host-name">
-													<?php echo htmlspecialchars($listing['first_name'] . ' ' . $listing['last_name']); ?>
-												</a>
-												<?php if ($listing['user_rating'] > 0): ?>
-													<div class="host-rating">
-														<?php echo number_format($listing['user_rating'], 2); ?>
-														<?php for ($i = 1; $i <= 5; $i++): ?>
-															<img src="../assets/img/icons/<?php echo ($i <= $listing['user_rating']) ? 'star-filled.svg' : 'star-void.svg'; ?>"
-																alt="Рейтинг" class="rating-star">
-														<?php endfor; ?>
-													</div>
-												<?php endif; ?>
-											</div>
-											<a href="../chat?user_id=<?php echo (int) $listing['user_id']; ?>&listing_id=<?php echo (int) $listing['listing_id']; ?>"
-												class="contact-host-btn">Написать</a>
-										</div>
-									</div>
-									<a href="housing?id=<?php echo $listing['user_id']; ?>" class="listing-link"></a>
-								</div>
+								<?php
+								echo renderListingCard($listing, [
+									'is_favorite' => true,
+									'show_chat' => true,
+									'root_path' => '../',
+								]);
+								?>
 							<?php endforeach; ?>
 						</div>
 					<?php endif; ?>

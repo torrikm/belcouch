@@ -2,6 +2,7 @@
 require_once __DIR__ . '/bootstrap.php';
 
 $pageTitle = "О нас";
+$additionalCss = ['assets/css/about-us.css'];
 include 'includes/header.php';
 ?>
 

@@ -23,8 +23,7 @@
 	class="global-scroll-top"
 	type="button"
 	aria-label="Вернуться наверх"
-	title="Наверх"
->
+	title="Наверх">
 	↑
 </button>
 
@@ -121,7 +120,7 @@
 <script src="<?php echo $root_path; ?>assets/js/core/notify.js"></script>
 <script src="<?php echo $root_path; ?>assets/js/city-autocomplete.js"></script>
 <script src="<?php echo $root_path; ?>assets/js/mobile-menu.js"></script>
-<script src="<?php echo $root_path; ?>assets/js/modal.js"></script>
+<script src="<?php echo $root_path; ?>assets/js/modals.js"></script>
 <script src="<?php echo $root_path; ?>assets/js/scroll-top.js"></script>
 
 <script src="<?php echo $root_path; ?>assets/js/auth.js"></script>

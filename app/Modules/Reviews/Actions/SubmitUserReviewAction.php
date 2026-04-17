@@ -24,13 +24,6 @@ class SubmitUserReviewAction
 				[$userId, $raterId, $comment, $rating]
 			);
 
-			// Keep denormalized value in users table in sync.
-			$db->prepareAndExecute(
-				'UPDATE users SET avg_rating = (SELECT AVG(rating) FROM user_ratings WHERE user_id = ?) WHERE id = ?',
-				'ii',
-				[$userId, $userId]
-			);
-
 			$ratingStmt = $db->prepareAndExecute(
 				'SELECT COALESCE(AVG(rating), 0) AS avg_rating, COUNT(*) AS rating_count FROM user_ratings WHERE user_id = ?',
 				'i',

@@ -1,14 +1,4 @@
 /* Housing block in profile (own + чужой) */
-
-:root {
-	--housing-surface: #ffffff;
-	--housing-ink: var(--primary-color);
-	--housing-muted: #5b6777;
-	--housing-line: rgba(15, 31, 55, 0.12);
-	--housing-shadow: 4px 4px 4px 0 rgba(29, 53, 139, 0.19);
-	--housing-radius: 18px;
-}
-
 .profile-page {
 	display: flex;
 	flex-direction: column;
@@ -32,6 +22,12 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 12px;
+}
+
+.housing-section-actions {
+	display: flex;
+	align-items: center;
 	gap: 12px;
 }
 
@@ -319,6 +315,24 @@
 
 .btn-delete-listing:hover {
 	background-color: #ffd2d7;
+	transform: translateY(-1px);
+}
+
+.btn-report-listing {
+	background-color: #fff4f4;
+	border: 1px solid rgba(194, 37, 46, 0.18);
+	border-radius: 100px;
+	padding: 7px 14px;
+	cursor: pointer;
+	color: #c2252e;
+	font-weight: 800;
+	transition:
+		background-color 0.2s,
+		transform 0.2s;
+}
+
+.btn-report-listing:hover {
+	background-color: #ffe6e8;
 	transform: translateY(-1px);
 }
 

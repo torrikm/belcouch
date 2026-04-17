@@ -83,9 +83,7 @@ App.register("housingManager", function () {
 		if (!toggleBtn) return;
 		const galleryContainer = toggleBtn.closest(".gallery-container");
 		if (!galleryContainer) return;
-		const container = galleryContainer.querySelector(
-			".thumbnails-container",
-		);
+		const container = galleryContainer.querySelector(".thumbnails-container");
 		if (!container) return;
 		const isCollapsed = container.classList.contains("is-collapsed");
 		if (isCollapsed) {
@@ -128,12 +126,8 @@ App.register("housingManager", function () {
 				const updatedProfileRight = doc.querySelector(".profile-right");
 				const currentDetails = document.querySelector(".details");
 				const updatedDetails = doc.querySelector(".details");
-				const currentReviews = document.querySelector(
-					".listing-reviews-section",
-				);
-				const updatedReviews = doc.querySelector(
-					".listing-reviews-section",
-				);
+				const currentReviews = document.querySelector(".listing-reviews-section");
+				const updatedReviews = doc.querySelector(".listing-reviews-section");
 				if (!updatedProfileRight) {
 					throw new Error("Не удалось обновить блок жилья");
 				}
@@ -148,16 +142,12 @@ App.register("housingManager", function () {
 				if (currentReviews) {
 					if (updatedReviews) {
 						currentReviews.innerHTML = updatedReviews.innerHTML;
-						const currentDetails =
-							document.querySelector(".details");
+						const currentDetails = document.querySelector(".details");
 						if (
 							currentDetails &&
 							currentReviews !== currentDetails.nextElementSibling
 						) {
-							currentDetails.insertAdjacentElement(
-								"afterend",
-								currentReviews,
-							);
+							currentDetails.insertAdjacentElement("afterend", currentReviews);
 						}
 					} else {
 						currentReviews.remove();
@@ -165,14 +155,9 @@ App.register("housingManager", function () {
 				} else if (updatedReviews) {
 					const currentDetails = document.querySelector(".details");
 					if (currentDetails && currentDetails.parentNode) {
-						currentDetails.insertAdjacentHTML(
-							"afterend",
-							updatedReviews.outerHTML,
-						);
+						currentDetails.insertAdjacentHTML("afterend", updatedReviews.outerHTML);
 					} else if (profileRight.parentElement) {
-						profileRight.parentElement.appendChild(
-							updatedReviews.cloneNode(true),
-						);
+						profileRight.parentElement.appendChild(updatedReviews.cloneNode(true));
 					}
 				}
 				document.dispatchEvent(new CustomEvent("contentUpdated"));
@@ -180,9 +165,7 @@ App.register("housingManager", function () {
 	}
 
 	function initGalleryNavigation() {
-		const galleryContainer = document.querySelector(
-			".profile-right .gallery-container",
-		);
+		const galleryContainer = document.querySelector(".profile-right .gallery-container");
 		if (!galleryContainer || galleryContainer.dataset.galleryInitialized) {
 			return;
 		}
@@ -246,9 +229,7 @@ App.register("housingManager", function () {
 				const isCollapsed = galleryContainer
 					.querySelector(".thumbnails-container")
 					?.classList.contains("is-collapsed");
-				const container = galleryContainer.querySelector(
-					".thumbnails-container",
-				);
+				const container = galleryContainer.querySelector(".thumbnails-container");
 				if (!container) return;
 				if (isCollapsed) {
 					container.classList.remove("is-collapsed");
@@ -288,9 +269,7 @@ App.register("housingManager", function () {
 					$("#listing_region_id").val(listing.region_id || "");
 					$("#notes").val(listing.notes || "");
 					$("#stay_duration_id").val(listing.stay_duration_id || "");
-					$(
-						"#property_type_id, #listing_region_id, #stay_duration_id",
-					).trigger("change");
+					$("#property_type_id, #listing_region_id, #stay_duration_id").trigger("change");
 					document
 						.querySelectorAll(
 							"#property_type_id, #listing_region_id, #stay_duration_id",
@@ -302,8 +281,7 @@ App.register("housingManager", function () {
 								}),
 							);
 						});
-					const listingCityInput =
-						document.getElementById("listing_city");
+					const listingCityInput = document.getElementById("listing_city");
 					if (listingCityInput) {
 						listingCityInput.dispatchEvent(
 							new Event("city-autocomplete:sync", {
@@ -360,15 +338,10 @@ App.register("housingManager", function () {
 					) {
 						listing.images.forEach(function (image) {
 							let src = "../" + image.image_path;
-							const preview =
-								$("<div>").addClass("photo-preview");
-							if (image.id)
-								preview.attr("data-image-id", image.id);
-							if (image.image_path)
-								preview.attr("data-path", image.image_path);
-							const img = $("<img>")
-								.attr("src", src)
-								.addClass("photo-preview-img");
+							const preview = $("<div>").addClass("photo-preview");
+							if (image.id) preview.attr("data-image-id", image.id);
+							if (image.image_path) preview.attr("data-path", image.image_path);
+							const img = $("<img>").attr("src", src).addClass("photo-preview-img");
 							const removeBtn = $(
 								"<button type='button' class='remove-photo' title='Удалить'>&times;</button>",
 							);
@@ -431,10 +404,7 @@ App.register("housingManager", function () {
 				if (data.success) {
 					window.App.notify("Объявление успешно удалено");
 					refreshHousingContent().catch(function (error) {
-						console.error(
-							"Ошибка при обновлении блока жилья:",
-							error,
-						);
+						console.error("Ошибка при обновлении блока жилья:", error);
 						window.App.notify(
 							"Объявление удалено, но обновить блок без перезагрузки не удалось.",
 							"error",
@@ -442,8 +412,7 @@ App.register("housingManager", function () {
 					});
 				} else {
 					window.App.notify(
-						"Ошибка при удалении объявления: " +
-							(data.message || "Неизвестная ошибка"),
+						"Ошибка при удалении объявления: " + (data.message || "Неизвестная ошибка"),
 						"error",
 					);
 				}
@@ -481,10 +450,7 @@ App.register("housingManager", function () {
 	// Функция для закрытия модального окна
 	function closeModal() {
 		if (modal) {
-			if (
-				window.App.modal &&
-				typeof window.App.modal.close === "function"
-			) {
+			if (window.App.modal && typeof window.App.modal.close === "function") {
 				window.App.modal.close(modal);
 				return;
 			}
@@ -531,10 +497,7 @@ App.register("housingManager", function () {
 					removeBtn.addEventListener("click", function () {
 						preview.remove();
 						// Если не осталось превью, очищаем input file
-						if (
-							previewContainer.querySelectorAll(".photo-preview")
-								.length === 0
-						) {
+						if (previewContainer.querySelectorAll(".photo-preview").length === 0) {
 							photoInput.value = "";
 						}
 					});
@@ -562,39 +525,28 @@ App.register("housingManager", function () {
 			button.addEventListener("click", function () {
 				const targetType = this.getAttribute("data-target"); // 'rules' или 'amenities'
 				const selectElement = document.getElementById(targetType);
-				const selectedItemsContainer = document.getElementById(
-					"selected-" + targetType,
-				);
+				const selectedItemsContainer = document.getElementById("selected-" + targetType);
 
 				if (!selectElement || !selectedItemsContainer) {
-					console.error(
-						"Не найдены необходимые элементы",
-						targetType,
-					);
+					console.error("Не найдены необходимые элементы", targetType);
 					return;
 				}
 
 				const selectedId = selectElement.value;
-				const selectedText =
-					selectElement.options[selectElement.selectedIndex].text;
+				const selectedText = selectElement.options[selectElement.selectedIndex].text;
 
 				if (!selectedId || selectedId === "") {
 					window.App.notify(
-						"Пожалуйста, выберите " +
-							(targetType === "rules" ? "правило" : "удобство"),
+						"Пожалуйста, выберите " + (targetType === "rules" ? "правило" : "удобство"),
 						"error",
 					);
 					return;
 				}
 
 				// Проверяем, не было ли уже добавлено это правило/удобство
-				const existingItems =
-					selectedItemsContainer.querySelectorAll(".selected-item");
+				const existingItems = selectedItemsContainer.querySelectorAll(".selected-item");
 				for (let i = 0; i < existingItems.length; i++) {
-					if (
-						existingItems[i].querySelector("input").value ===
-						selectedId
-					) {
+					if (existingItems[i].querySelector("input").value === selectedId) {
 						window.App.notify("Этот элемент уже добавлен", "error");
 						return;
 					}
@@ -645,8 +597,7 @@ App.register("housingManager", function () {
 			const listingCityInput = document.getElementById("listing_city");
 			if (
 				window.App.cityAutocomplete &&
-				typeof window.App.cityAutocomplete.validateInput ===
-					"function" &&
+				typeof window.App.cityAutocomplete.validateInput === "function" &&
 				!window.App.cityAutocomplete.validateInput(listingCityInput)
 			) {
 				return;
@@ -672,10 +623,7 @@ App.register("housingManager", function () {
 						window.App.notify(data.message);
 						closeModal();
 						refreshHousingContent().catch(function (error) {
-							console.error(
-								"Ошибка при обновлении блока жилья:",
-								error,
-							);
+							console.error("Ошибка при обновлении блока жилья:", error);
 							window.App.notify(
 								"Данные сохранены, но обновить блок без перезагрузки не удалось.",
 								"error",

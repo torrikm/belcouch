@@ -67,8 +67,7 @@ App.register("proposalsFilter", function () {
 	}
 
 	function applyFilters() {
-		listingsContent.innerHTML =
-			'<div class="loading-indicator">Загрузка результатов...</div>';
+		listingsContent.innerHTML = '<div class="loading-indicator">Загрузка результатов...</div>';
 
 		const formData = new FormData(filtersForm);
 		formData.append("page", currentPage);
@@ -103,12 +102,8 @@ App.register("proposalsFilter", function () {
 
 	function updateUrlWithFilters(formData) {
 		const params = new URLSearchParams();
-		const defaultMin = String(
-			filtersForm.querySelector(".guest-range")?.dataset.min || "1",
-		);
-		const defaultMax = String(
-			filtersForm.querySelector(".guest-range")?.dataset.max || "20",
-		);
+		const defaultMin = String(filtersForm.querySelector(".guest-range")?.dataset.min || "1");
+		const defaultMax = String(filtersForm.querySelector(".guest-range")?.dataset.max || "20");
 
 		for (const [key, value] of formData.entries()) {
 			if (key === "min_guests" && String(value) === defaultMin) {
@@ -132,8 +127,7 @@ App.register("proposalsFilter", function () {
 		}
 
 		const newUrl =
-			window.location.pathname +
-			(params.toString() ? "?" + params.toString() : "");
+			window.location.pathname + (params.toString() ? "?" + params.toString() : "");
 		window.history.pushState({}, "", newUrl);
 	}
 
@@ -158,12 +152,8 @@ App.register("proposalsFilter", function () {
 	function updateResetButton(formData) {
 		const resetBtn = document.querySelector(".reset-filters");
 		let hasActiveFilters = false;
-		const defaultMin = String(
-			filtersForm.querySelector(".guest-range")?.dataset.min || "1",
-		);
-		const defaultMax = String(
-			filtersForm.querySelector(".guest-range")?.dataset.max || "20",
-		);
+		const defaultMin = String(filtersForm.querySelector(".guest-range")?.dataset.min || "1");
+		const defaultMax = String(filtersForm.querySelector(".guest-range")?.dataset.max || "20");
 
 		for (const [key, value] of formData.entries()) {
 			if (key === "min_guests" && String(value) === defaultMin) {
@@ -180,7 +170,7 @@ App.register("proposalsFilter", function () {
 		}
 
 		if (resetBtn) {
-			resetBtn.style.display = hasActiveFilters ? "block" : "none";
+			resetBtn.style.display = hasActiveFilters ? "inline-flex" : "none";
 		}
 	}
 
@@ -206,9 +196,7 @@ App.register("proposalsFilter", function () {
 		resetFiltersBtn.addEventListener("click", function (e) {
 			e.preventDefault();
 
-			filtersForm
-				.querySelectorAll("select")
-				.forEach((select) => (select.value = "0"));
+			filtersForm.querySelectorAll("select").forEach((select) => (select.value = "0"));
 			filtersForm
 				.querySelectorAll('input[type="number"], input[type="text"]')
 				.forEach((input) => (input.value = ""));
@@ -220,18 +208,10 @@ App.register("proposalsFilter", function () {
 				const maxLimit = Number(rangeBox.dataset.max || 20);
 				const minSlider = rangeBox.querySelector(".guest-range-min");
 				const maxSlider = rangeBox.querySelector(".guest-range-max");
-				const minInput = rangeBox.querySelector(
-					'input[name="min_guests"]',
-				);
-				const maxInput = rangeBox.querySelector(
-					'input[name="max_guests"]',
-				);
-				const minValue = rangeBox.querySelector(
-					".guest-range-min-value",
-				);
-				const maxValue = rangeBox.querySelector(
-					".guest-range-max-value",
-				);
+				const minInput = rangeBox.querySelector('input[name="min_guests"]');
+				const maxInput = rangeBox.querySelector('input[name="max_guests"]');
+				const minValue = rangeBox.querySelector(".guest-range-min-value");
+				const maxValue = rangeBox.querySelector(".guest-range-max-value");
 
 				if (minSlider) minSlider.value = String(minLimit);
 				if (maxSlider) maxSlider.value = String(maxLimit);
@@ -251,13 +231,13 @@ App.register("proposalsFilter", function () {
 		applyFilters();
 	});
 
+	updateResetButton(new FormData(filtersForm));
+
 	setupPagination();
 
 	if (window.location.search) {
 		const urlParams = new URLSearchParams(window.location.search);
-		const hasOnlyRegion =
-			urlParams.has("region") &&
-			Array.from(urlParams.keys()).length === 1;
+		const hasOnlyRegion = urlParams.has("region") && Array.from(urlParams.keys()).length === 1;
 
 		if (!hasOnlyRegion) {
 			if (urlParams.has("page")) {
