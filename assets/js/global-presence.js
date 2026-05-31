@@ -97,6 +97,118 @@ App.register("globalPresence", function () {
 			});
 	}
 
+	function appendAccountNotification(payload) {
+		const title = ((payload || {}).title || "").trim();
+		const message = ((payload || {}).message || "").trim();
+		const notificationId = Number((payload || {}).notification_id || 0);
+		if (!title && !message) {
+			return;
+		}
+
+		window.App.notify(title ? title + (message ? ": " + message : "") : message, "error", {
+			clickable: false,
+			duration: 7000,
+		});
+
+		const notificationBlocks = document.querySelectorAll(".account-notifications");
+		if (!notificationBlocks.length) {
+			return;
+		}
+
+		const date = new Date();
+		const formattedDate = date.toLocaleString("ru-RU", {
+			day: "2-digit",
+			month: "2-digit",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+		});
+
+		notificationBlocks.forEach(function (block) {
+			const existingItem = block.querySelector(".account-notification-item");
+			const item = existingItem || document.createElement("div");
+			item.className = "account-notification-item";
+			if (notificationId) {
+				item.dataset.notificationId = String(notificationId);
+			}
+			item.innerHTML =
+				'<button type="button" class="account-notification-close" aria-label="Закрыть уведомление">' +
+				'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+				'<line x1="6" y1="6" x2="18" y2="18"></line>' +
+				'<line x1="18" y1="6" x2="6" y2="18"></line>' +
+				'</svg>' +
+				"</button>" +
+				'<div class="account-notification-title"></div>' +
+				'<div class="account-notification-message"></div>' +
+				'<div class="account-notification-date"></div>';
+			item.querySelector(".account-notification-title").textContent =
+				title || "Уведомление";
+			item.querySelector(".account-notification-message").textContent = message;
+			item.querySelector(".account-notification-date").textContent = formattedDate;
+			if (!existingItem) {
+				block.appendChild(item);
+			}
+		});
+	}
+
+	function deleteAccountNotification(notificationId, item, closeButton) {
+		if (!notificationId || !window.accountNotificationsCsrfToken) {
+			return Promise.reject(new Error("missing-notification-data"));
+		}
+
+		if (closeButton) {
+			closeButton.disabled = true;
+		}
+
+		const formData = new FormData();
+		formData.append("notification_id", String(notificationId));
+		formData.append("csrf_token", String(window.accountNotificationsCsrfToken));
+
+		return window.App.api
+			.postForm(API_BASE_URL + "/notifications/delete_notification.php", formData)
+			.then(function (response) {
+				if (!response || !response.success) {
+					throw new Error((response || {}).message || "Не удалось удалить уведомление");
+				}
+
+				if (item) {
+					const block = item.closest(".account-notifications");
+					item.remove();
+					if (block && !block.querySelector(".account-notification-item")) {
+						block.remove();
+					}
+				}
+			})
+			.catch(function (error) {
+				if (closeButton) {
+					closeButton.disabled = false;
+				}
+				window.App.notify(
+					"Не удалось удалить уведомление",
+					"error",
+					{ clickable: false, duration: 4000 },
+				);
+				throw error;
+			});
+	}
+
+	document.addEventListener("click", function (event) {
+		const closeButton = event.target.closest(".account-notification-close");
+		if (!closeButton) {
+			return;
+		}
+
+		const item = closeButton.closest(".account-notification-item");
+		const notificationId = Number(
+			(item && item.dataset.notificationId) || 0,
+		);
+		if (item) {
+			deleteAccountNotification(notificationId, item, closeButton).catch(function () {
+				// Ошибка уже показана в notify
+			});
+		}
+	});
+
 	function connect() {
 		if (
 			socket &&
@@ -117,6 +229,20 @@ App.register("globalPresence", function () {
 		socket.onmessage = function (event) {
 			const payload = JSON.parse(event.data || "{}");
 			if (payload.event !== "chat:message_created") {
+				if (payload.event === "account:notification") {
+					const accountPayload = (payload || {}).payload || {};
+					appendAccountNotification(accountPayload);
+					if (
+						accountPayload.type === "listing_deleted_by_report" &&
+						typeof window.dispatchEvent === "function"
+					) {
+						window.dispatchEvent(
+							new CustomEvent("account:listing_deleted_by_report", {
+								detail: accountPayload,
+							}),
+						);
+					}
+				}
 				return;
 			}
 

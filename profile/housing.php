@@ -8,8 +8,22 @@
 require_once '../bootstrap.php';
 $pageTitle = "Управление жильем";
 $root_path = '../';
-$additionalJs = ['../assets/js/housing_fixed.js', '../assets/js/listing_review.js', '../assets/js/favorites.js', '../assets/js/listing-report.js'];
-$additionalCss = ['../assets/css/profile.css', '../assets/css/proposals.css', '../assets/css/review.css', '../assets/css/housing.css', '../assets/css/housing-modal.css'];
+$additionalJs = [
+	'https://cdn.jsdelivr.net/npm/flatpickr',
+	'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js',
+	'../assets/js/housing_fixed.js',
+	'../assets/js/listing_review.js',
+	'../assets/js/favorites.js',
+	'../assets/js/listing-report.js'
+];
+$additionalCss = [
+	'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+	'../assets/css/profile.css',
+	'../assets/css/proposals.css',
+	'../assets/css/review.css',
+	'../assets/css/housing.css',
+	'../assets/css/housing-modal.css'
+];
 
 if (!isset($_SESSION['user_id']) && !isset($_GET['id'])) {
 	header('Location: ../index.php#login-modal');
@@ -27,6 +41,7 @@ try {
 	$starRating = $profileData['starRating'];
 	$regions = $profileService->getRegions();
 	$listingReportCsrfToken = Csrf::token();
+	$housingCsrfToken = Csrf::token();
 } catch (Exception $e) {
 	header('Location: ../index.php');
 	exit;
@@ -56,6 +71,7 @@ try {
 	$has_reviews = !empty($reviews);
 	$can_review = $listing ? $housingService->canReviewListing($listing_id, (int) $listing['user_id']) : false;
 	$has_reported = $listing ? $housingService->hasUserReported($listing_id) : false;
+	$unavailable_dates = $housingData['unavailable_dates'] ?? [];
 } catch (Exception $e) {
 	$has_housing = false;
 	$listing = null;
@@ -74,8 +90,22 @@ try {
 	$reviews = [];
 	$has_reviews = false;
 	$can_review = false;
+	$unavailable_dates = [];
+}
+
+$notifications = [];
+if ($isOwnProfile && isset($_SESSION['user_id'])) {
+	try {
+		$notifications = (new NotificationService())->getUserNotifications((int) $_SESSION['user_id'], 5);
+	} catch (Exception $e) {
+		$notifications = [];
+	}
 }
 ?>
+
+<script>
+	window.accountNotificationsCsrfToken = "<?php echo htmlspecialchars((string) $housingCsrfToken, ENT_QUOTES, 'UTF-8'); ?>";
+</script>
 
 <div class="container">
 	<div class="profile-page">
@@ -94,6 +124,24 @@ try {
 				</div>
 
 				<div class="profile-block profile-housing-block">
+					<?php if ($isOwnProfile && !empty($notifications)): ?>
+						<div class="account-notifications">
+							<h3>Уведомления аккаунта</h3>
+							<?php foreach ($notifications as $notification): ?>
+								<div class="account-notification-item" data-notification-id="<?php echo (int) $notification['id']; ?>">
+									<button type="button" class="account-notification-close" aria-label="Закрыть уведомление">
+										<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+											<line x1="6" y1="6" x2="18" y2="18"></line>
+											<line x1="18" y1="6" x2="6" y2="18"></line>
+										</svg>
+									</button>
+									<div class="account-notification-title"><?php echo htmlspecialchars((string) $notification['title']); ?></div>
+									<div class="account-notification-message"><?php echo nl2br(htmlspecialchars((string) $notification['message'])); ?></div>
+									<div class="account-notification-date"><?php echo date('d.m.Y H:i', strtotime((string) $notification['created_at'])); ?></div>
+								</div>
+							<?php endforeach; ?>
+						</div>
+					<?php endif; ?>
 					<?php if (!$has_housing && $isOwnProfile): ?>
 						<div class="no-listings">
 							<h3>У Вас пока нет предложений жилья!</h3>
@@ -383,6 +431,7 @@ try {
 			<div class="modal-body">
 				<form id="housing-form" method="post" enctype="multipart/form-data"
 					action="<?php echo API_URL; ?>/listings/add_listing.php">
+					<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars((string) $housingCsrfToken); ?>">
 					<input type="hidden" id="listing_id" name="listing_id" value="">
 
 					<div class="form-group">
@@ -486,6 +535,7 @@ try {
 						</div>
 						<div class="selected-items-container" id="selected-amenities"></div>
 					</div>
+					<input type="hidden" id="unavailable_dates_json" name="unavailable_dates_json" value="[]">
 				</form>
 			</div>
 			<div class="modal-footer">

@@ -59,8 +59,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 <div class="profile-header">
 	<div class="profile-avatar-container">
 		<?php if ($user['avatar_image']): ?>
-			<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $user['id']; ?>"
-				alt="Аватар" class="profile-avatar">
+			<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $user['id']; ?>" alt="Аватар"
+				class="profile-avatar">
 		<?php else: ?>
 			<div class="profile-avatar profile-avatar-placeholder">
 				<?php echo mb_substr($user['first_name'], 0, 1) . mb_substr($user['last_name'], 0, 1); ?>
@@ -105,7 +105,7 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 
 				<?php if ($hasAge): ?>
 					<div class="profile-age">
-						<span><?php echo $age; ?> <?php echo plural_form($age, ['год', 'года', 'лет']); ?></span>
+						<span><?php echo $age; ?> 		<?php echo plural_form($age, ['год', 'года', 'лет']); ?></span>
 					</div>
 				<?php endif; ?>
 			</div>
@@ -129,6 +129,19 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 					</span>
 				<?php endif; ?>
 			</div>
+			<?php if (!empty($has_housing) && !empty($listing)): ?>
+				<button type="button" class="btn-calendar-listing profile-calendar-button" data-open-calendar="1"
+					data-tooltip="<?php echo $isOwnProfile ? 'Нажмите, чтобы отметить дни, когда вы не принимаете гостей' : 'Здесь отмечены дни, когда вас не смогут принять'; ?>"
+					aria-label="<?php echo $isOwnProfile ? 'Открыть календарь недоступных дат' : 'Посмотреть занятые даты'; ?>">
+					<svg class="btn-calendar-listing__icon" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+						<line x1="16" y1="2" x2="16" y2="6"></line>
+						<line x1="8" y1="2" x2="8" y2="6"></line>
+						<line x1="3" y1="10" x2="21" y2="10"></line>
+					</svg>
+				</button>
+			<?php endif; ?>
 		</div>
 
 		<?php if ($isOwnProfile): ?>
@@ -140,9 +153,12 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 					<?php if (($verificationRequest['status'] ?? '') === 'pending'): ?>
 						<button type="button" class="btn btn-outline-primary" disabled aria-disabled="true">На модерации</button>
 					<?php elseif (($verificationRequest['status'] ?? '') === 'rejected'): ?>
-						<button type="button" class="btn btn-outline-primary" onclick="window.App && window.App.modal ? window.App.modal.open('verification-request-modal') : null;">Заявка отклонена</button>
+						<button type="button" class="btn btn-outline-primary"
+							onclick="window.App && window.App.modal ? window.App.modal.open('verification-request-modal') : null;">Заявка
+							отклонена</button>
 					<?php else: ?>
-						<button type="button" class="btn btn-outline-primary" onclick="window.App && window.App.modal ? window.App.modal.open('verification-request-modal') : null;">Верификация</button>
+						<button type="button" class="btn btn-outline-primary"
+							onclick="window.App && window.App.modal ? window.App.modal.open('verification-request-modal') : null;">Верификация</button>
 					<?php endif; ?>
 				<?php endif; ?>
 			</div>
@@ -151,18 +167,81 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 					<div class="verification-rejected-note__title">Заявка отклонена</div>
 					<?php if (!empty($verificationRequest['admin_note'])): ?>
 						<div class="verification-rejected-note__label">Причина</div>
-						<div class="verification-rejected-note__text"><?php echo nl2br(htmlspecialchars((string) $verificationRequest['admin_note'])); ?></div>
+						<div class="verification-rejected-note__text">
+							<?php echo nl2br(htmlspecialchars((string) $verificationRequest['admin_note'])); ?></div>
 					<?php endif; ?>
 				</div>
 			<?php endif; ?>
 		<?php else: ?>
 			<div class="profile-actions">
-				<a href="<?php echo isset($root_path) ? $root_path : '../'; ?>chat?user_id=<?php echo (int) $user['id']; ?>" class="btn btn-message">Написать сообщение</a>
+				<a href="<?php echo isset($root_path) ? $root_path : '../'; ?>chat?user_id=<?php echo (int) $user['id']; ?>"
+					class="btn btn-message">Написать сообщение</a>
 			</div>
 		<?php endif; ?>
 	</div>
 </div>
 
+
+<?php if (!empty($has_housing) && !empty($listing)): ?>
+	<script>
+		window.listingUnavailableDates = <?php echo json_encode($unavailable_dates ?? [], JSON_UNESCAPED_UNICODE); ?>;
+		window.currentHousingListingId = <?php echo (int) ($listing_id ?? 0); ?>;
+	</script>
+	<div id="listing-calendar-modal" class="modal-overlay" data-modal-width="560px">
+		<div class="modal">
+			<div class="modal-header">
+				<h2 class="modal-title"><?php echo $isOwnProfile ? 'Календарь недоступных дат' : 'Календарь занятых дат'; ?>
+				</h2>
+				<button type="button" class="modal-close">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</button>
+			</div>
+			<div class="modal-body">
+				<?php if ($isOwnProfile): ?>
+					<p class="calendar-modal-hint">Нажмите на дату, чтобы отметить недоступной или снова сделать доступной.</p>
+				<?php endif; ?>
+				<div class="calendar-custom-toolbar">
+					<label for="calendar-month-select">Месяц:</label>
+					<select id="calendar-month-select" class="calendar-month-select form-control">
+						<option value="0">Январь</option>
+						<option value="1">Февраль</option>
+						<option value="2">Март</option>
+						<option value="3">Апрель</option>
+						<option value="4">Май</option>
+						<option value="5">Июнь</option>
+						<option value="6">Июль</option>
+						<option value="7">Август</option>
+						<option value="8">Сентябрь</option>
+						<option value="9">Октябрь</option>
+						<option value="10">Ноябрь</option>
+						<option value="11">Декабрь</option>
+					</select>
+					<label for="calendar-year-select">Год:</label>
+					<select id="calendar-year-select" class="calendar-year-select form-control">
+						<?php $currentYear = (int) date('Y'); ?>
+						<option value="<?php echo $currentYear; ?>"><?php echo $currentYear; ?></option>
+						<option value="<?php echo $currentYear + 1; ?>"><?php echo $currentYear + 1; ?></option>
+					</select>
+				</div>
+				<div id="listing-availability-calendar-modal-wrap"
+					class="<?php echo $isOwnProfile ? '' : 'availability-flatpickr-readonly'; ?>">
+					<input type="text" id="listing-availability-calendar-modal"
+						data-editable="<?php echo $isOwnProfile ? '1' : '0'; ?>">
+				</div>
+			</div>
+			<div class="modal-footer">
+				<?php if ($isOwnProfile): ?>
+					<button type="button" class="btn-save" id="calendar-apply-btn">Применить</button>
+				<?php endif; ?>
+				<button type="button" class="btn-cancel">Закрыть</button>
+			</div>
+		</div>
+	</div>
+<?php endif; ?>
 
 <!-- Модальное окно для редактирования профиля -->
 <?php if ($isOwnProfile): ?>
@@ -171,7 +250,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 			<div class="modal-header">
 				<h2 class="modal-title">Редактирование профиля</h2>
 				<button type="button" class="modal-close">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="18" y1="6" x2="6" y2="18"></line>
 						<line x1="6" y1="6" x2="18" y2="18"></line>
 					</svg>
@@ -181,7 +261,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 				<form id="edit-profile-form" enctype="multipart/form-data">
 					<div class="avatar-upload-container">
 						<?php if ($user['avatar_image']): ?>
-							<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $user['id']; ?>" alt="Аватар" class="current-avatar">
+							<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $user['id']; ?>" alt="Аватар"
+								class="current-avatar">
 						<?php else: ?>
 							<div class="current-avatar">
 								<?php echo mb_substr($user['first_name'], 0, 1) . mb_substr($user['last_name'], 0, 1); ?>
@@ -265,7 +346,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 			<div class="modal-header">
 				<h2 class="modal-title">Редактирование информации о себе</h2>
 				<button type="button" class="modal-close">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="18" y1="6" x2="6" y2="18"></line>
 						<line x1="6" y1="6" x2="18" y2="18"></line>
 					</svg>
@@ -275,11 +357,11 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 				<form id="edit-bio-form">
 					<div class="form-group">
 						<label for="description">О себе</label>
-						<textarea id="description" name="description" class="form-control" rows="6"
-							maxlength="800"
+						<textarea id="description" name="description" class="form-control" rows="6" maxlength="800"
 							placeholder="Расскажите немного о себе..."><?php echo htmlspecialchars($user['description'] ?? ''); ?></textarea>
 						<div class="bio-length-hint">
-							<span id="description-length-value"><?php echo mb_strlen((string) ($user['description'] ?? '')); ?></span>/800
+							<span
+								id="description-length-value"><?php echo mb_strlen((string) ($user['description'] ?? '')); ?></span>/800
 						</div>
 					</div>
 
@@ -318,7 +400,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 			<div class="modal-header">
 				<h2 class="modal-title">Изменение пароля</h2>
 				<button type="button" class="modal-close">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="18" y1="6" x2="6" y2="18"></line>
 						<line x1="6" y1="6" x2="18" y2="18"></line>
 					</svg>
@@ -358,7 +441,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 			<div class="modal-header">
 				<h2 class="modal-title">Подтверждение личности</h2>
 				<button type="button" class="modal-close">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="18" y1="6" x2="6" y2="18"></line>
 						<line x1="6" y1="6" x2="18" y2="18"></line>
 					</svg>
@@ -366,9 +450,11 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 			</div>
 			<div class="modal-body">
 				<form id="verification-request-form" enctype="multipart/form-data">
-					<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars((string) $verificationCsrfToken); ?>">
+					<input type="hidden" name="csrf_token"
+						value="<?php echo htmlspecialchars((string) $verificationCsrfToken); ?>">
 					<p class="verification-form-note">
-						Загрузите чёткое фото документа. Имя и фамилия в профиле должны совпадать с паспортом. Изображение будет доступно только администраторам для ручной проверки.
+						Загрузите чёткое фото документа. Имя и фамилия в профиле должны совпадать с паспортом. Изображение
+						будет доступно только администраторам для ручной проверки.
 					</p>
 
 					<div class="form-group">
@@ -376,7 +462,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 						<div class="verification-upload">
 							<label for="document_photo" class="verification-upload-btn">Выбрать файл</label>
 							<span class="verification-upload-text" id="verification-file-name">Файл не выбран</span>
-							<input type="file" id="document_photo" name="document_photo" class="verification-file-input" accept="image/jpeg,image/png,image/webp" required>
+							<input type="file" id="document_photo" name="document_photo" class="verification-file-input"
+								accept="image/jpeg,image/png,image/webp" required>
 						</div>
 						<div id="verification-preview-container" class="verification-preview verification-preview--hidden">
 							<img id="verification-preview-image" src="" alt="Предпросмотр документа">

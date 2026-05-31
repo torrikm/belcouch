@@ -20,6 +20,9 @@ class SaveListingAction
 		$stayDurationId = isset($_POST['stay_duration_id']) ? (int) $_POST['stay_duration_id'] : 0;
 		$rules = isset($_POST['rules']) && is_array($_POST['rules']) ? $_POST['rules'] : [];
 		$amenities = isset($_POST['amenities']) && is_array($_POST['amenities']) ? $_POST['amenities'] : [];
+		$unavailableDatesJson = isset($_POST['unavailable_dates_json']) ? (string) $_POST['unavailable_dates_json'] : '[]';
+		$unavailableDates = json_decode($unavailableDatesJson, true);
+		$unavailableDates = is_array($unavailableDates) ? $unavailableDates : [];
 
 		if ($propertyTypeId <= 0 || $title === '') {
 			JsonResponse::send(['success' => false, 'message' => 'Пожалуйста, заполните все обязательные поля'], 422);
@@ -43,6 +46,7 @@ class SaveListingAction
 
 			$db->prepareAndExecute('DELETE FROM listing_rules WHERE listing_id = ?', 'i', [$listingId]);
 			$db->prepareAndExecute('DELETE FROM listing_amenities WHERE listing_id = ?', 'i', [$listingId]);
+			$db->prepareAndExecute('DELETE FROM listing_unavailable_dates WHERE listing_id = ?', 'i', [$listingId]);
 
 			foreach ($rules as $ruleId) {
 				$ruleId = (int) $ruleId;
@@ -56,6 +60,18 @@ class SaveListingAction
 				if ($amenityId > 0) {
 					$db->prepareAndExecute('INSERT INTO listing_amenities (listing_id, amenity_id) VALUES (?, ?)', 'ii', [$listingId, $amenityId]);
 				}
+			}
+
+			foreach ($unavailableDates as $rawDate) {
+				$rawDate = trim((string) $rawDate);
+				if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $rawDate)) {
+					continue;
+				}
+				$db->prepareAndExecute(
+					'INSERT INTO listing_unavailable_dates (listing_id, unavailable_date) VALUES (?, ?)',
+					'is',
+					[$listingId, $rawDate]
+				);
 			}
 
 			$listingsRoot = dirname(__DIR__, 4) . '/assets/img/listings';

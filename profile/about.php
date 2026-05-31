@@ -8,8 +8,19 @@
 require_once '../bootstrap.php';
 $pageTitle = "О пользователе";
 $root_path = '../';
-$additionalCss = ['../assets/css/profile.css', '../assets/css/review.css'];
-$additionalJs = ['../assets/js/review.js', '../assets/js/user-verification.js'];
+$additionalCss = [
+	'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+	'../assets/css/profile.css',
+	'../assets/css/review.css',
+	'../assets/css/housing.css',
+];
+$additionalJs = [
+	'https://cdn.jsdelivr.net/npm/flatpickr',
+	'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js',
+	'../assets/js/housing_fixed.js',
+	'../assets/js/review.js',
+	'../assets/js/user-verification.js',
+];
 
 if (!isset($_GET['id']) && !isset($_SESSION['user_id'])) {
 	header("Location: ../index.php#login-modal");
@@ -52,6 +63,12 @@ try {
 	$isOwnProfile = $profileData['isOwnProfile'];
 	$starRating = $profileData['starRating'];
 	$registrationDateFormatted = $profileData['registrationDateFormatted'];
+	$housingService = new ProfileHousingService();
+	$housingData = $housingService->getUserListingSummary($profile_id);
+	$has_housing = $housingData['has_housing'];
+	$listing = $housingData['listing'];
+	$listing_id = $housingData['listing_id'];
+	$unavailable_dates = $housingData['unavailable_dates'] ?? [];
 } catch (Exception $e) {
 	header('Location: ../index.php');
 	exit;

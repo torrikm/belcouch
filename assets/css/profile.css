@@ -123,6 +123,96 @@
 	border-radius: 100px;
 }
 
+.profile-rating-container {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: nowrap;
+	justify-content: center;
+	margin-bottom: 20px;
+}
+
+.profile-rating-container .profile-rating {
+	margin-bottom: 0;
+}
+
+.profile-rating-container .profile-calendar-button.btn-calendar-listing {
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid rgba(29, 53, 139, 0.18);
+	border-radius: 50%;
+	background: #eef4ff;
+	position: relative;
+	flex-shrink: 0;
+}
+
+.profile-rating-container .profile-calendar-button.btn-calendar-listing:hover,
+.profile-rating-container .profile-calendar-button.btn-calendar-listing:focus-visible {
+	background: #e4edff;
+}
+
+.profile-calendar-button__icon,
+.btn-calendar-listing__icon {
+	width: 18px;
+	height: 18px;
+	display: inline-block;
+	color: #1d358b;
+	flex-shrink: 0;
+}
+
+.profile-rating-container .profile-calendar-button.btn-calendar-listing::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	left: 50%;
+	bottom: calc(100% + 10px);
+	transform: translateX(-50%) translateY(6px);
+	min-width: 220px;
+	max-width: 280px;
+	padding: 8px 10px;
+	border-radius: 10px;
+	background: rgba(15, 31, 55, 0.96);
+	color: #fff;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.35;
+	text-align: center;
+	opacity: 0;
+	pointer-events: none;
+	transition:
+		opacity 0.2s,
+		transform 0.2s;
+	z-index: 30;
+}
+
+.profile-rating-container .profile-calendar-button.btn-calendar-listing::before {
+	content: "";
+	position: absolute;
+	left: 50%;
+	bottom: calc(100% + 4px);
+	transform: translateX(-50%) translateY(6px);
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-top: 6px solid rgba(15, 31, 55, 0.96);
+	opacity: 0;
+	pointer-events: none;
+	transition:
+		opacity 0.2s,
+		transform 0.2s;
+	z-index: 30;
+}
+
+.profile-rating-container .profile-calendar-button.btn-calendar-listing:hover::after,
+.profile-rating-container .profile-calendar-button.btn-calendar-listing:hover::before,
+.profile-rating-container .profile-calendar-button.btn-calendar-listing:focus-visible::after,
+.profile-rating-container .profile-calendar-button.btn-calendar-listing:focus-visible::before {
+	opacity: 1;
+	transform: translateX(-50%) translateY(0);
+}
+
 .rating-score {
 	font-size: 22px;
 	font-weight: 600;
@@ -262,6 +352,80 @@
 	padding: 25px;
 	display: flex;
 	flex-direction: column;
+}
+
+.account-notifications {
+	border: 1px solid rgba(15, 31, 55, 0.12);
+	border-radius: 14px;
+	padding: 14px;
+	background: #f8fbff;
+	margin-bottom: 16px;
+}
+
+.account-notifications h3 {
+	margin: 0 0 10px;
+	font-size: 16px;
+}
+
+.account-notification-item {
+	position: relative;
+	padding: 10px;
+	border: 1px solid rgba(15, 31, 55, 0.12);
+	border-radius: 10px;
+	background: #fff;
+}
+
+.account-notification-item + .account-notification-item {
+	margin-top: 8px;
+}
+
+.account-notification-title {
+	font-weight: 700;
+}
+
+.account-notification-message {
+	margin-top: 4px;
+	color: #475467;
+}
+
+.account-notification-date {
+	margin-top: 6px;
+	font-size: 12px;
+	color: #667085;
+}
+
+.account-notification-close {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	width: 24px;
+	height: 24px;
+	border: none;
+	border-radius: 50%;
+	background: transparent;
+	color: #98a2b3;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease,
+		transform 0.2s ease;
+}
+
+.account-notification-close svg {
+	width: 14px;
+	height: 14px;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+}
+
+.account-notification-close:hover {
+	background: rgba(15, 31, 55, 0.06);
+	color: #344054;
+	transform: scale(1.05);
 }
 
 /* Заголовок секции с кнопкой редактирования */
@@ -554,6 +718,10 @@
 
 	.profile-rating {
 		justify-content: center;
+	}
+
+	.profile-rating-container {
+		flex-wrap: wrap;
 	}
 
 	.profile-nav {

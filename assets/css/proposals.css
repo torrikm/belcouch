@@ -588,8 +588,11 @@
 	box-shadow: var(--filters-shadow);
 	padding: 12px;
 	flex: 0 0 300px;
+	max-width: 300px;
 	position: sticky;
 	top: 20px;
+	overflow: hidden;
+	box-sizing: border-box;
 }
 
 .filters-header {
@@ -649,6 +652,7 @@
 .filter-group input[type="text"],
 .filter-group input[type="number"] {
 	width: 100%;
+	max-width: 276px;
 	border: 1px solid var(--filters-line);
 	border-radius: 10px;
 	padding: 10px 12px;
@@ -659,6 +663,9 @@
 		border-color 0.2s,
 		box-shadow 0.2s,
 		background-color 0.2s;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .filter-group select:focus,
@@ -742,6 +749,7 @@
 .filter-checkboxes,
 .filters-modal .checkbox-group {
 	max-height: 176px;
+	max-width: 276px;
 	overflow-y: auto;
 	border: 1px solid var(--filters-line);
 	border-radius: 10px;

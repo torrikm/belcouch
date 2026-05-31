@@ -70,6 +70,7 @@ class ListingsApiService
 			'city' => isset($input['city']) ? trim((string) $input['city']) : '',
 			'has_amenities' => isset($input['amenities']) && is_array($input['amenities']) ? $input['amenities'] : [],
 			'has_rules' => isset($input['rules']) && is_array($input['rules']) ? $input['rules'] : [],
+			'sort' => isset($input['sort']) ? trim((string) $input['sort']) : 'newest',
 		];
 	}
 
@@ -144,6 +145,7 @@ class ListingsApiService
 			'where_clause' => empty($conditions) ? '' : 'WHERE ' . implode(' AND ', $conditions),
 			'params' => $params,
 			'types' => $types,
+			'sort' => $filters['sort'] ?? 'newest',
 		];
 	}
 
@@ -163,7 +165,8 @@ class ListingsApiService
 
 	private function getListings(array $whereData, int $offset, int $perPage): array
 	{
-		$sql = "SELECT l.*, pt.name as property_type_name, r.name as region_name, sd.name as stay_duration_name, u.first_name, u.last_name, COALESCE(ur.avg_rating, 0) as user_rating, u.avatar_image, u.is_verify FROM listings l JOIN property_types pt ON l.property_type_id = pt.id JOIN regions r ON l.region_id = r.id LEFT JOIN stay_durations sd ON l.stay_duration_id = sd.id JOIN users u ON l.user_id = u.id LEFT JOIN (SELECT user_id, AVG(rating) as avg_rating FROM user_ratings GROUP BY user_id) ur ON ur.user_id = u.id {$whereData['where_clause']} ORDER BY l.created_at DESC LIMIT {$offset}, {$perPage}";
+		$orderBy = $this->resolveOrderBy($whereData['sort'] ?? 'newest');
+		$sql = "SELECT l.*, pt.name as property_type_name, r.name as region_name, sd.name as stay_duration_name, u.first_name, u.last_name, COALESCE(ur.avg_rating, 0) as user_rating, u.avatar_image, u.is_verify FROM listings l JOIN property_types pt ON l.property_type_id = pt.id JOIN regions r ON l.region_id = r.id LEFT JOIN stay_durations sd ON l.stay_duration_id = sd.id JOIN users u ON l.user_id = u.id LEFT JOIN (SELECT user_id, AVG(rating) as avg_rating FROM user_ratings GROUP BY user_id) ur ON ur.user_id = u.id {$whereData['where_clause']} ORDER BY {$orderBy} LIMIT {$offset}, {$perPage}";
 
 		$result = empty($whereData['params'])
 			? $this->db->query($sql)
@@ -206,5 +209,14 @@ class ListingsApiService
 		}
 
 		return 'assets/img/listing-placeholder.svg';
+	}
+
+	private function resolveOrderBy(string $sort): string
+	{
+		return match ($sort) {
+			'listing_rating_desc' => 'COALESCE(l.avg_rating, 0) DESC, l.created_at DESC',
+			'user_rating_desc' => 'COALESCE(ur.avg_rating, 0) DESC, l.created_at DESC',
+			default => 'l.created_at DESC',
+		};
 	}
 }

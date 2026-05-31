@@ -27,7 +27,7 @@ class SubmitSupportRequestAction
 				isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null
 			);
 
-			JsonResponse::send(['success' => true, 'message' => 'Обращение отправлено в поддержку']);
+			JsonResponse::send(['success' => true, 'message' => 'Обращение отправлено в поддержку. Письмо ушло на почту службы поддержки.']);
 		} catch (Exception $exception) {
 			JsonResponse::send(['success' => false, 'message' => $exception->getMessage()], 422);
 		}

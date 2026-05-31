@@ -57,10 +57,22 @@ class GetListingAction
             $listing['rules'] = $rules;
             $listing['amenities'] = $amenities;
             $listing['images'] = $images;
+            $datesStmt = $db->prepareAndExecute(
+                'SELECT unavailable_date FROM listing_unavailable_dates WHERE listing_id = ? ORDER BY unavailable_date ASC',
+                'i',
+                [$listingId]
+            );
+            $dates = [];
+            $datesResult = $datesStmt->get_result();
+            while ($dateRow = $datesResult->fetch_assoc()) {
+                $dates[] = $dateRow['unavailable_date'];
+            }
+            $listing['unavailable_dates'] = $dates;
             $listing['debug'] = [
                 'rules_count' => count($rules),
                 'amenities_count' => count($amenities),
-                'images_count' => count($images)
+                'images_count' => count($images),
+                'unavailable_dates_count' => count($dates),
             ];
 
             JsonResponse::send(['success' => true, 'listing' => $listing]);

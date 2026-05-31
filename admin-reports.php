@@ -32,7 +32,7 @@ include __DIR__ . '/includes/header.php';
 						</div>
 						<div class="admin-request-grid admin-request-grid--reports">
 							<a href="profile/housing?id=<?php echo (int) $report['listing_id']; ?>" class="admin-request-meta-item admin-request-meta-item--wide admin-request-meta-item--link"><span>Объявление</span><strong><?php echo htmlspecialchars($report['listing_title']); ?></strong></a>
-							<div class="admin-request-meta-item"><span>Отправлена</span><strong><?php echo htmlspecialchars($report['created_at']); ?></strong></div>
+							<div class="admin-request-meta-item"><span>Отправлена</span><strong><?php echo date('d.m.Y H:i', strtotime((string) $report['created_at'])); ?></strong></div>
 						</div>
 						<div class="admin-report-participants">
 							<a href="profile/about?id=<?php echo (int) $report['reporter_id']; ?>" class="admin-report-person admin-report-person--link">

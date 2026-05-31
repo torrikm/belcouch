@@ -196,7 +196,13 @@ App.register("proposalsFilter", function () {
 		resetFiltersBtn.addEventListener("click", function (e) {
 			e.preventDefault();
 
-			filtersForm.querySelectorAll("select").forEach((select) => (select.value = "0"));
+			filtersForm.querySelectorAll("select").forEach((select) => {
+				if (select.name === "sort") {
+					select.value = "newest";
+					return;
+				}
+				select.value = "0";
+			});
 			filtersForm
 				.querySelectorAll('input[type="number"], input[type="text"]')
 				.forEach((input) => (input.value = ""));

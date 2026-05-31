@@ -48,6 +48,7 @@ class ProfileHousingService
 				'amenities' => [],
 				'duration_name' => 'Не указано',
 				'listing_count' => 0,
+				'unavailable_dates' => [],
 			];
 		}
 
@@ -102,6 +103,17 @@ class ProfileHousingService
 		$countResult = $countStmt->get_result();
 		$listingCount = (int) $countResult->fetch_assoc()['count'];
 
+		$unavailableDatesStmt = $this->db->prepareAndExecute(
+			'SELECT unavailable_date FROM listing_unavailable_dates WHERE listing_id = ? ORDER BY unavailable_date ASC',
+			'i',
+			[$listingId]
+		);
+		$unavailableDatesResult = $unavailableDatesStmt->get_result();
+		$unavailableDates = [];
+		while ($row = $unavailableDatesResult->fetch_assoc()) {
+			$unavailableDates[] = $row['unavailable_date'];
+		}
+
 		return [
 			'has_housing' => true,
 			'listing' => $listing,
@@ -112,6 +124,7 @@ class ProfileHousingService
 			'amenities' => $amenities,
 			'duration_name' => $durationName,
 			'listing_count' => $listingCount,
+			'unavailable_dates' => $unavailableDates,
 		];
 	}
 

@@ -51,6 +51,7 @@ class ProposalsPageService
 			'city' => isset($_GET['city']) ? trim($_GET['city']) : '',
 			'has_amenities' => isset($_GET['amenities']) && is_array($_GET['amenities']) ? $_GET['amenities'] : [],
 			'has_rules' => isset($_GET['rules']) && is_array($_GET['rules']) ? $_GET['rules'] : [],
+			'sort' => isset($_GET['sort']) ? trim((string) $_GET['sort']) : 'newest',
 		];
 	}
 
@@ -112,6 +113,7 @@ class ProposalsPageService
 			'where_clause' => !empty($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : '',
 			'params' => $params,
 			'types' => $types,
+			'sort' => $filters['sort'] ?? 'newest',
 		];
 	}
 
@@ -134,6 +136,7 @@ class ProposalsPageService
 
 	private function getListings(array $whereData, int $offset, int $perPage): array
 	{
+		$orderBy = $this->resolveOrderBy($whereData['sort'] ?? 'newest');
 		$sql = "SELECT l.*, pt.name as property_type_name, r.name as region_name,
                 sd.name as stay_duration_name, u.first_name, u.last_name, COALESCE(ur.avg_rating, 0) as user_rating, u.is_verify,
                 u.avatar_image
@@ -148,7 +151,7 @@ class ProposalsPageService
                     GROUP BY user_id
                 ) ur ON ur.user_id = u.id
                 {$whereData['where_clause']}
-                ORDER BY l.created_at DESC
+                ORDER BY {$orderBy}
                 LIMIT {$offset}, {$perPage}";
 
 		$result = empty($whereData['params'])
@@ -204,5 +207,14 @@ class ProposalsPageService
 		}
 
 		return $items;
+	}
+
+	private function resolveOrderBy(string $sort): string
+	{
+		return match ($sort) {
+			'listing_rating_desc' => 'COALESCE(l.avg_rating, 0) DESC, l.created_at DESC',
+			'user_rating_desc' => 'COALESCE(ur.avg_rating, 0) DESC, l.created_at DESC',
+			default => 'l.created_at DESC',
+		};
 	}
 }

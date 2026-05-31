@@ -30,6 +30,18 @@ App.register("housingManager", function () {
 	const modalTitle = document.getElementById("housing-modal-title");
 	const listingIdInput = document.getElementById("listing_id");
 	const profileRight = document.querySelector(".profile-right");
+	const unavailableDatesInput = document.getElementById("unavailable_dates_json");
+	let unavailableDates = Array.isArray(window.listingUnavailableDates)
+		? window.listingUnavailableDates.slice()
+		: [];
+	const calendarModal = document.getElementById("listing-calendar-modal");
+	const calendarApplyBtn = document.getElementById("calendar-apply-btn");
+	const calendarMonthSelect = document.getElementById("calendar-month-select");
+	const calendarYearSelect = document.getElementById("calendar-year-select");
+	let availabilityPicker = null;
+	let monthSelectBound = false;
+	let yearSelectBound = false;
+	let draftUnavailableDates = [];
 
 	console.log("DOM загружен, ищем элементы:", {
 		modal: modal,
@@ -59,6 +71,11 @@ App.register("housingManager", function () {
 		if (selectedAmenities) {
 			selectedAmenities.innerHTML = "";
 		}
+		unavailableDates = [];
+		draftUnavailableDates = [];
+		if (unavailableDatesInput) {
+			unavailableDatesInput.value = "[]";
+		}
 		document
 			.querySelectorAll(
 				"#property_type_id, #listing_region_id, #stay_duration_id, #rules, #amenities",
@@ -73,9 +90,107 @@ App.register("housingManager", function () {
 			});
 	}
 
+	function renderAvailabilityCalendar() {
+		const calendarInput = document.getElementById("listing-availability-calendar-modal");
+		if (!calendarInput || typeof flatpickr !== "function") return;
+		const isEditable = calendarInput.dataset.editable === "1";
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const minSelectableDate = new Date(today);
+		minSelectableDate.setDate(minSelectableDate.getDate() + 1);
+
+		if (availabilityPicker) {
+			availabilityPicker.destroy();
+			availabilityPicker = null;
+		}
+
+		const config = {
+			inline: true,
+			dateFormat: "Y-m-d",
+			mode: "multiple",
+			defaultDate: draftUnavailableDates,
+			minDate: minSelectableDate,
+			monthSelectorType: "static",
+			locale:
+				(typeof flatpickr.l10ns !== "undefined" && flatpickr.l10ns.ru) ||
+				"default",
+			onReady: function (_, __, instance) {
+				syncCustomMonthControls(instance);
+			},
+			onMonthChange: function (_, __, instance) {
+				syncCustomMonthControls(instance);
+			},
+			onYearChange: function (_, __, instance) {
+				syncCustomMonthControls(instance);
+			},
+			onChange: function (selectedDates) {
+				if (!isEditable) return;
+				draftUnavailableDates = selectedDates
+					.map((date) => availabilityPicker.formatDate(date, "Y-m-d"))
+					.sort();
+			},
+		};
+
+		availabilityPicker = flatpickr(calendarInput, config);
+		calendarInput.setAttribute("type", "hidden");
+		syncCustomMonthControls(availabilityPicker);
+		bindCustomMonthSelect();
+		bindCustomYearSelect();
+
+		draftUnavailableDates = Array.isArray(unavailableDates)
+			? unavailableDates.slice().sort()
+			: [];
+	}
+
+	function syncCustomMonthControls(instance) {
+		if (!instance) return;
+		if (calendarMonthSelect) {
+			calendarMonthSelect.value = String(instance.currentMonth);
+			calendarMonthSelect.dispatchEvent(
+				new Event("custom-select:refresh", { bubbles: true }),
+			);
+		}
+		if (calendarYearSelect) {
+			calendarYearSelect.value = String(instance.currentYear);
+			calendarYearSelect.dispatchEvent(
+				new Event("custom-select:refresh", { bubbles: true }),
+			);
+		}
+	}
+
+	function bindCustomMonthSelect() {
+		if (!calendarMonthSelect || monthSelectBound) return;
+		monthSelectBound = true;
+		calendarMonthSelect.addEventListener("change", function () {
+			if (!availabilityPicker) return;
+			const month = Number(this.value);
+			if (Number.isNaN(month) || month < 0 || month > 11) return;
+			const targetDate = new Date(availabilityPicker.currentYear, month, 1);
+			availabilityPicker.jumpToDate(targetDate, true);
+			syncCustomMonthControls(availabilityPicker);
+		});
+	}
+
+	function bindCustomYearSelect() {
+		if (!calendarYearSelect || yearSelectBound) return;
+		yearSelectBound = true;
+		calendarYearSelect.addEventListener("change", function () {
+			if (!availabilityPicker) return;
+			const year = Number(this.value);
+			if (Number.isNaN(year)) return;
+			const targetDate = new Date(year, availabilityPicker.currentMonth, 1);
+			availabilityPicker.jumpToDate(targetDate, true);
+			syncCustomMonthControls(availabilityPicker);
+		});
+	}
+
 	// Инициализируем галерею сразу и после обновлений контента
 	document.addEventListener("DOMContentLoaded", initGalleryNavigation);
 	document.addEventListener("contentUpdated", initGalleryNavigation);
+	document.addEventListener("DOMContentLoaded", renderAvailabilityCalendar);
+	document.addEventListener("contentUpdated", renderAvailabilityCalendar);
+	initGalleryNavigation();
+	renderAvailabilityCalendar();
 
 	// Делегированный обработчик кнопки раскрытия миниатюр (чтобы работало после подмены DOM)
 	document.addEventListener("click", function (e) {
@@ -163,6 +278,20 @@ App.register("housingManager", function () {
 				document.dispatchEvent(new CustomEvent("contentUpdated"));
 			});
 	}
+
+	window.addEventListener("account:listing_deleted_by_report", function (event) {
+		const detail = (event && event.detail) || {};
+		const deletedListingId = Number(detail.listing_id || 0);
+		const currentListingId = Number(listingIdInput ? listingIdInput.value : 0);
+
+		if (deletedListingId && currentListingId && deletedListingId !== currentListingId) {
+			return;
+		}
+
+		refreshHousingContent().catch(function (error) {
+			console.error("Не удалось обновить жилье после удаления по жалобе:", error);
+		});
+	});
 
 	function initGalleryNavigation() {
 		const galleryContainer = document.querySelector(".profile-right .gallery-container");
@@ -327,6 +456,15 @@ App.register("housingManager", function () {
 						});
 					}
 
+					unavailableDates = Array.isArray(listing.unavailable_dates)
+						? listing.unavailable_dates.slice()
+						: [];
+					draftUnavailableDates = unavailableDates.slice();
+					if (unavailableDatesInput) {
+						unavailableDatesInput.value = JSON.stringify(unavailableDates.sort());
+					}
+					renderAvailabilityCalendar();
+
 					// Очищаем контейнер предпросмотра фото
 					$("#photo-previews").empty();
 
@@ -382,6 +520,54 @@ App.register("housingManager", function () {
 		});
 	}
 
+	if (calendarApplyBtn) {
+		calendarApplyBtn.addEventListener("click", function () {
+			const listingIdFromForm = listingIdInput ? Number(listingIdInput.value) : 0;
+			const listingIdFromPage = Number(window.currentHousingListingId || 0);
+			const listingId = listingIdFromForm || listingIdFromPage;
+			if (!listingId) {
+				window.App.notify("Сначала сохраните объявление, потом можно отметить даты", "error");
+				return;
+			}
+
+			const formData = new FormData();
+			formData.append("csrf_token", document.querySelector("#housing-form input[name='csrf_token']")?.value || "");
+			formData.append("listing_id", String(listingId));
+			formData.append("unavailable_dates_json", JSON.stringify(draftUnavailableDates.slice().sort()));
+
+			$.ajax({
+				xhrFields: { withCredentials: true },
+				url: API_BASE_URL + "/listings/save_unavailable_dates.php",
+				type: "POST",
+				data: formData,
+				processData: false,
+				contentType: false,
+				dataType: "json",
+				success: function (data) {
+					if (!data.success) {
+						window.App.notify(data.message || "Не удалось сохранить календарь", "error");
+						return;
+					}
+					unavailableDates = Array.isArray(data.unavailable_dates)
+						? data.unavailable_dates.slice().sort()
+						: draftUnavailableDates.slice().sort();
+					if (unavailableDatesInput) {
+						unavailableDatesInput.value = JSON.stringify(unavailableDates);
+					}
+					draftUnavailableDates = unavailableDates.slice();
+					renderAvailabilityCalendar();
+					window.App.notify(data.message || "Календарь сохранён");
+					if (calendarModal && window.App.modal && typeof window.App.modal.close === "function") {
+						window.App.modal.close(calendarModal);
+					}
+				},
+				error: function () {
+					window.App.notify("Не удалось сохранить календарь", "error");
+				},
+			});
+		});
+	}
+
 	function handleDeleteListing(listingId) {
 		console.log("Удаление объявления ID:", listingId);
 
@@ -428,6 +614,21 @@ App.register("housingManager", function () {
 	}
 
 	document.addEventListener("click", function (event) {
+		const openCalendarBtn = event.target.closest("[data-open-calendar]");
+		if (openCalendarBtn && calendarModal) {
+			draftUnavailableDates = Array.isArray(unavailableDates)
+				? unavailableDates.slice().sort()
+				: [];
+			renderAvailabilityCalendar();
+			if (window.App.modal && typeof window.App.modal.open === "function") {
+				window.App.modal.open(calendarModal);
+			} else {
+				calendarModal.classList.add("show");
+				document.body.style.overflow = "hidden";
+			}
+			return;
+		}
+
 		const addButton = event.target.closest("#add-housing-btn");
 		if (addButton) {
 			resetHousingForm();

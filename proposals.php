@@ -23,6 +23,7 @@ $region_id = $filters['region_id'];
 $city = $filters['city'];
 $has_amenities = $filters['has_amenities'];
 $has_rules = $filters['has_rules'];
+$sort = $filters['sort'] ?? 'newest';
 $page = $pagination['page'];
 $total_listings = $pagination['total_listings'];
 $total_pages = $pagination['total_pages'];
@@ -122,6 +123,15 @@ require_once __DIR__ . '/includes/header.php';
 			</div>
 
 			<form id="filters-form" method="post" action="javascript:void(0);">
+				<div class="filter-group">
+					<h4>Сортировка</h4>
+					<select name="sort" class="form-control">
+						<option value="newest" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Сначала новые</option>
+						<option value="user_rating_desc" <?php echo $sort === 'user_rating_desc' ? 'selected' : ''; ?>>По рейтингу пользователя</option>
+						<option value="listing_rating_desc" <?php echo $sort === 'listing_rating_desc' ? 'selected' : ''; ?>>По рейтингу жилья</option>
+					</select>
+				</div>
+
 				<div class="filter-group">
 					<h4>Тип жилья</h4>
 					<select name="property_type" class="form-control">
@@ -230,6 +240,15 @@ require_once __DIR__ . '/includes/header.php';
 		</div>
 
 		<form id="mobile-filters-form" method="get" action="proposals.php">
+			<div class="filter-group">
+				<h4>Сортировка</h4>
+				<select name="sort" class="form-control">
+					<option value="newest" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Сначала новые</option>
+					<option value="user_rating_desc" <?php echo $sort === 'user_rating_desc' ? 'selected' : ''; ?>>По рейтингу пользователя</option>
+					<option value="listing_rating_desc" <?php echo $sort === 'listing_rating_desc' ? 'selected' : ''; ?>>По рейтингу жилья</option>
+				</select>
+			</div>
+
 			<div class="filter-group">
 				<h4>Тип жилья</h4>
 				<select name="property_type" class="form-control">
