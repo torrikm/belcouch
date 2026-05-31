@@ -59,8 +59,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 <div class="profile-header">
 	<div class="profile-avatar-container">
 		<?php if ($user['avatar_image']): ?>
-			<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $user['id']; ?>"
-				alt="Аватар" class="profile-avatar">
+			<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $user['id']; ?>" alt="Аватар"
+				class="profile-avatar">
 		<?php else: ?>
 			<div class="profile-avatar profile-avatar-placeholder">
 				<?php echo mb_substr($user['first_name'], 0, 1) . mb_substr($user['last_name'], 0, 1); ?>
@@ -105,7 +105,7 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 
 				<?php if ($hasAge): ?>
 					<div class="profile-age">
-						<span><?php echo $age; ?> <?php echo plural_form($age, ['год', 'года', 'лет']); ?></span>
+						<span><?php echo $age; ?> 		<?php echo plural_form($age, ['год', 'года', 'лет']); ?></span>
 					</div>
 				<?php endif; ?>
 			</div>
@@ -140,9 +140,12 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 					<?php if (($verificationRequest['status'] ?? '') === 'pending'): ?>
 						<button type="button" class="btn btn-outline-primary" disabled aria-disabled="true">На модерации</button>
 					<?php elseif (($verificationRequest['status'] ?? '') === 'rejected'): ?>
-						<button type="button" class="btn btn-outline-primary" onclick="window.App && window.App.modal ? window.App.modal.open('verification-request-modal') : null;">Заявка отклонена</button>
+						<button type="button" class="btn btn-outline-primary"
+							onclick="window.App && window.App.modal ? window.App.modal.open('verification-request-modal') : null;">Заявка
+							отклонена</button>
 					<?php else: ?>
-						<button type="button" class="btn btn-outline-primary" onclick="window.App && window.App.modal ? window.App.modal.open('verification-request-modal') : null;">Верификация</button>
+						<button type="button" class="btn btn-outline-primary"
+							onclick="window.App && window.App.modal ? window.App.modal.open('verification-request-modal') : null;">Верификация</button>
 					<?php endif; ?>
 				<?php endif; ?>
 			</div>
@@ -151,13 +154,16 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 					<div class="verification-rejected-note__title">Заявка отклонена</div>
 					<?php if (!empty($verificationRequest['admin_note'])): ?>
 						<div class="verification-rejected-note__label">Причина</div>
-						<div class="verification-rejected-note__text"><?php echo nl2br(htmlspecialchars((string) $verificationRequest['admin_note'])); ?></div>
+						<div class="verification-rejected-note__text">
+							<?php echo nl2br(htmlspecialchars((string) $verificationRequest['admin_note'])); ?>
+						</div>
 					<?php endif; ?>
 				</div>
 			<?php endif; ?>
 		<?php else: ?>
 			<div class="profile-actions">
-				<a href="<?php echo isset($root_path) ? $root_path : '../'; ?>chat?user_id=<?php echo (int) $user['id']; ?>" class="btn btn-message">Написать сообщение</a>
+				<a href="<?php echo isset($root_path) ? $root_path : '../'; ?>chat?user_id=<?php echo (int) $user['id']; ?>"
+					class="btn btn-message">Написать сообщение</a>
 			</div>
 		<?php endif; ?>
 	</div>
@@ -171,7 +177,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 			<div class="modal-header">
 				<h2 class="modal-title">Редактирование профиля</h2>
 				<button type="button" class="modal-close">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="18" y1="6" x2="6" y2="18"></line>
 						<line x1="6" y1="6" x2="18" y2="18"></line>
 					</svg>
@@ -181,7 +188,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 				<form id="edit-profile-form" enctype="multipart/form-data">
 					<div class="avatar-upload-container">
 						<?php if ($user['avatar_image']): ?>
-							<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $user['id']; ?>" alt="Аватар" class="current-avatar">
+							<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $user['id']; ?>" alt="Аватар"
+								class="current-avatar">
 						<?php else: ?>
 							<div class="current-avatar">
 								<?php echo mb_substr($user['first_name'], 0, 1) . mb_substr($user['last_name'], 0, 1); ?>
@@ -265,7 +273,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 			<div class="modal-header">
 				<h2 class="modal-title">Редактирование информации о себе</h2>
 				<button type="button" class="modal-close">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="18" y1="6" x2="6" y2="18"></line>
 						<line x1="6" y1="6" x2="18" y2="18"></line>
 					</svg>
@@ -275,11 +284,11 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 				<form id="edit-bio-form">
 					<div class="form-group">
 						<label for="description">О себе</label>
-						<textarea id="description" name="description" class="form-control" rows="6"
-							maxlength="800"
+						<textarea id="description" name="description" class="form-control" rows="6" maxlength="800"
 							placeholder="Расскажите немного о себе..."><?php echo htmlspecialchars($user['description'] ?? ''); ?></textarea>
 						<div class="bio-length-hint">
-							<span id="description-length-value"><?php echo mb_strlen((string) ($user['description'] ?? '')); ?></span>/800
+							<span
+								id="description-length-value"><?php echo mb_strlen((string) ($user['description'] ?? '')); ?></span>/800
 						</div>
 					</div>
 
@@ -318,7 +327,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 			<div class="modal-header">
 				<h2 class="modal-title">Изменение пароля</h2>
 				<button type="button" class="modal-close">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="18" y1="6" x2="6" y2="18"></line>
 						<line x1="6" y1="6" x2="18" y2="18"></line>
 					</svg>
@@ -358,7 +368,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 			<div class="modal-header">
 				<h2 class="modal-title">Подтверждение личности</h2>
 				<button type="button" class="modal-close">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="18" y1="6" x2="6" y2="18"></line>
 						<line x1="6" y1="6" x2="18" y2="18"></line>
 					</svg>
@@ -366,17 +377,21 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 			</div>
 			<div class="modal-body">
 				<form id="verification-request-form" enctype="multipart/form-data">
-					<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars((string) $verificationCsrfToken); ?>">
+					<input type="hidden" name="csrf_token"
+						value="<?php echo htmlspecialchars((string) $verificationCsrfToken); ?>">
 					<p class="verification-form-note">
-						Загрузите чёткое фото документа. Имя и фамилия в профиле должны совпадать с паспортом. Изображение будет доступно только администраторам для ручной проверки.
+						Загрузите чёткое селфи с документом, подтверждающим личность. Если это паспорт, то откройте
+						последнюю страницу, на которой написаны ваши ФИО. Имя и фамилия в профиле должны совпадать с
+						паспортом. Изображение будет доступно только администраторам для ручной проверки.
 					</p>
 
 					<div class="form-group">
-						<label for="document_photo">Фото документа</label>
+						<label for="document_photo"><b>Фото с документом</b></label>
 						<div class="verification-upload">
 							<label for="document_photo" class="verification-upload-btn">Выбрать файл</label>
 							<span class="verification-upload-text" id="verification-file-name">Файл не выбран</span>
-							<input type="file" id="document_photo" name="document_photo" class="verification-file-input" accept="image/jpeg,image/png,image/webp" required>
+							<input type="file" id="document_photo" name="document_photo" class="verification-file-input"
+								accept="image/jpeg,image/png,image/webp" required>
 						</div>
 						<div id="verification-preview-container" class="verification-preview verification-preview--hidden">
 							<img id="verification-preview-image" src="" alt="Предпросмотр документа">

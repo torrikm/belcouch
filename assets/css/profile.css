@@ -118,7 +118,7 @@
 	align-items: center;
 	margin-bottom: 20px;
 	background: rgba(15, 31, 55, 0.08);
-    border: 1px solid var(--housing-line);
+	border: 1px solid var(--housing-line);
 	padding: 6px 10px;
 	border-radius: 100px;
 }
@@ -146,12 +146,13 @@
 	justify-content: center;
 	flex-wrap: wrap;
 	gap: 14px;
+	padding: 6px 10px;
 }
 
 .profile-actions button,
 .profile-actions a {
 	font-size: 14px;
-	padding: 4px 12px;
+	/* padding: 4px 12px; */
 	border-radius: 100px;
 	max-width: max-content;
 }
