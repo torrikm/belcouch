@@ -37,8 +37,11 @@ include __DIR__ . '/includes/header.php';
 	</div>
 
 	<div class="admin-filters">
-		<a href="admin?tab=verified_users" class="admin-filter<?php echo $tab === 'verified_users' ? ' active' : ''; ?>">Верифицированные пользователи<span class="admin-filter-badge"><?php echo (int) $stats['verified_users']; ?></span></a>
-		<a href="admin?tab=requests" class="admin-filter<?php echo $tab === 'requests' ? ' active' : ''; ?>">Ручная верификация</a>
+		<a href="admin?tab=verified_users"
+			class="admin-filter<?php echo $tab === 'verified_users' ? ' active' : ''; ?>">Верифицированные
+			пользователи<span class="admin-filter-badge"><?php echo (int) $stats['verified_users']; ?></span></a>
+		<a href="admin?tab=requests" class="admin-filter<?php echo $tab === 'requests' ? ' active' : ''; ?>">Ручная
+			верификация</a>
 	</div>
 
 	<?php if ($tab === 'verified_users'): ?>
@@ -58,8 +61,12 @@ include __DIR__ . '/includes/header.php';
 							</div>
 							<div class="admin-request-grid">
 								<div><strong>ID пользователя:</strong> <?php echo (int) $user['id']; ?></div>
-								<div><strong>Роль:</strong> <?php echo htmlspecialchars($roleLabels[(string) $user['role']] ?? (string) $user['role']); ?></div>
-								<div><strong>Последняя верификация:</strong> <?php echo htmlspecialchars((string) ($user['latest_reviewed_at'] ?: 'ещё нет')); ?></div>
+								<div><strong>Роль:</strong>
+									<?php echo htmlspecialchars($roleLabels[(string) $user['role']] ?? (string) $user['role']); ?>
+								</div>
+								<div><strong>Последняя верификация:</strong>
+									<?php echo $user['latest_reviewed_at'] ? date('d.m.Y H:i', strtotime($user['latest_reviewed_at'])) : 'ещё нет'; ?>
+								</div>
 							</div>
 							<?php if (!empty($user['latest_admin_note'])): ?>
 								<div class="admin-note-box"><?php echo nl2br(htmlspecialchars($user['latest_admin_note'])); ?></div>
@@ -78,9 +85,12 @@ include __DIR__ . '/includes/header.php';
 					<input type="hidden" name="user_email" value="<?php echo htmlspecialchars($userEmail); ?>">
 				<?php endif; ?>
 				<select name="status" class="form-control admin-status-select" onchange="this.form.submit()">
-					<option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>На проверке (<?php echo (int) $stats['pending']; ?>)</option>
-					<option value="approved" <?php echo $status === 'approved' ? 'selected' : ''; ?>>Одобренные (<?php echo (int) $stats['approved']; ?>)</option>
-					<option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Отклонённые (<?php echo (int) $stats['rejected']; ?>)</option>
+					<option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>На проверке
+						(<?php echo (int) $stats['pending']; ?>)</option>
+					<option value="approved" <?php echo $status === 'approved' ? 'selected' : ''; ?>>Одобренные
+						(<?php echo (int) $stats['approved']; ?>)</option>
+					<option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Отклонённые
+						(<?php echo (int) $stats['rejected']; ?>)</option>
 				</select>
 			</form>
 		</div>
@@ -94,7 +104,8 @@ include __DIR__ . '/includes/header.php';
 			</div>
 			<form method="get" action="admin" class="admin-user-search-form">
 				<input type="hidden" name="tab" value="requests">
-				<input type="email" name="user_email" class="admin-input" placeholder="Введите email пользователя" value="<?php echo htmlspecialchars($userEmail); ?>" required>
+				<input type="email" name="user_email" class="admin-input" placeholder="Введите email пользователя"
+					value="<?php echo htmlspecialchars($userEmail); ?>" required>
 				<button type="submit" class="btn btn-primary">Найти</button>
 			</form>
 
@@ -102,12 +113,21 @@ include __DIR__ . '/includes/header.php';
 				<?php if ($manualUser): ?>
 					<div class="admin-manual-user">
 						<div class="admin-manual-user-grid">
-							<div><strong>Пользователь:</strong> <?php echo htmlspecialchars(trim($manualUser['first_name'] . ' ' . $manualUser['last_name'])); ?></div>
+							<div><strong>Пользователь:</strong>
+								<?php echo htmlspecialchars(trim($manualUser['first_name'] . ' ' . $manualUser['last_name'])); ?>
+							</div>
 							<div><strong>Email:</strong> <?php echo htmlspecialchars($manualUser['email']); ?></div>
-							<div><strong>Роль:</strong> <?php echo htmlspecialchars($roleLabels[(string) $manualUser['role']] ?? (string) $manualUser['role']); ?></div>
-							<div><strong>Текущая верификация:</strong> <?php echo (int) $manualUser['is_verify'] === 1 ? 'Да' : 'Нет'; ?></div>
-							<div><strong>Последняя заявка:</strong> <?php echo htmlspecialchars($statusLabels[(string) ($manualUser['latest_verification_status'] ?? '')] ?? (string) ($manualUser['latest_verification_status'] ?? 'Нет')); ?></div>
-							<div><strong>Последняя модерация:</strong> <?php echo htmlspecialchars((string) ($manualUser['latest_reviewed_at'] ?: 'ещё нет')); ?></div>
+							<div><strong>Роль:</strong>
+								<?php echo htmlspecialchars($roleLabels[(string) $manualUser['role']] ?? (string) $manualUser['role']); ?>
+							</div>
+							<div><strong>Текущая верификация:</strong>
+								<?php echo (int) $manualUser['is_verify'] === 1 ? 'Да' : 'Нет'; ?></div>
+							<div><strong>Последняя заявка:</strong>
+								<?php echo htmlspecialchars($statusLabels[(string) ($manualUser['latest_verification_status'] ?? '')] ?? (string) ($manualUser['latest_verification_status'] ?? 'Нет')); ?>
+							</div>
+							<div><strong>Последняя модерация:</strong>
+								<?php echo $manualUser['latest_reviewed_at'] ? date('d.m.Y H:i', strtotime($manualUser['latest_reviewed_at'])) : 'ещё нет'; ?>
+							</div>
 						</div>
 						<form class="admin-manual-verification-form js-admin-manual-verification-form">
 							<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
@@ -115,9 +135,11 @@ include __DIR__ . '/includes/header.php';
 							<textarea name="admin_note" class="admin-textarea" placeholder="Комментарий администратора"></textarea>
 							<div class="admin-actions-row">
 								<?php if ((int) $manualUser['is_verify'] === 1): ?>
-									<button type="submit" name="action" value="unverify" class="btn btn-outline-primary">Снять верификацию</button>
+									<button type="submit" name="action" value="unverify" class="btn btn-outline-primary">Снять
+										верификацию</button>
 								<?php else: ?>
-									<button type="submit" name="action" value="verify" class="btn btn-primary">Выдать верификацию</button>
+									<button type="submit" name="action" value="verify" class="btn btn-primary">Выдать
+										верификацию</button>
 								<?php endif; ?>
 							</div>
 						</form>
@@ -136,22 +158,25 @@ include __DIR__ . '/includes/header.php';
 					<div class="admin-request-card <?php echo $request['status'] === 'pending' ? '' : 'not-pending'; ?>">
 						<?php if ($request['status'] === 'pending'): ?>
 							<div class="admin-request-preview">
-								<img src="<?php echo API_URL; ?>/admin/get_verification_document.php?id=<?php echo (int) $request['id']; ?>" alt="Документ пользователя">
+								<img src="<?php echo API_URL; ?>/admin/get_verification_document.php?id=<?php echo (int) $request['id']; ?>"
+									alt="Документ пользователя">
 							</div>
 						<?php endif; ?>
 						<div class="admin-request-body">
 							<div class="admin-request-header">
 								<div>
-									<h2><?php echo htmlspecialchars(trim($request['first_name'] . ' ' . $request['last_name'])); ?></h2>
+									<h2><?php echo htmlspecialchars(trim($request['first_name'] . ' ' . $request['last_name'])); ?>
+									</h2>
 									<p><?php echo htmlspecialchars($request['email']); ?></p>
 								</div>
-								<span class="admin-status admin-status--<?php echo htmlspecialchars($request['status']); ?>"><?php echo htmlspecialchars($statusLabels[(string) $request['status']] ?? (string) $request['status']); ?></span>
+								<span
+									class="admin-status admin-status--<?php echo htmlspecialchars($request['status']); ?>"><?php echo htmlspecialchars($statusLabels[(string) $request['status']] ?? (string) $request['status']); ?></span>
 							</div>
 							<div class="admin-request-grid">
 								<div><strong>ID заявки:</strong> <?php echo (int) $request['id']; ?></div>
 								<div><strong>ID пользователя:</strong> <?php echo (int) $request['user_id']; ?></div>
-								<div><strong>Отправлена:</strong> <?php echo htmlspecialchars((string) $request['created_at']); ?></div>
-								<div><strong>Проверена:</strong> <?php echo htmlspecialchars((string) ($request['reviewed_at'] ?: 'ещё нет')); ?></div>
+								<div><strong>Отправлена:</strong> <?php echo date('d.m.Y H:i', strtotime($request['created_at'])); ?></div>
+								<div><strong>Проверена:</strong> <?php echo $request['reviewed_at'] ? date('d.m.Y H:i', strtotime($request['reviewed_at'])) : 'ещё нет'; ?></div>
 							</div>
 							<?php if (!empty($request['admin_note'])): ?>
 								<div class="admin-note-box"><?php echo nl2br(htmlspecialchars($request['admin_note'])); ?></div>
@@ -160,10 +185,13 @@ include __DIR__ . '/includes/header.php';
 								<form class="admin-moderation-form js-admin-moderation-form">
 									<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
 									<input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-									<textarea name="admin_note" class="admin-textarea" placeholder="Комментарий администратора"></textarea>
+									<textarea name="admin_note" class="admin-textarea"
+										placeholder="Комментарий администратора"></textarea>
 									<div class="admin-actions-row">
-										<button type="submit" name="status" value="approved" class="btn btn-primary">Подтвердить</button>
-										<button type="submit" name="status" value="rejected" class="btn btn-outline-primary">Отклонить</button>
+										<button type="submit" name="status" value="approved"
+											class="btn btn-primary">Подтвердить</button>
+										<button type="submit" name="status" value="rejected"
+											class="btn btn-outline-primary">Отклонить</button>
 									</div>
 								</form>
 							<?php endif; ?>
