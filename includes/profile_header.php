@@ -168,7 +168,8 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 					<?php if (!empty($verificationRequest['admin_note'])): ?>
 						<div class="verification-rejected-note__label">Причина</div>
 						<div class="verification-rejected-note__text">
-							<?php echo nl2br(htmlspecialchars((string) $verificationRequest['admin_note'])); ?></div>
+							<?php echo nl2br(htmlspecialchars((string) $verificationRequest['admin_note'])); ?>
+						</div>
 					<?php endif; ?>
 				</div>
 			<?php endif; ?>
@@ -458,7 +459,7 @@ if ($isOwnProfile && class_exists('AdminVerificationService') && class_exists('C
 					</p>
 
 					<div class="form-group">
-						<label for="document_photo">Фото документа</label>
+						<label for="document_photo"><b>Фото с документом</b></label>
 						<div class="verification-upload">
 							<label for="document_photo" class="verification-upload-btn">Выбрать файл</label>
 							<span class="verification-upload-text" id="verification-file-name">Файл не выбран</span>
