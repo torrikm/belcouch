@@ -520,53 +520,60 @@ App.register("housingManager", function () {
 		});
 	}
 
-	if (calendarApplyBtn) {
-		calendarApplyBtn.addEventListener("click", function () {
-			const listingIdFromForm = listingIdInput ? Number(listingIdInput.value) : 0;
-			const listingIdFromPage = Number(window.currentHousingListingId || 0);
-			const listingId = listingIdFromForm || listingIdFromPage;
-			if (!listingId) {
-				window.App.notify("Сначала сохраните объявление, потом можно отметить даты", "error");
-				return;
-			}
+	function applyCalendarDates() {
+		const listingIdFromForm = listingIdInput ? Number(listingIdInput.value) : 0;
+		const listingIdFromPage = Number(window.currentHousingListingId || 0);
+		const listingId = listingIdFromForm || listingIdFromPage;
+		if (!listingId) {
+			window.App.notify("Сначала сохраните объявление, потом можно отметить даты", "error");
+			return;
+		}
 
-			const formData = new FormData();
-			formData.append("csrf_token", document.querySelector("#housing-form input[name='csrf_token']")?.value || "");
-			formData.append("listing_id", String(listingId));
-			formData.append("unavailable_dates_json", JSON.stringify(draftUnavailableDates.slice().sort()));
+		const formData = new FormData();
+		formData.append("csrf_token", document.querySelector("#housing-form input[name='csrf_token']")?.value || "");
+		formData.append("listing_id", String(listingId));
+		formData.append("unavailable_dates_json", JSON.stringify(draftUnavailableDates.slice().sort()));
 
-			$.ajax({
-				xhrFields: { withCredentials: true },
-				url: API_BASE_URL + "/listings/save_unavailable_dates.php",
-				type: "POST",
-				data: formData,
-				processData: false,
-				contentType: false,
-				dataType: "json",
-				success: function (data) {
-					if (!data.success) {
-						window.App.notify(data.message || "Не удалось сохранить календарь", "error");
-						return;
-					}
-					unavailableDates = Array.isArray(data.unavailable_dates)
-						? data.unavailable_dates.slice().sort()
-						: draftUnavailableDates.slice().sort();
-					if (unavailableDatesInput) {
-						unavailableDatesInput.value = JSON.stringify(unavailableDates);
-					}
-					draftUnavailableDates = unavailableDates.slice();
-					renderAvailabilityCalendar();
-					window.App.notify(data.message || "Календарь сохранён");
-					if (calendarModal && window.App.modal && typeof window.App.modal.close === "function") {
-						window.App.modal.close(calendarModal);
-					}
-				},
-				error: function () {
-					window.App.notify("Не удалось сохранить календарь", "error");
-				},
-			});
+		$.ajax({
+			xhrFields: { withCredentials: true },
+			url: API_BASE_URL + "/listings/save_unavailable_dates.php",
+			type: "POST",
+			data: formData,
+			processData: false,
+			contentType: false,
+			dataType: "json",
+			success: function (data) {
+				if (!data.success) {
+					window.App.notify(data.message || "Не удалось сохранить календарь", "error");
+					return;
+				}
+				unavailableDates = Array.isArray(data.unavailable_dates)
+					? data.unavailable_dates.slice().sort()
+					: draftUnavailableDates.slice().sort();
+				if (unavailableDatesInput) {
+					unavailableDatesInput.value = JSON.stringify(unavailableDates);
+				}
+				draftUnavailableDates = unavailableDates.slice();
+				renderAvailabilityCalendar();
+				window.App.notify(data.message || "Календарь сохранён");
+				if (calendarModal && window.App.modal && typeof window.App.modal.close === "function") {
+					window.App.modal.close(calendarModal);
+				}
+			},
+			error: function () {
+				window.App.notify("Не удалось сохранить календарь", "error");
+			},
 		});
 	}
+
+	document.addEventListener("click", function (event) {
+		const applyBtn = event.target.closest("#calendar-apply-btn");
+		if (!applyBtn) {
+			return;
+		}
+		event.preventDefault();
+		applyCalendarDates();
+	});
 
 	function handleDeleteListing(listingId) {
 		console.log("Удаление объявления ID:", listingId);

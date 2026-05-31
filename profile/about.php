@@ -82,6 +82,10 @@ if (!in_array($active_tab, ['about', 'housing', 'favorites'])) {
 
 require_once '../includes/header.php';
 
+// Генерируем CSRF токен для календаря
+$csrf_token = bin2hex(random_bytes(32));
+$_SESSION['csrf_token'] = $csrf_token;
+
 try {
 	$ratings = $profileService->getUserRatings($profile_id);
 	$can_review = $profileService->canReviewUser($profile_id);
@@ -93,6 +97,13 @@ try {
 
 <div class="container">
 	<div class="profile-page">
+		<!-- Скрытые элементы для работы календаря -->
+		<form id="housing-form" style="display: none;">
+			<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+			<input type="hidden" id="listing_id" name="listing_id" value="<?php echo (int) $listing_id; ?>">
+			<input type="hidden" id="unavailable_dates_json" name="unavailable_dates_json" value="<?php echo htmlspecialchars(json_encode($unavailable_dates)); ?>">
+		</form>
+
 		<!-- Шапка профиля -->
 		<div class="profile-header-container">
 			<?php require_once '../includes/profile_header.php'; ?>
@@ -127,9 +138,9 @@ try {
 							$paragraphs = explode("\n", $user['description']);
 							foreach ($paragraphs as $paragraph):
 								if (trim($paragraph)): // Проверяем, что параграф не пустой
-							?>
+									?>
 									<p><?php echo htmlspecialchars($paragraph); ?></p>
-							<?php
+									<?php
 								endif;
 							endforeach;
 							?>
@@ -188,8 +199,8 @@ try {
 								<div class="review-item-header">
 									<div class="reviewer-info">
 										<?php if ($review['avatar_image']): ?>
-											<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $review['rater_id']; ?>" alt="Аватар"
-												class="reviewer-avatar">
+											<img src="<?php echo API_URL; ?>/users/get_avatar.php?id=<?php echo $review['rater_id']; ?>"
+												alt="Аватар" class="reviewer-avatar">
 										<?php else: ?>
 											<div class="reviewer-avatar reviewer-avatar-placeholder">
 												<?php echo mb_substr($review['first_name'], 0, 1) . mb_substr($review['last_name'], 0, 1); ?>

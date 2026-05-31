@@ -633,8 +633,10 @@
 }
 
 #listing-availability-calendar-modal-wrap .flatpickr-day.flatpickr-disabled,
-#listing-availability-calendar-modal-wrap .flatpickr-day.prevMonthDay.flatpickr-disabled,
-#listing-availability-calendar-modal-wrap .flatpickr-day.nextMonthDay.flatpickr-disabled {
+#listing-availability-calendar-modal-wrap
+	.flatpickr-day.prevMonthDay.flatpickr-disabled,
+#listing-availability-calendar-modal-wrap
+	.flatpickr-day.nextMonthDay.flatpickr-disabled {
 	color: #b8bfcc !important;
 	background: #f3f5f9 !important;
 	cursor: not-allowed !important;
@@ -646,6 +648,29 @@
 
 #listing-calendar-modal .modal-body {
 	padding-top: 8px;
+}
+
+#listing-calendar-modal .modal {
+	display: flex;
+	flex-direction: column;
+}
+
+#listing-calendar-modal .modal-body {
+	flex: 1 1 auto;
+}
+
+#listing-calendar-modal .modal-footer {
+	position: sticky;
+	bottom: 0;
+	z-index: 5;
+	background: #fff;
+	padding-top: 10px;
+	margin-top: 10px;
+}
+
+#listing-availability-calendar-modal-wrap {
+	position: relative;
+	z-index: 1;
 }
 
 /* Rules / amenities */
